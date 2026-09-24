@@ -12,11 +12,11 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/login_tentativas.php');
+    header('Location: /login-tentativas');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/login_tentativas.php');
+csrf_verificar(json: false, redirecionarPara: '/login-tentativas');
 
 $acao = $_POST['acao'] ?? '';
 
@@ -29,7 +29,7 @@ if ($acao === 'desbloquear-todos') {
         ['name' => '👑 Desbloqueado por', 'value' => $_SESSION['nome'] ?? ('#' . ($_SESSION['id'] ?? '—')), 'inline' => true],
     ]);
 
-    header('Location: ../paginas/login_tentativas.php?status=desbloqueado-todos');
+    header('Location: /login-tentativas?status=desbloqueado-todos');
     exit;
 }
 
@@ -46,9 +46,9 @@ if ($acao === 'desbloquear-um') {
         ]);
     }
 
-    header('Location: ../paginas/login_tentativas.php?status=desbloqueado-sucesso');
+    header('Location: /login-tentativas?status=desbloqueado-sucesso');
     exit;
 }
 
-header('Location: ../paginas/login_tentativas.php');
+header('Location: /login-tentativas');
 exit;

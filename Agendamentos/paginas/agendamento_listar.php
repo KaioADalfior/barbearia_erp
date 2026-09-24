@@ -72,7 +72,7 @@ $STATUS_INFO = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 
 <style>
     table tbody tr{
@@ -425,7 +425,7 @@ $STATUS_INFO = [
         btn.disabled = true;
 
         try {
-            const resposta = await fetch('../scripts/agendamento_cancelados_listar.php');
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_cancelados_listar.php');
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -473,7 +473,7 @@ $STATUS_INFO = [
         btn.textContent = 'Excluindo...';
 
         try {
-            const resposta = await fetch('../scripts/agendamento_cancelados_excluir.php', { method: 'POST' });
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_cancelados_excluir.php', { method: 'POST' });
             const dados = await resposta.json();
 
             if (!dados.ok) {

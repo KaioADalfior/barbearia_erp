@@ -17,8 +17,8 @@ $paginaAtual = 'financeiro-fiados';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
-<link rel="stylesheet" href="../../assets/css/forma-pagamento.css">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/forma-pagamento.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -536,7 +536,7 @@ function abrirDetalheCliente(idCliente) {
     document.getElementById('modal-cliente-detalhe').classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
 
-    fetch('../../Clientes/scripts/cliente_detalhes.php?id=' + encodeURIComponent(idCliente))
+    fetch('/Clientes/scripts/cliente_detalhes.php?id=' + encodeURIComponent(idCliente))
         .then(function (resp) { return resp.json(); })
         .then(function (dados) {
             if (!dados.ok) {
@@ -638,7 +638,7 @@ async function carregarFiados() {
     try {
         const termo = document.getElementById('busca-fiado').value.trim();
         const params = new URLSearchParams({ termo: termo });
-        const resposta = await fetch('../scripts/fiados_listar.php?' + params.toString());
+        const resposta = await fetch('/Financeiro/scripts/fiados_listar.php?' + params.toString());
         const dados = await resposta.json();
         document.getElementById('estado-carregando').classList.add('hidden');
 
@@ -798,7 +798,7 @@ async function confirmarRecebimento(evento) {
     obterFormasSelecionadas('receber').forEach(function (f) { formData.append('formas[]', f); });
 
     try {
-        const resposta = await fetch('../scripts/fiado_receber.php', { method: 'POST', body: formData });
+        const resposta = await fetch('/Financeiro/scripts/fiado_receber.php', { method: 'POST', body: formData });
         const dados = await resposta.json();
 
         if (!dados.ok) {
@@ -913,7 +913,7 @@ document.getElementById('nf-busca-cliente-input').addEventListener('input', func
 
     temporizadorBuscaNovoFiado = setTimeout(async function () {
         try {
-            const resposta = await fetch('../../Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
+            const resposta = await fetch('/Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
             const dados = await resposta.json();
             resultados.innerHTML = '';
 
@@ -961,7 +961,7 @@ async function confirmarNovoFiado(evento) {
     formData.set('descricao', document.getElementById('nf-descricao').value.trim());
 
     try {
-        const resposta = await fetch('../scripts/fiado_criar.php', { method: 'POST', body: formData });
+        const resposta = await fetch('/Financeiro/scripts/fiado_criar.php', { method: 'POST', body: formData });
         const dados = await resposta.json();
 
         if (!dados.ok) {

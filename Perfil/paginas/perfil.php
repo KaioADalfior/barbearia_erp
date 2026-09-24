@@ -14,12 +14,12 @@ $stmt->execute(['id' => $idBarbeiro]);
 $barbeiro = $stmt->fetch();
 
 if (!$barbeiro) {
-    header('Location: ../../Autenticacao/paginas/login.php');
+    header('Location: /Autenticacao/paginas/login.php');
     exit;
 }
 
 $temFoto     = !empty($barbeiro['foto']) && is_file(__DIR__ . '/../../assets/uploads/perfil/' . $barbeiro['foto']);
-$fotoUrl     = $temFoto ? '../../assets/uploads/perfil/' . rawurlencode($barbeiro['foto']) . '?v=' . filemtime(__DIR__ . '/../../assets/uploads/perfil/' . $barbeiro['foto']) : null;
+$fotoUrl     = $temFoto ? '/assets/uploads/perfil/' . rawurlencode($barbeiro['foto']) . '?v=' . filemtime(__DIR__ . '/../../assets/uploads/perfil/' . $barbeiro['foto']) : null;
 $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 ?>
 <!DOCTYPE html>
@@ -35,7 +35,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 
 <style>
     .perfil-avatar-wrap{
@@ -177,7 +177,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
                 <p class="text-sm font-semibold text-[color:var(--cream)] mb-1">Dados da conta</p>
                 <p class="settings-desc mb-5">Seu nome completo e usuário de acesso.</p>
 
-                <form action="../scripts/perfil_atualizar.php" method="POST" autocomplete="off" class="flex flex-col gap-4">
+                <form action="/Perfil/scripts/perfil_atualizar.php" method="POST" autocomplete="off" class="flex flex-col gap-4">
                     <?= csrf_field() ?>
                     <div>
                         <label class="field-label block mb-2 uppercase" for="nome">Nome completo</label>
@@ -207,7 +207,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
             <p class="text-sm font-semibold text-[color:var(--cream)] mb-1">Segurança</p>
             <p class="settings-desc mb-5">Altere a senha da sua conta.</p>
 
-            <form action="../../Configuracoes/scripts/senha_atualizar.php" method="POST" autocomplete="off" class="flex flex-col gap-4">
+            <form action="/Configuracoes/scripts/senha_atualizar.php" method="POST" autocomplete="off" class="flex flex-col gap-4">
                 <?= csrf_field() ?>
                 <input type="hidden" name="voltar" value="perfil">
 
@@ -251,7 +251,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         formData.set('_csrf', document.querySelector('meta[name="csrf-token"]').content);
 
         try {
-            const resposta = await fetch('../scripts/perfil_foto_atualizar.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Perfil/scripts/perfil_foto_atualizar.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -291,7 +291,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
             const formData = new FormData();
             formData.set('acao', 'remover');
             formData.set('_csrf', document.querySelector('meta[name="csrf-token"]').content);
-            const resposta = await fetch('../scripts/perfil_foto_atualizar.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Perfil/scripts/perfil_foto_atualizar.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {

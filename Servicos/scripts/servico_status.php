@@ -9,17 +9,17 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/servico_listar.php');
+    header('Location: /servicos');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/servico_listar.php');
+csrf_verificar(json: false, redirecionarPara: '/servicos');
 
 $id   = (int) ($_POST['id'] ?? 0);
 $acao = $_POST['acao'] ?? '';
 
 if ($id <= 0 || !in_array($acao, ['inativar', 'reativar'], true)) {
-    header('Location: ../paginas/servico_listar.php?status=status-erro');
+    header('Location: /servicos?status=status-erro');
     exit;
 }
 
@@ -45,5 +45,5 @@ DiscordLogger::servicos(
 );
 
 $statusMsg = $acao === 'inativar' ? 'inativado-sucesso' : 'reativado-sucesso';
-header('Location: ../paginas/servico_listar.php?status=' . $statusMsg . '&nome=' . urlencode($nome ?: ''));
+header('Location: /servicos?status=' . $statusMsg . '&nome=' . urlencode($nome ?: ''));
 exit;

@@ -15,7 +15,7 @@ $paginaAtual = 'dashboard';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 </head>
 <body class="flex">
 
@@ -30,7 +30,7 @@ $paginaAtual = 'dashboard';
     </header>
 
     <section class="p-8">
-        <a href="../../Barbeiros/paginas/barbeiro_cadastrar.php" class="panel-card block rounded-2xl p-6 max-w-sm hover:border-yellow-600/40 transition-colors">
+        <a href="/barbeiros/cadastrar" class="panel-card block rounded-2xl p-6 max-w-sm hover:border-yellow-600/40 transition-colors">
             <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M6.5 5.5a2.5 2.5 0 1 1 3.4 3.4L18 17.5" stroke="#6fa8ea" stroke-width="1.5" stroke-linecap="round"/>

@@ -8,11 +8,11 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/barbeiro_listar.php');
+    header('Location: /barbeiros');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/barbeiro_listar.php');
+csrf_verificar(json: false, redirecionarPara: '/barbeiros');
 
 $id       = (int) ($_POST['id'] ?? 0);
 $nome     = trim($_POST['nome'] ?? '');
@@ -30,7 +30,7 @@ $paramsVolta = http_build_query([
 ]);
 
 if ($id <= 0 || $nome === '' || $login === '' || $telefone === '' || ($novaSenha !== '' && strlen($novaSenha) < 6)) {
-    header('Location: ../paginas/barbeiro_listar.php?status=edicao-erro&' . $paramsVolta);
+    header('Location: /barbeiros?status=edicao-erro&' . $paramsVolta);
     exit;
 }
 
@@ -38,7 +38,7 @@ if ($id <= 0 || $nome === '' || $login === '' || $telefone === '' || ($novaSenha
 $stmt = $pdo->prepare('SELECT id_barbeiro FROM Barbeiro WHERE id_barbeiro = :id LIMIT 1');
 $stmt->execute(['id' => $id]);
 if (!$stmt->fetch()) {
-    header('Location: ../paginas/barbeiro_listar.php?status=nao-encontrado');
+    header('Location: /barbeiros?status=nao-encontrado');
     exit;
 }
 
@@ -46,7 +46,7 @@ if (!$stmt->fetch()) {
 $stmt = $pdo->prepare('SELECT id_barbeiro FROM Barbeiro WHERE login = :login AND id_barbeiro != :id LIMIT 1');
 $stmt->execute(['login' => $login, 'id' => $id]);
 if ($stmt->fetch()) {
-    header('Location: ../paginas/barbeiro_listar.php?status=login-existe&' . $paramsVolta);
+    header('Location: /barbeiros?status=login-existe&' . $paramsVolta);
     exit;
 }
 
@@ -87,5 +87,5 @@ DiscordLogger::admin('✏️ Dados de barbeiro atualizados', [
     ['name' => '👑 Editado por', 'value' => $_SESSION['nome'] ?? ('#' . ($_SESSION['id'] ?? '—')), 'inline' => false],
 ]);
 
-header('Location: ../paginas/barbeiro_listar.php?status=edicao-sucesso');
+header('Location: /barbeiros?status=edicao-sucesso');
 exit;

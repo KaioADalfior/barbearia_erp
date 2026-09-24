@@ -54,8 +54,23 @@ RewriteCond %{ENV:REDIRECT_VIA_LINK_PUBLICO} !^1$
 RewriteRule ^ - [F,L]
 
 # URLs curtas das páginas de gestão (login já exigido nelas mesmas — ver
-# includes/guard.php) — piloto: Configurações. A URL "feia" continua
-# funcionando também (sem bloqueio), diferente do link público acima; se
-# no futuro quisermos bloquear o acesso direto aqui também, o padrão é o
-# mesmo já usado para Publico/paginas/agendar.php.
+# includes/guard.php). As URLs "feias" continuam funcionando também (sem
+# bloqueio), diferente do link público acima; se no futuro quisermos
+# bloquear o acesso direto aqui também, o padrão é o mesmo já usado para
+# Publico/paginas/agendar.php.
 RewriteRule ^configuracoes/?$ Configuracoes/paginas/configuracoes.php [L,QSA]
+RewriteRule ^login-tentativas/?$ Configuracoes/paginas/login_tentativas.php [L,QSA]
+RewriteRule ^painel/?$ Painel/paginas/painel_admin.php [L,QSA]
+RewriteRule ^inicio/?$ Painel/paginas/painel_barbeiro.php [L,QSA]
+RewriteRule ^perfil/?$ Perfil/paginas/perfil.php [L,QSA]
+RewriteRule ^barbeiros/cadastrar/?$ Barbeiros/paginas/barbeiro_cadastrar.php [L,QSA]
+RewriteRule ^barbeiros/?$ Barbeiros/paginas/barbeiro_listar.php [L,QSA]
+RewriteRule ^clientes/?$ Clientes/paginas/cliente_listar.php [L,QSA]
+RewriteRule ^servicos/?$ Servicos/paginas/servico_listar.php [L,QSA]
+RewriteRule ^agendar/?$ Agendamentos/paginas/agendar.php [L,QSA]
+RewriteRule ^agendamentos/?$ Agendamentos/paginas/agendamento_listar.php [L,QSA]
+RewriteRule ^financeiro/a-receber/?$ Financeiro/paginas/financeiro_aReceber.php [L,QSA]
+RewriteRule ^financeiro/baixa/?$ Financeiro/paginas/financeiro_baixa.php [L,QSA]
+RewriteRule ^financeiro/relatorios/?$ Financeiro/paginas/financeiro_relatorios.php [L,QSA]
+RewriteRule ^financeiro/?$ Financeiro/paginas/financeiro_dashboard.php [L,QSA]
+RewriteRule ^uploads/?$ Uploads/paginas/uploads.php [L,QSA]

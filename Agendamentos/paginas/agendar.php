@@ -22,8 +22,8 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
-<link rel="stylesheet" href="../../assets/css/forma-pagamento.css">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/forma-pagamento.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -1091,7 +1091,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         if (disponibilidadeMesCache[chave]) return disponibilidadeMesCache[chave];
 
         try {
-            const resposta = await fetch(`../scripts/mes_disponibilidade.php?mes=${mes + 1}&ano=${ano}`);
+            const resposta = await fetch(`/Agendamentos/scripts/mes_disponibilidade.php?mes=${mes + 1}&ano=${ano}`);
             const dados = await resposta.json();
             disponibilidadeMesCache[chave] = (dados.ok && dados.dias) ? dados.dias : {};
         } catch (e) {
@@ -1225,7 +1225,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         const minhaRequisicao = ++requisicaoAtual;
 
         try {
-            const resposta = await fetch('../scripts/horarios_buscar.php?data=' + encodeURIComponent(dataChave));
+            const resposta = await fetch('/Agendamentos/scripts/horarios_buscar.php?data=' + encodeURIComponent(dataChave));
             const dados = await resposta.json();
 
             if (minhaRequisicao !== requisicaoAtual) return; // resposta antiga, ignora
@@ -1420,7 +1420,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             formData.set('data', dataChave);
             formData.set('acao', acao);
 
-            const resposta = await fetch('../scripts/dia_bloqueio_status.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/dia_bloqueio_status.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -1712,7 +1712,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             const formData = new FormData();
             formData.set('idHorario', idHorario);
             formData.set('acao', 'inativar');
-            const resposta = await fetch('../scripts/horario_status.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/horario_status.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -1745,7 +1745,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             const formData = new FormData();
             formData.set('idHorario', horario.idHorario);
             formData.set('acao', 'reativar');
-            const resposta = await fetch('../scripts/horario_status.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/horario_status.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -1794,7 +1794,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
 
         temporizadorBusca = setTimeout(async () => {
             try {
-                const resposta = await fetch('../../Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
+                const resposta = await fetch('/Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
                 const dados = await resposta.json();
                 resultados.innerHTML = '';
 
@@ -1848,7 +1848,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         }
 
         try {
-            const resposta = await fetch('../scripts/agendamento_salvar.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_salvar.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -2049,7 +2049,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         try {
             const formData = new FormData();
             formData.set('idAgendamento', idAgendamentoParaCancelar);
-            const resposta = await fetch('../scripts/agendamento_liberar_secundario.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_liberar_secundario.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -2078,7 +2078,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         try {
             const formData = new FormData();
             formData.set('idAgendamento', idAgendamento);
-            const resposta = await fetch('../scripts/agendamento_cancelar.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_cancelar.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -2169,7 +2169,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         try {
             const formData = new FormData();
             formData.set('idAgendamento', idAgendamento);
-            const resposta = await fetch('../scripts/agendamento_cancelar_todos_futuros.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_cancelar_todos_futuros.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -2398,7 +2398,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                 }
             }
 
-            const resposta = await fetch('../scripts/agendamento_concluir.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_concluir.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -2456,7 +2456,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                 obterFormasSelecionadas('concluir').forEach(function (f) { formData.append('formas[]', f); });
             }
 
-            const resposta = await fetch('../scripts/agendamento_concluir_individual.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/agendamento_concluir_individual.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
 
             if (!dados.ok) {
@@ -2524,7 +2524,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         selectEl.disabled = true;
         selectEl.innerHTML = '<option value="">Carregando...</option>';
 
-        fetch('../scripts/horarios_buscar.php?data=' + encodeURIComponent(dataEscolhida))
+        fetch('/Agendamentos/scripts/horarios_buscar.php?data=' + encodeURIComponent(dataEscolhida))
             .then(function (r) { return r.json(); })
             .then(function (dados) {
                 if (!dados.ok) {
@@ -2607,7 +2607,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             formData.set('novaData', resultado.value.novaData);
             formData.set('novaHora', resultado.value.novaHora);
 
-            fetch('../scripts/agendamento_reagendar_unico.php', { method: 'POST', body: formData })
+            fetch('/Agendamentos/scripts/agendamento_reagendar_unico.php', { method: 'POST', body: formData })
                 .then(function (r) { return r.json(); })
                 .then(function (dados) {
                     if (!dados.ok) {
@@ -2692,7 +2692,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             formData.set('novaData', resultado.value.novaData);
             formData.set('novaHora', resultado.value.novaHora);
 
-            fetch('../scripts/agendamento_reagendar_fidelidade.php', { method: 'POST', body: formData })
+            fetch('/Agendamentos/scripts/agendamento_reagendar_fidelidade.php', { method: 'POST', body: formData })
                 .then(function (r) { return r.json(); })
                 .then(function (dados) {
                     if (!dados.ok) {
@@ -2803,7 +2803,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
 
                     temporizador = setTimeout(async () => {
                         try {
-                            const resposta = await fetch('../../Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
+                            const resposta = await fetch('/Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
                             const dados = await resposta.json();
                             resultados.innerHTML = '';
 
@@ -2848,7 +2848,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             formData.set('idAgendamento', idAgendamentoAtual);
             formData.set('novoIdCliente', resultado.value.idCliente);
 
-            fetch('../scripts/agendamento_alterar_cliente.php', { method: 'POST', body: formData })
+            fetch('/Agendamentos/scripts/agendamento_alterar_cliente.php', { method: 'POST', body: formData })
                 .then(function (r) { return r.json(); })
                 .then(function (dados) {
                     if (!dados.ok) {
@@ -2941,7 +2941,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             formData.set('novaHora', resultado.value.novaHora);
             if (observacaoOriginal) formData.set('observacao', observacaoOriginal);
 
-            fetch('../scripts/agendamento_criar_para_cliente_existente.php', { method: 'POST', body: formData })
+            fetch('/Agendamentos/scripts/agendamento_criar_para_cliente_existente.php', { method: 'POST', body: formData })
                 .then(function (r) { return r.json(); })
                 .then(function (dados) {
                     if (!dados.ok) {
@@ -2999,7 +2999,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
 
                     temporizador = setTimeout(async () => {
                         try {
-                            const resposta = await fetch('../scripts/agendamento_buscar_para_troca.php?termo=' + encodeURIComponent(termo) + '&excluir=' + encodeURIComponent(idAgendamentoAtual));
+                            const resposta = await fetch('/Agendamentos/scripts/agendamento_buscar_para_troca.php?termo=' + encodeURIComponent(termo) + '&excluir=' + encodeURIComponent(idAgendamentoAtual));
                             const dados = await resposta.json();
                             resultados.innerHTML = '';
 
@@ -3043,7 +3043,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             formData.set('idAgendamentoA', idAgendamentoAtual);
             formData.set('idAgendamentoB', resultado.value.idAgendamento);
 
-            fetch('../scripts/agendamento_trocar_cliente.php', { method: 'POST', body: formData })
+            fetch('/Agendamentos/scripts/agendamento_trocar_cliente.php', { method: 'POST', body: formData })
                 .then(function (r) { return r.json(); })
                 .then(function (dados) {
                     if (!dados.ok) {
@@ -3080,7 +3080,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
 
     async function carregarListaEspera() {
         try {
-            const resposta = await fetch('../scripts/listaespera_listar.php');
+            const resposta = await fetch('/Agendamentos/scripts/listaespera_listar.php');
             const dados = await resposta.json();
             listaEsperaAtual = dados.ok ? dados.lista : [];
         } catch (e) {
@@ -3131,7 +3131,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         try {
             const formData = new FormData();
             formData.set('idEspera', idEspera);
-            const resposta = await fetch('../scripts/listaespera_remover.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/listaespera_remover.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
             if (!dados.ok) {
                 toast(dados.erro || 'Não foi possível remover da lista.', 'erro');
@@ -3148,7 +3148,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         try {
             const formData = new FormData();
             formData.set('idCliente', cliente.idCliente);
-            const resposta = await fetch('../scripts/listaespera_adicionar.php', { method: 'POST', body: formData });
+            const resposta = await fetch('/Agendamentos/scripts/listaespera_adicionar.php', { method: 'POST', body: formData });
             const dados = await resposta.json();
             if (!dados.ok) {
                 toast(dados.erro || 'Não foi possível adicionar à lista.', 'erro');
@@ -3178,7 +3178,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
 
             temporizadorBuscaListaEspera = setTimeout(async () => {
                 try {
-                    const resposta = await fetch('../../Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
+                    const resposta = await fetch('/Clientes/scripts/clientes_buscar.php?termo=' + encodeURIComponent(termo));
                     const dados = await resposta.json();
                     resultados.innerHTML = '';
 

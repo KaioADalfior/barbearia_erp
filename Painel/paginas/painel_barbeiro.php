@@ -98,7 +98,7 @@ for ($i = 5; $i >= 0; $i--) {
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <style>
@@ -307,7 +307,7 @@ for ($i = 5; $i >= 0; $i--) {
         <p class="eyebrow text-yellow-500/70 uppercase mb-3">Ações rápidas</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl">
 
-            <a href="../../Agendamentos/paginas/agendar.php" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="/agendar" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="3.5" y="4.5" width="17" height="16" rx="2" stroke="#6fa8ea" stroke-width="1.5"/>
@@ -319,7 +319,7 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-xs text-zinc-500">Ver o calendário e marcar um horário</p>
             </a>
 
-            <a href="../../Clientes/paginas/cliente_listar.php" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="/clientes" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="8" r="3.3" stroke="#6fa8ea" stroke-width="1.5"/>
@@ -330,7 +330,7 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-xs text-zinc-500">Listar, cadastrar, editar e inativar clientes</p>
             </a>
 
-            <a href="../../Agendamentos/paginas/agendamento_listar.php" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="/agendamentos" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8 6h12M8 12h12M8 18h12" stroke="#6fa8ea" stroke-width="1.5" stroke-linecap="round"/>
@@ -343,7 +343,7 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-xs text-zinc-500">Ver, filtrar e gerenciar todos os agendamentos</p>
             </a>
 
-            <a href="../../Financeiro/paginas/financeiro_dashboard.php" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="/financeiro" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 3.5v17M16.5 7.2c0-1.6-1.6-2.7-4-2.7-2.6 0-4.3 1.2-4.3 3s1.4 2.5 4.3 3c2.9.5 4.3 1.3 4.3 3.1 0 1.8-1.8 3-4.3 3-2.2 0-4-1-4.3-2.6" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -353,7 +353,7 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-xs text-zinc-500">Ver receitas, saídas e saldo do período</p>
             </a>
 
-            <a href="../../Financeiro/paginas/financeiro_baixa.php" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="/financeiro/baixa" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="4" y="6" width="16" height="12" rx="2" stroke="#6fa8ea" stroke-width="1.5"/>
@@ -365,7 +365,7 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-xs text-zinc-500">Lançar uma entrada ou saída manual</p>
             </a>
 
-            <a href="../../Financeiro/paginas/financeiro_aReceber.php" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="/financeiro/a-receber" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="8.5" stroke="#6fa8ea" stroke-width="1.5"/>
@@ -376,7 +376,7 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-xs text-zinc-500">Ver e receber fiados em aberto</p>
             </a>
 
-            <a href="../../Servicos/paginas/servico_listar.php" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="/servicos" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M6.5 5.5a2.5 2.5 0 1 1 3.4 3.4L18 17.5" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round"/>

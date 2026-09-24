@@ -16,7 +16,7 @@ $paginaAtual = 'barbeiro-cadastrar';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 </head>
 <body class="flex">
 
@@ -57,7 +57,7 @@ $paginaAtual = 'barbeiro-cadastrar';
                     </div>
                 <?php endif; ?>
 
-                <form action="../scripts/barbeiro_salvar.php" method="POST" autocomplete="off">
+                <form action="/Barbeiros/scripts/barbeiro_salvar.php" method="POST" autocomplete="off">
                     <?= csrf_field() ?>
 
                     <div class="mb-5">
@@ -89,7 +89,7 @@ $paginaAtual = 'barbeiro-cadastrar';
                         <button type="submit" class="btn-primary h-12 px-6 rounded-xl text-sm flex-1">
                             Cadastrar Barbeiro
                         </button>
-                        <a href="../../Painel/paginas/painel_admin.php" class="btn-secondary h-12 px-6 rounded-xl text-sm flex items-center justify-center">
+                        <a href="/painel" class="btn-secondary h-12 px-6 rounded-xl text-sm flex items-center justify-center">
                             Cancelar
                         </a>
                     </div>

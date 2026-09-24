@@ -16,7 +16,7 @@ if ($tipo !== 'admin' && $tipo !== 'barbeiro') {
 // formulário/endpoint também é usado pela tela Barbeiro > Perfil.
 $destinos = [
     'configuracoes' => '/configuracoes',
-    'perfil'        => '../../Perfil/paginas/perfil.php',
+    'perfil'        => '/perfil',
 ];
 $voltarPara = $_POST['voltar'] ?? $_GET['voltar'] ?? 'configuracoes';
 $urlVolta   = $destinos[$voltarPara] ?? $destinos['configuracoes'];

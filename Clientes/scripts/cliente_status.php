@@ -25,17 +25,17 @@ require_once __DIR__ . '/../../includes/ClienteService.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/cliente_listar.php');
+    header('Location: /clientes');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/cliente_listar.php');
+csrf_verificar(json: false, redirecionarPara: '/clientes');
 
 $id    = (int) ($_POST['id'] ?? 0);
 $acao  = $_POST['acao'] ?? '';
 
 if ($id <= 0 || !in_array($acao, ['inativar', 'reativar'], true)) {
-    header('Location: ../paginas/cliente_listar.php?status=status-erro');
+    header('Location: /clientes?status=status-erro');
     exit;
 }
 
@@ -88,7 +88,7 @@ try {
         $pdo->rollBack();
     }
     DiscordLogger::erro('💥 Falha ao alterar status do cliente', $e);
-    header('Location: ../paginas/cliente_listar.php?status=status-erro');
+    header('Location: /clientes?status=status-erro');
     exit;
 }
 
@@ -108,5 +108,5 @@ DiscordLogger::clientes(
 );
 
 $statusMsg = $acao === 'inativar' ? 'inativado-sucesso' : 'reativado-sucesso';
-header('Location: ../paginas/cliente_listar.php?status=' . $statusMsg . '&nome=' . urlencode($nome ?: ''));
+header('Location: /clientes?status=' . $statusMsg . '&nome=' . urlencode($nome ?: ''));
 exit;

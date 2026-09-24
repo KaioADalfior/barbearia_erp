@@ -46,7 +46,7 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 
 <style>
     .modal-overlay{
@@ -322,7 +322,7 @@ $mensagens = [
                 </button>
             </div>
 
-            <form action="../scripts/servico_salvar.php" method="POST" autocomplete="off">
+            <form action="/Servicos/scripts/servico_salvar.php" method="POST" autocomplete="off">
                 <?= csrf_field() ?>
                 <div class="mb-5">
                     <label class="field-label block mb-2 uppercase" for="nome">Nome do Serviço</label>
@@ -374,7 +374,7 @@ $mensagens = [
                 </button>
             </div>
 
-            <form action="../scripts/servico_atualizar.php" method="POST" autocomplete="off">
+            <form action="/Servicos/scripts/servico_atualizar.php" method="POST" autocomplete="off">
                 <?= csrf_field() ?>
                 <input type="hidden" id="edit-id" name="id" value="<?= $reabrirEdicao ? htmlspecialchars($voltaEditId) : '' ?>">
 
@@ -491,7 +491,7 @@ $mensagens = [
                 Tem certeza que deseja alterar o status deste serviço?
             </p>
 
-            <form action="../scripts/servico_status.php" method="POST" autocomplete="off">
+            <form action="/Servicos/scripts/servico_status.php" method="POST" autocomplete="off">
                 <?= csrf_field() ?>
                 <input type="hidden" id="status-id" name="id" value="">
                 <input type="hidden" id="status-acao" name="acao" value="">

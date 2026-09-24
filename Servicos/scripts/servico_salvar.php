@@ -8,11 +8,11 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/servico_listar.php');
+    header('Location: /servicos');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/servico_listar.php');
+csrf_verificar(json: false, redirecionarPara: '/servicos');
 
 $nome            = trim($_POST['nome'] ?? '');
 $duracaoMinutos  = (int) ($_POST['duracao_minutos'] ?? 0);
@@ -28,7 +28,7 @@ $paramsVolta = http_build_query([
 ]);
 
 if ($nome === '' || $duracaoMinutos <= 0 || $valor <= 0) {
-    header('Location: ../paginas/servico_listar.php?status=cadastro-erro&' . $paramsVolta);
+    header('Location: /servicos?status=cadastro-erro&' . $paramsVolta);
     exit;
 }
 
@@ -49,5 +49,5 @@ DiscordLogger::servicos('🆕 Serviço cadastrado', [
     ['name' => '👤 Cadastrado por', 'value' => $_SESSION['nome'] ?? ('#' . ($_SESSION['id'] ?? '—')), 'inline' => true],
 ]);
 
-header('Location: ../paginas/servico_listar.php?status=cadastro-sucesso&nome=' . urlencode($nome));
+header('Location: /servicos?status=cadastro-sucesso&nome=' . urlencode($nome));
 exit;

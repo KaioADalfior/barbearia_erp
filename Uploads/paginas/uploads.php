@@ -204,7 +204,7 @@ $uploads = $stmt->fetchAll();
     </div>
 
     <p class="text-center text-xs text-zinc-600 mt-8 font-light">
-        <a href="../../Autenticacao/paginas/login.php" class="hover:text-yellow-500/70 transition-colors">&larr; Voltar para o login</a>
+        <a href="/Autenticacao/paginas/login.php" class="hover:text-yellow-500/70 transition-colors">&larr; Voltar para o login</a>
     </p>
 
 </div>

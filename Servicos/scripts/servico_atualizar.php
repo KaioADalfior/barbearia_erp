@@ -9,11 +9,11 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/servico_listar.php');
+    header('Location: /servicos');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/servico_listar.php');
+csrf_verificar(json: false, redirecionarPara: '/servicos');
 
 $id              = (int) ($_POST['id'] ?? 0);
 $nome            = trim($_POST['nome'] ?? '');
@@ -31,12 +31,12 @@ $paramsVolta = http_build_query([
 ]);
 
 if ($id <= 0) {
-    header('Location: ../paginas/servico_listar.php?status=edicao-erro');
+    header('Location: /servicos?status=edicao-erro');
     exit;
 }
 
 if ($nome === '' || $duracaoMinutos <= 0 || $valor <= 0) {
-    header('Location: ../paginas/servico_listar.php?status=edicao-erro&' . $paramsVolta);
+    header('Location: /servicos?status=edicao-erro&' . $paramsVolta);
     exit;
 }
 
@@ -51,7 +51,7 @@ $stmtAntigo->execute(['id' => $id]);
 $servicoAntigo = $stmtAntigo->fetch(PDO::FETCH_ASSOC);
 
 if (!$servicoAntigo) {
-    header('Location: ../paginas/servico_listar.php?status=servico-nao-encontrado');
+    header('Location: /servicos?status=servico-nao-encontrado');
     exit;
 }
 
@@ -93,5 +93,5 @@ if ($stmt->rowCount() > 0) {
     ], DiscordLogger::COR_EDICAO);
 }
 
-header('Location: ../paginas/servico_listar.php?status=edicao-sucesso&nome=' . urlencode($nome));
+header('Location: /servicos?status=edicao-sucesso&nome=' . urlencode($nome));
 exit;

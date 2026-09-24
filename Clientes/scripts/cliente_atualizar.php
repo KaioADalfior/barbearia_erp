@@ -25,11 +25,11 @@ require_once __DIR__ . '/../../includes/ClienteService.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/cliente_listar.php');
+    header('Location: /clientes');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/cliente_listar.php');
+csrf_verificar(json: false, redirecionarPara: '/clientes');
 
 $id        = (int) ($_POST['id'] ?? 0);
 $nome      = trim($_POST['nome'] ?? '');
@@ -46,17 +46,17 @@ $paramsVolta = http_build_query([
 ]);
 
 if ($id <= 0) {
-    header('Location: ../paginas/cliente_listar.php?status=edicao-erro');
+    header('Location: /clientes?status=edicao-erro');
     exit;
 }
 
 if ($nome === '' || $telefone === '') {
-    header('Location: ../paginas/cliente_listar.php?status=edicao-erro&' . $paramsVolta);
+    header('Location: /clientes?status=edicao-erro&' . $paramsVolta);
     exit;
 }
 
 if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    header('Location: ../paginas/cliente_listar.php?status=edicao-email-invalido&' . $paramsVolta);
+    header('Location: /clientes?status=edicao-email-invalido&' . $paramsVolta);
     exit;
 }
 
@@ -79,7 +79,7 @@ $stmtAntigo->execute([
 $clienteAntigo = $stmtAntigo->fetch(PDO::FETCH_ASSOC);
 
 if (!$clienteAntigo) {
-    header('Location: ../paginas/cliente_listar.php?status=cliente-nao-encontrado');
+    header('Location: /clientes?status=cliente-nao-encontrado');
     exit;
 }
 
@@ -129,7 +129,7 @@ try {
         $pdo->rollBack();
     }
     DiscordLogger::erro('💥 Falha ao editar cliente', $e);
-    header('Location: ../paginas/cliente_listar.php?status=edicao-erro&' . $paramsVolta);
+    header('Location: /clientes?status=edicao-erro&' . $paramsVolta);
     exit;
 }
 
@@ -155,5 +155,5 @@ if ($linhasAlteradas > 0 || $totalRemovido > 0) {
     DiscordLogger::clientes('✏️ Cliente editado', $camposLog, DiscordLogger::COR_EDICAO);
 }
 
-header('Location: ../paginas/cliente_listar.php?status=edicao-sucesso&nome=' . urlencode($nome));
+header('Location: /clientes?status=edicao-sucesso&nome=' . urlencode($nome));
 exit;

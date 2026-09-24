@@ -12,15 +12,15 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/perfil.php');
+    header('Location: /perfil');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/perfil.php');
+csrf_verificar(json: false, redirecionarPara: '/perfil');
 
 function voltarComErro(string $msg): void
 {
-    header('Location: ../paginas/perfil.php?perfil_erro=' . urlencode($msg));
+    header('Location: /perfil?perfil_erro=' . urlencode($msg));
     exit;
 }
 
@@ -61,5 +61,5 @@ DiscordLogger::configuracoes('👤 Perfil atualizado', [
     ['name' => '🔑 Usuário',  'value' => $login, 'inline' => true],
 ]);
 
-header('Location: ../paginas/perfil.php?perfil_sucesso=1');
+header('Location: /perfil?perfil_sucesso=1');
 exit;

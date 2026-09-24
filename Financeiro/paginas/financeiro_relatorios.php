@@ -16,7 +16,7 @@ $paginaAtual = 'financeiro-relatorios';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -311,7 +311,7 @@ async function carregarRelatorios() {
     document.getElementById('relatorios-vazio').classList.add('hidden');
 
     try {
-        const resposta = await fetch('../scripts/relatorio_listar.php');
+        const resposta = await fetch('/Financeiro/scripts/relatorio_listar.php');
         const dados = await resposta.json();
         document.getElementById('estado-carregando').classList.add('hidden');
 
@@ -354,7 +354,7 @@ function renderizarRelatorios() {
             '<td class="px-5 py-4 text-right font-semibold ' + saldoClasse + '">' + formatarMoeda(r.saldo) + '</td>' +
             '<td class="px-5 py-4 text-zinc-500 text-xs hidden lg:table-cell">' + formatarDataHora(r.gerado_em) + '</td>' +
             '<td class="px-5 py-4 text-right whitespace-nowrap">' +
-                '<a href="../scripts/relatorio_baixar.php?id=' + r.idRelatorio + '" class="icon-btn" title="Baixar PDF">' +
+                '<a href="/Financeiro/scripts/relatorio_baixar.php?id=' + r.idRelatorio + '" class="icon-btn" title="Baixar PDF">' +
                     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>' +
                 '</a>' +
                 '<button type="button" onclick="excluirRelatorio(' + r.idRelatorio + ')" class="icon-btn icon-btn-danger ml-2" title="Excluir relatório">' +
@@ -405,7 +405,7 @@ async function gerarRelatorio(evento) {
     btnTexto.textContent = 'Gerando PDF...';
 
     try {
-        const resposta = await fetch('../scripts/relatorio_gerar.php', { method: 'POST', body: formData });
+        const resposta = await fetch('/Financeiro/scripts/relatorio_gerar.php', { method: 'POST', body: formData });
         const dados = await resposta.json();
 
         if (!dados.ok) {
@@ -414,7 +414,7 @@ async function gerarRelatorio(evento) {
         }
 
         toast('Relatório gerado com sucesso.', 'sucesso');
-        window.open('../scripts/relatorio_baixar.php?id=' + dados.idRelatorio + '&inline=1', '_blank');
+        window.open('/Financeiro/scripts/relatorio_baixar.php?id=' + dados.idRelatorio + '&inline=1', '_blank');
         await carregarRelatorios();
     } catch (e) {
         toast('Erro de conexão. Tente novamente.', 'erro');
@@ -442,7 +442,7 @@ function excluirRelatorio(idRelatorio) {
         const formData = new FormData();
         formData.set('idRelatorio', idRelatorio);
 
-        fetch('../scripts/relatorio_excluir.php', { method: 'POST', body: formData })
+        fetch('/Financeiro/scripts/relatorio_excluir.php', { method: 'POST', body: formData })
             .then(function (resposta) { return resposta.json(); })
             .then(function (dados) {
                 if (!dados.ok) {

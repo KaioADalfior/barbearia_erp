@@ -35,7 +35,7 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 
 <style>
     table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
@@ -80,7 +80,7 @@ $mensagens = [
             <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Barbeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Barbeiros Cadastrados</h1>
         </div>
-        <a href="../paginas/barbeiro_cadastrar.php" class="btn-primary h-11 px-5 rounded-xl text-sm flex items-center justify-center gap-2 shrink-0">
+        <a href="/barbeiros/cadastrar" class="btn-primary h-11 px-5 rounded-xl text-sm flex items-center justify-center gap-2 shrink-0">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 5v14M5 12h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -155,7 +155,7 @@ $mensagens = [
                                 <td class="px-5 py-3">
                                     <div class="flex items-center gap-3">
                                         <?php if (!empty($b['foto'])): ?>
-                                            <img src="../../assets/uploads/perfil/<?= htmlspecialchars($b['foto']) ?>" alt="" class="avatar">
+                                            <img src="/assets/uploads/perfil/<?= htmlspecialchars($b['foto']) ?>" alt="" class="avatar">
                                         <?php else: ?>
                                             <div class="avatar-fallback"><?= htmlspecialchars($inicial) ?></div>
                                         <?php endif; ?>
@@ -210,7 +210,7 @@ $mensagens = [
                 </button>
             </div>
 
-            <form action="../scripts/barbeiro_atualizar.php" method="POST" autocomplete="off">
+            <form action="/Barbeiros/scripts/barbeiro_atualizar.php" method="POST" autocomplete="off">
                 <?= csrf_field() ?>
                 <input type="hidden" id="edit-id" name="id" value="">
 

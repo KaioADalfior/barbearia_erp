@@ -8,11 +8,11 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/cliente_listar.php');
+    header('Location: /clientes');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/cliente_listar.php');
+csrf_verificar(json: false, redirecionarPara: '/clientes');
 
 $nome     = trim($_POST['nome'] ?? '');
 $telefone = trim($_POST['telefone'] ?? '');
@@ -29,12 +29,12 @@ $paramsVolta = http_build_query([
 ]);
 
 if ($nome === '' || $telefone === '') {
-    header('Location: ../paginas/cliente_listar.php?status=cadastro-erro&' . $paramsVolta);
+    header('Location: /clientes?status=cadastro-erro&' . $paramsVolta);
     exit;
 }
 
 if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    header('Location: ../paginas/cliente_listar.php?status=cadastro-email-invalido&' . $paramsVolta);
+    header('Location: /clientes?status=cadastro-email-invalido&' . $paramsVolta);
     exit;
 }
 
@@ -55,5 +55,5 @@ DiscordLogger::clientes('🆕 Cliente cadastrado', [
     ['name' => '📧 E-mail', 'value' => $email ?: 'Não informado', 'inline' => true],
 ]);
 
-header('Location: ../paginas/cliente_listar.php?status=cadastro-sucesso&nome=' . urlencode($nome));
+header('Location: /clientes?status=cadastro-sucesso&nome=' . urlencode($nome));
 exit;

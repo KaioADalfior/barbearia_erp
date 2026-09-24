@@ -8,11 +8,11 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/barbeiro_cadastrar.php');
+    header('Location: /barbeiros/cadastrar');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/barbeiro_cadastrar.php');
+csrf_verificar(json: false, redirecionarPara: '/barbeiros/cadastrar');
 
 $nome     = trim($_POST['nome'] ?? '');
 $login    = trim($_POST['login'] ?? '');
@@ -20,7 +20,7 @@ $telefone = trim($_POST['telefone'] ?? '');
 $senha    = trim($_POST['senha'] ?? '');
 
 if ($nome === '' || $login === '' || $telefone === '' || $senha === '' || strlen($senha) < 6) {
-    header('Location: ../paginas/barbeiro_cadastrar.php?status=erro');
+    header('Location: /barbeiros/cadastrar?status=erro');
     exit;
 }
 
@@ -29,7 +29,7 @@ $stmt = $pdo->prepare('SELECT id_barbeiro FROM Barbeiro WHERE login = :login LIM
 $stmt->execute(['login' => $login]);
 
 if ($stmt->fetch()) {
-    header('Location: ../paginas/barbeiro_cadastrar.php?status=login-existe');
+    header('Location: /barbeiros/cadastrar?status=login-existe');
     exit;
 }
 
@@ -54,5 +54,5 @@ DiscordLogger::admin('✂️ Novo barbeiro cadastrado', [
     ['name' => '👑 Cadastrado por', 'value' => $_SESSION['nome'] ?? ('#' . ($_SESSION['id'] ?? '—')), 'inline' => false],
 ]);
 
-header('Location: ../paginas/barbeiro_cadastrar.php?status=sucesso');
+header('Location: /barbeiros/cadastrar?status=sucesso');
 exit;

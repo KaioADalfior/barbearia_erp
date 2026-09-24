@@ -56,7 +56,7 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 
 <style>
     table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
@@ -86,7 +86,7 @@ $mensagens = [
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Logins Bloqueados</h1>
         </div>
         <?php if (!empty($bloqueios)): ?>
-        <form action="../scripts/login_desbloquear.php" method="POST" autocomplete="off" onsubmit="return confirm('Desbloquear TODOS os logins da lista?')">
+        <form action="/Configuracoes/scripts/login_desbloquear.php" method="POST" autocomplete="off" onsubmit="return confirm('Desbloquear TODOS os logins da lista?')">
             <?= csrf_field() ?>
             <input type="hidden" name="acao" value="desbloquear-todos">
             <button type="submit" class="btn-secondary h-11 px-5 rounded-xl text-sm shrink-0">
@@ -137,7 +137,7 @@ $mensagens = [
                                 <td class="px-5 py-3"><span class="badge"><?= (int) $b['tentativas'] ?> erradas</span></td>
                                 <td class="px-5 py-3 text-zinc-400">~<?= (int) $b['minutos_restantes'] ?> min</td>
                                 <td class="px-5 py-3 text-right">
-                                    <form action="../scripts/login_desbloquear.php" method="POST" autocomplete="off">
+                                    <form action="/Configuracoes/scripts/login_desbloquear.php" method="POST" autocomplete="off">
                                         <?= csrf_field() ?>
                                         <input type="hidden" name="acao" value="desbloquear-um">
                                         <input type="hidden" name="chave" value="<?= htmlspecialchars($b['chave']) ?>">

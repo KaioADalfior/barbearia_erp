@@ -85,7 +85,7 @@ if ($senhaAdminOk) {
         ['name' => '🔑 Login', 'value' => $admin['login'], 'inline' => true],
     ]);
 
-    header('Location: ../../Painel/paginas/painel_admin.php?login=sucesso');
+    header('Location: /painel?login=sucesso');
     exit;
 }
 
@@ -114,7 +114,7 @@ if ($senhaBarbeiroOk) {
         ['name' => '🔑 Login', 'value' => $barbeiro['login'], 'inline' => true],
     ]);
 
-    header('Location: ../../Painel/paginas/painel_barbeiro.php?login=sucesso');
+    header('Location: /inicio?login=sucesso');
     exit;
 }
 

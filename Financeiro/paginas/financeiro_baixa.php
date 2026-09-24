@@ -17,8 +17,8 @@ $paginaAtual = 'financeiro-baixa';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
-<link rel="stylesheet" href="../../assets/css/forma-pagamento.css">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/forma-pagamento.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -437,7 +437,7 @@ async function carregarExtrato() {
 
     try {
         const params = new URLSearchParams({ termo: termo, tipo: filtroTipo });
-        const resposta = await fetch('../scripts/baixa_listar.php?' + params.toString());
+        const resposta = await fetch('/Financeiro/scripts/baixa_listar.php?' + params.toString());
         const dados = await resposta.json();
 
         if (!dados.ok) {
@@ -573,7 +573,7 @@ function excluirBaixa(idLancamento) {
         const formData = new FormData();
         formData.set('idLancamento', idLancamento);
 
-        fetch('../scripts/baixa_excluir.php', { method: 'POST', body: formData })
+        fetch('/Financeiro/scripts/baixa_excluir.php', { method: 'POST', body: formData })
             .then(function (resposta) { return resposta.json(); })
             .then(function (dados) {
                 if (!dados.ok) {
@@ -608,7 +608,7 @@ async function salvarBaixa(evento) {
     btn.textContent = 'Salvando...';
 
     try {
-        const resposta = await fetch('../scripts/baixa_salvar.php', { method: 'POST', body: formData });
+        const resposta = await fetch('/Financeiro/scripts/baixa_salvar.php', { method: 'POST', body: formData });
         const dados = await resposta.json();
 
         if (!dados.ok) {

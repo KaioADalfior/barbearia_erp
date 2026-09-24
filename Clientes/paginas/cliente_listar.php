@@ -48,7 +48,7 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 
 <style>
     .modal-overlay{
@@ -508,7 +508,7 @@ $mensagens = [
 
             <!-- ---- Aba: Cliente ---- -->
             <div id="cli-tab-dados" class="cli-tab-panel is-active">
-                <form id="form-cliente" action="../scripts/cliente_salvar.php" method="POST" autocomplete="off" onsubmit="return cliPrepararEnvioForm()">
+                <form id="form-cliente" action="/Clientes/scripts/cliente_salvar.php" method="POST" autocomplete="off" onsubmit="return cliPrepararEnvioForm()">
                     <?= csrf_field() ?>
                     <input type="hidden" id="cliente-id" name="id" value="<?= $reabrirEdicao ? htmlspecialchars($voltaEditId) : '' ?>">
 
@@ -785,7 +785,7 @@ $mensagens = [
         document.getElementById('cli-lista-agendamentos').innerHTML = '<p class="cli-vazio">Carregando agendamentos...</p>';
         document.getElementById('cli-lista-historico').innerHTML = '<p class="cli-vazio">Carregando histórico...</p>';
 
-        fetch(`../scripts/cliente_detalhes.php?id=${encodeURIComponent(idCliente)}`)
+        fetch(`/Clientes/scripts/cliente_detalhes.php?id=${encodeURIComponent(idCliente)}`)
             .then(resp => resp.json())
             .then(dados => {
                 if (!dados.ok) {
@@ -816,7 +816,7 @@ $mensagens = [
         botao.disabled = true;
         botao.textContent = 'Salvando...';
 
-        fetch('../scripts/cliente_historico_salvar.php', {
+        fetch('/Clientes/scripts/cliente_historico_salvar.php', {
             method: 'POST',
             body: new FormData(form),
         })
@@ -926,7 +926,7 @@ $mensagens = [
     function cliPrepararEnvioForm() {
         const form = document.getElementById('form-cliente');
         const id = document.getElementById('cliente-id').value;
-        form.action = id ? '../scripts/cliente_atualizar.php' : '../scripts/cliente_salvar.php';
+        form.action = id ? '/Clientes/scripts/cliente_atualizar.php' : '/Clientes/scripts/cliente_salvar.php';
         return true;
     }
 

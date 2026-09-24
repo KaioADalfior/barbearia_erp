@@ -4,11 +4,11 @@ require_once __DIR__ . '/../../includes/csrf.php';
 
 if (!empty($_SESSION['tipo'])) {
     if ($_SESSION['tipo'] === 'barbeiro') {
-        header('Location: ../../Painel/paginas/painel_barbeiro.php?login=sucesso');
+        header('Location: /inicio?login=sucesso');
         exit;
     }
     if ($_SESSION['tipo'] === 'admin') {
-        header('Location: ../../Painel/paginas/painel_admin.php?login=sucesso');
+        header('Location: /painel?login=sucesso');
         exit;
     }
 }
