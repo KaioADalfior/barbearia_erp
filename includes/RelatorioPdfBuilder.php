@@ -58,7 +58,7 @@ class RelatorioPdfBuilder extends FPDF
         $this->SetAutoPageBreak(true, 20);
         $this->AliasNbPages();
         $this->SetTitle($this->conv($tituloRelatorio));
-        $this->SetCreator('Alex Barbearia');
+        $this->SetCreator('Sistema de Gestão');
     }
 
     /** Converte UTF-8 (padrão do resto do sistema) para o encoding das fontes core do FPDF. */
@@ -90,7 +90,7 @@ class RelatorioPdfBuilder extends FPDF
         $xTexto = 14;
 
         if ($this->logoPath) {
-            // Logo já contém o nome "Alex Barbearia" na própria arte, então
+            // A logo já contém o nome do sistema na própria arte, então
             // o nome não é repetido em texto ao lado — evita redundância.
             $this->Image($this->logoPath, 14, $y, 26);
             $xTexto = 44;

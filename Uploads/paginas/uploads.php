@@ -19,23 +19,23 @@ $uploads = $stmt->fetchAll();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uploads &amp; Versões — Alex Barbearia</title>
+<title>Uploads &amp; Versões — Sistema de Gestão</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
     :root{
-        --onyx:#0a0e1a;
-        --charcoal:#101828;
-        --charcoal-2:#182338;
-        --charcoal-3:#182338;
-        --gold:#3d7ec9;
-        --gold-light:#6fa8ea;
-        --cream:#e9eef6;
-        --pole-red:#1e4d80;
-        --pole-blue:#5b9bd8;
+        --onyx:#0b0f17;
+        --charcoal:#111827;
+        --charcoal-2:#141b2b;
+        --charcoal-3:#1a2236;
+        --gold:#2f6fed;
+        --gold-light:#5b93f7;
+        --cream:#e7ebf3;
+        --pole-red:#64748b;
+        --pole-blue:#94a3b8;
     }
 
     *{ box-sizing:border-box; }
@@ -44,15 +44,16 @@ $uploads = $stmt->fetchAll();
         font-family:'Poppins', sans-serif;
         background-color:var(--onyx);
         background-image:
-            radial-gradient(ellipse at 50% 0%, rgba(61,126,201,0.10), transparent 55%),
+            radial-gradient(ellipse at 50% 0%, rgba(47,111,237,0.10), transparent 55%),
             radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.65), transparent 60%),
             repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 6px);
         min-height:100vh;
     }
 
     .display{
-        font-family:'Bebas Neue', sans-serif;
-        letter-spacing:0.06em;
+        font-family:'Poppins', sans-serif;
+        font-weight:700;
+        letter-spacing:-0.01em;
     }
 
     .eyebrow{
@@ -65,38 +66,26 @@ $uploads = $stmt->fetchAll();
     .emblem{
         background:
             radial-gradient(circle at 35% 30%, rgba(255,255,255,0.10), transparent 45%),
-            linear-gradient(145deg, #142238, #0a0e1a);
-        border:1px solid rgba(61,126,201,0.55);
+            linear-gradient(145deg, #17233a, #0b0f17);
+        border:1px solid rgba(47,111,237,0.55);
         box-shadow:
-            0 0 0 4px rgba(61,126,201,0.08),
+            0 0 0 4px rgba(47,111,237,0.08),
             0 12px 30px -8px rgba(0,0,0,0.7),
             inset 0 1px 1px rgba(255,255,255,0.05);
     }
 
+    /* Faixa de destaque neutra — mesmo tratamento de assets/css/admin-theme.css
+       (.barber-stripe-thin): barra sólida na cor de destaque do sistema, sem
+       referência temática a barbearia. */
     .barber-stripe{
-        height:6px;
+        height:4px;
         width:100%;
-        background:repeating-linear-gradient(
-            -45deg,
-            var(--pole-red) 0 14px,
-            var(--cream) 14px 28px,
-            var(--pole-blue) 28px 42px,
-            var(--cream) 42px 56px
-        );
-        background-size:200% 100%;
-        animation:pole-scroll 7s linear infinite;
-    }
-    @keyframes pole-scroll{
-        from{ background-position:0 0; }
-        to{ background-position:-79px 0; }
-    }
-    @media (prefers-reduced-motion: reduce){
-        .barber-stripe{ animation:none; }
+        background:linear-gradient(90deg, var(--gold), var(--gold-light));
     }
 
     .card{
         background:linear-gradient(180deg, var(--charcoal), var(--charcoal-2));
-        border:1px solid rgba(61,126,201,0.14);
+        border:1px solid rgba(47,111,237,0.14);
     }
 
     .version-item{
@@ -105,23 +94,24 @@ $uploads = $stmt->fetchAll();
         transition:border-color .2s, background-color .2s;
     }
     .version-item:hover{
-        border-color:rgba(61,126,201,0.3);
-        background:rgba(61,126,201,0.04);
+        border-color:rgba(47,111,237,0.3);
+        background:rgba(47,111,237,0.04);
     }
     .version-item:first-child{
-        border-color:rgba(61,126,201,0.45);
-        background:rgba(61,126,201,0.07);
+        border-color:rgba(47,111,237,0.45);
+        background:rgba(47,111,237,0.07);
     }
 
     .badge-versao{
         display:inline-flex;
         align-items:center;
-        font-family:'Bebas Neue', sans-serif;
-        letter-spacing:0.04em;
-        font-size:17px;
+        font-family:'Poppins', sans-serif;
+        font-weight:600;
+        letter-spacing:0.02em;
+        font-size:14px;
         color:var(--gold-light);
-        background:rgba(61,126,201,0.12);
-        border:1px solid rgba(61,126,201,0.4);
+        background:rgba(47,111,237,0.12);
+        border:1px solid rgba(47,111,237,0.4);
         border-radius:999px;
         padding:0.2rem 0.9rem;
     }
@@ -143,7 +133,7 @@ $uploads = $stmt->fetchAll();
     .divider-tick{
         width:1px;
         height:14px;
-        background:rgba(61,126,201,0.4);
+        background:rgba(47,111,237,0.4);
     }
 </style>
 </head>
@@ -155,17 +145,16 @@ $uploads = $stmt->fetchAll();
     <!-- Emblema -->
     <div class="flex flex-col items-center mb-7">
         <div class="emblem w-16 h-16 rounded-full flex items-center justify-center mb-4">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6.5 5.5a2.5 2.5 0 1 1 3.4 3.4L18 17.5" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round"/>
-                <path d="M6.5 18.5a2.5 2.5 0 1 0 3.4-3.4L18 6.5" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round"/>
-                <circle cx="6.2" cy="6.2" r="1.6" stroke="#6fa8ea" stroke-width="1.2"/>
-                <circle cx="6.2" cy="17.8" r="1.6" stroke="#6fa8ea" stroke-width="1.2"/>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="11" width="14" height="9" rx="2" stroke="var(--gold-light)" stroke-width="1.4"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="var(--gold-light)" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="12" cy="15.4" r="1.3" fill="var(--gold-light)"/>
             </svg>
         </div>
 
-        <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Alex Barbearia</p>
+        <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Plataforma de Gestão</p>
         <h1 class="display text-4xl text-[color:var(--cream)] leading-none">
-            UPLOADS <span class="text-yellow-500">&amp; VERSÕES</span>
+            UPLOADS <span style="color:var(--gold-light)">&amp; VERSÕES</span>
         </h1>
         <div class="flex items-center gap-3 mt-3 text-[11px] text-zinc-500 tracking-wider">
             <span>HISTÓRICO DE ATUALIZAÇÕES</span>

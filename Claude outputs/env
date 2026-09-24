@@ -1,0 +1,8 @@
+# Variáveis de ambiente do App (aba "Environment" do serviço da aplicação
+# no Easypanel — NÃO é o serviço do banco). config/config.php lê só estas
+# 4 (via getenv()); não há mais nenhuma outra variável usada no projeto.
+
+DB_HOST=comandai_barbearia-padrao-bd
+DB_NAME=barbearia-padrao-bd
+DB_USER=barbearia_user
+DB_PASS=COLE_AQUI_A_SENHA_DO_BARBEARIA_USER

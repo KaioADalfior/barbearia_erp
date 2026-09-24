@@ -29,7 +29,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
 <?php include __DIR__ . '/../../includes/theme-init.php'; ?>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Perfil — Alex Barbearia</title>
+<title>Perfil — Sistema de Gestão</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

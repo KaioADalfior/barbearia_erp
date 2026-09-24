@@ -20,23 +20,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Alex Barbearia — Acesso</title>
+<title>Sistema de Gestão — Acesso</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
     :root{
-        --onyx:#0a0e1a;
-        --charcoal:#101828;
-        --charcoal-2:#182338;
-        --gold:#3d7ec9;
-        --gold-light:#6fa8ea;
-        --cream:#e9eef6;
-        --pole-red:#1e4d80;
-        --pole-blue:#5b9bd8;
+        --onyx:#0b0f17;
+        --charcoal:#111827;
+        --charcoal-2:#141b2b;
+        --gold:#2f6fed;
+        --gold-light:#5b93f7;
+        --cream:#e7ebf3;
+        --pole-red:#64748b;
+        --pole-blue:#94a3b8;
     }
 
     *{ box-sizing:border-box; }
@@ -45,15 +45,16 @@
         font-family:'Poppins', sans-serif;
         background-color:var(--onyx);
         background-image:
-            radial-gradient(ellipse at 50% 18%, rgba(61,126,201,0.10), transparent 55%),
+            radial-gradient(ellipse at 50% 18%, rgba(47,111,237,0.10), transparent 55%),
             radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.65), transparent 60%),
             repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 6px);
         min-height:100vh;
     }
 
     .display{
-        font-family:'Bebas Neue', sans-serif;
-        letter-spacing:0.06em;
+        font-family:'Poppins', sans-serif;
+        font-weight:700;
+        letter-spacing:-0.01em;
     }
 
     .eyebrow{
@@ -63,43 +64,30 @@
         font-weight:500;
     }
 
-    /* Emblema em relevo dourado */
+    /* Emblema em relevo */
     .emblem{
         background:
             radial-gradient(circle at 35% 30%, rgba(255,255,255,0.10), transparent 45%),
-            linear-gradient(145deg, #142238, #0a0e1a);
-        border:1px solid rgba(61,126,201,0.55);
+            linear-gradient(145deg, #17233a, #0b0f17);
+        border:1px solid rgba(47,111,237,0.55);
         box-shadow:
-            0 0 0 4px rgba(61,126,201,0.08),
+            0 0 0 4px rgba(47,111,237,0.08),
             0 12px 30px -8px rgba(0,0,0,0.7),
             inset 0 1px 1px rgba(255,255,255,0.05);
     }
 
-    /* Faixa de poste de barbeiro — o elemento de assinatura */
+    /* Faixa de destaque neutra — barra sólida na cor de destaque do sistema,
+       sem referência temática a barbearia, para servir de base genérica a
+       qualquer cliente (ver mesmo tratamento em assets/css/admin-theme.css). */
     .barber-stripe{
-        height:8px;
+        height:5px;
         width:100%;
-        background:repeating-linear-gradient(
-            -45deg,
-            var(--pole-red) 0 14px,
-            var(--cream) 14px 28px,
-            var(--pole-blue) 28px 42px,
-            var(--cream) 42px 56px
-        );
-        background-size:200% 100%;
-        animation:pole-scroll 7s linear infinite;
-    }
-    @keyframes pole-scroll{
-        from{ background-position:0 0; }
-        to{ background-position:-79px 0; }
-    }
-    @media (prefers-reduced-motion: reduce){
-        .barber-stripe{ animation:none; }
+        background:linear-gradient(90deg, var(--gold), var(--gold-light));
     }
 
     .card{
         background:linear-gradient(180deg, var(--charcoal), var(--charcoal-2));
-        border:1px solid rgba(61,126,201,0.14);
+        border:1px solid rgba(47,111,237,0.14);
     }
 
     .field-label{
@@ -120,7 +108,7 @@
         outline:none;
         border-color:var(--gold);
         background:rgba(0,0,0,0.5);
-        box-shadow:0 0 0 4px rgba(61,126,201,0.12);
+        box-shadow:0 0 0 4px rgba(47,111,237,0.12);
     }
 
     .btn-entrar{
@@ -129,20 +117,20 @@
         font-weight:600;
         letter-spacing:0.03em;
         transition:filter .2s, transform .15s, box-shadow .2s;
-        box-shadow:0 8px 20px -8px rgba(61,126,201,0.55);
+        box-shadow:0 8px 20px -8px rgba(47,111,237,0.55);
     }
-    .btn-entrar:hover{ filter:brightness(1.08); box-shadow:0 10px 26px -6px rgba(61,126,201,0.65); }
+    .btn-entrar:hover{ filter:brightness(1.08); box-shadow:0 10px 26px -6px rgba(47,111,237,0.65); }
     .btn-entrar:active{ transform:scale(0.98); }
 
     .divider-tick{
         width:1px;
         height:14px;
-        background:rgba(61,126,201,0.4);
+        background:rgba(47,111,237,0.4);
     }
 
     .error-box{
-        border:1px solid rgba(140,31,40,0.55);
-        background:rgba(140,31,40,0.12);
+        border:1px solid rgba(239,68,68,0.55);
+        background:rgba(239,68,68,0.12);
         color:#f0c9cc;
     }
 </style>
@@ -155,17 +143,16 @@
     <!-- Emblema -->
     <div class="flex flex-col items-center mb-7">
         <div class="emblem w-20 h-20 rounded-full flex items-center justify-center mb-4">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6.5 5.5a2.5 2.5 0 1 1 3.4 3.4L18 17.5" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round"/>
-                <path d="M6.5 18.5a2.5 2.5 0 1 0 3.4-3.4L18 6.5" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round"/>
-                <circle cx="6.2" cy="6.2" r="1.6" stroke="#6fa8ea" stroke-width="1.2"/>
-                <circle cx="6.2" cy="17.8" r="1.6" stroke="#6fa8ea" stroke-width="1.2"/>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="11" width="14" height="9" rx="2" stroke="var(--gold-light)" stroke-width="1.4"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="var(--gold-light)" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="12" cy="15.4" r="1.3" fill="var(--gold-light)"/>
             </svg>
         </div>
 
-        <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Est. 2026 · Espírito Santo</p>
+        <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Plataforma de Gestão</p>
         <h1 class="display text-5xl text-[color:var(--cream)] leading-none">
-            ALEX <span style="color:var(--gold-light)">BARBEARIA</span>
+            SISTEMA <span style="color:var(--gold-light)">DE GESTÃO</span>
         </h1>
         <div class="flex items-center gap-3 mt-3 text-[11px] text-zinc-500 tracking-wider">
             <span>PAINEL INTERNO</span>
@@ -238,11 +225,11 @@ Swal.fire({
     text: '<?= $_GET['erro'] === 'bloqueado'
         ? 'Muitas tentativas de acesso. Tente novamente mais tarde.'
         : 'Usuário ou senha inválidos. Confira os dados e tente novamente.' ?>',
-    background: '#101828',
-    color: '#e9eef6',
-    confirmButtonColor: '#3d7ec9',
+    background: '#141b2b',
+    color: '#e7ebf3',
+    confirmButtonColor: '#2f6fed',
     confirmButtonText: 'Tentar novamente',
-    iconColor: '#8c1f28'
+    iconColor: '#ef4444'
 }).then(function () {
     // Remove ?erro=1 da URL para não reabrir o modal num refresh
     var url = new URL(window.location.href);

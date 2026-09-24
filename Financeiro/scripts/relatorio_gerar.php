@@ -79,7 +79,7 @@ try {
     $logoPath = __DIR__ . '/../../assets/img/logoRelatorio.png';
 
     $pdfBytes = construirRelatorioPdf(
-        'Alex Barbearia',
+        'Sistema de Gestão',
         $nomeBarbeiro,
         $tipo,
         $dataInicio,
