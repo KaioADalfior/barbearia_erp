@@ -209,12 +209,9 @@
     </div>
 
     <p class="text-center text-xs text-zinc-600 mt-8 font-light">
-        © 2026 DAK ChatBots e Soluções Digitais — Todos os direitos reservados.
+        DAK Soluções Digitais
     </p>
-    <p class="text-center text-xs text-zinc-600 mt-8 font-light">
-        <a href="../../Uploads/paginas/uploads.php">Ver Uploads e Versões</a>
-    </p>
-    
+
 </div>
 
 <script>
