@@ -67,6 +67,21 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     }
     .horario-cheio:hover{ filter:brightness(1.15); }
 
+    /* ---------- Agendamento feito pelo cliente no link público ---------- */
+    .horario-publico{
+        background:rgba(249,115,22,0.12);
+        border-color:rgba(249,115,22,0.4);
+    }
+    .horario-publico:hover{ filter:brightness(1.15); }
+    .status-dot-publico{ background:#f97316; box-shadow:0 0 6px rgba(249,115,22,0.7); }
+    .badge-publico{
+        display:inline-flex; align-items:center; gap:4px;
+        font-size:10.5px; font-weight:600; letter-spacing:.02em;
+        color:#fdba8c; background:rgba(249,115,22,0.14);
+        border:1px solid rgba(249,115,22,0.35);
+        border-radius:999px; padding:2px 8px;
+    }
+
     .horario-passado{
         opacity:0.45;
         cursor:not-allowed;
@@ -542,6 +557,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
             <div class="px-4 sm:px-5 pb-3.5 sm:pb-4 -mt-1 flex items-center justify-center gap-4 flex-wrap">
                 <span class="flex items-center text-[11px] text-zinc-400"><span class="status-dot status-dot-livre"></span> Livre</span>
                 <span class="flex items-center text-[11px] text-zinc-400"><span class="status-dot status-dot-cheio"></span> Ocupado</span>
+                <span class="flex items-center text-[11px] text-zinc-400"><span class="status-dot status-dot-publico"></span> Via link</span>
             </div>
         </div>
 
@@ -842,6 +858,10 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
                 <div class="det-field det-field--full hidden" id="det-duplicado-row">
                     <p class="det-field__label">🟣 Duplicado</p>
                     <p class="det-field__value" id="det-duplicado-valor">—</p>
+                </div>
+                <div class="det-field det-field--full hidden" id="det-origem-row">
+                    <p class="det-field__label" style="color:#fdba8c;">🟠 Origem</p>
+                    <p class="det-field__value">Cliente agendou sozinho pelo link público</p>
                 </div>
             </div>
 
@@ -1259,7 +1279,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             const bloqueadoPeloDia = diaBloqueadoAtual && !h.ocupado && !inativo;
 
             let estadoClasse = 'horario-livre';
-            if (h.ocupado) estadoClasse = h.duplicado ? 'horario-duplicado' : 'horario-cheio';
+            if (h.ocupado) estadoClasse = h.duplicado ? 'horario-duplicado' : (h.origemPublica ? 'horario-publico' : 'horario-cheio');
             else if (inativo || bloqueadoPeloDia) estadoClasse = 'horario-inativo';
 
             const linha = document.createElement('div');
@@ -1272,6 +1292,13 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             direita.className = 'horario-info';
             if (h.ocupado && h.duplicado) {
                 direita.innerHTML = `<span class="status-dot status-dot-duplicado"></span>${escapeHtml(h.cliente.nome)} <span class="badge-duplicado">Duplicado</span>`;
+            } else if (h.ocupado && h.origemPublica) {
+                // Agendamento que o próprio cliente fez sozinho pelo link
+                // público (ver Publico/paginas/agendar.php), sem passar pelo
+                // barbeiro — mesma linha/clique de sempre (abre o modal de
+                // detalhes normalmente), só com cor e rótulo diferentes pra
+                // avisar de onde veio.
+                direita.innerHTML = `<span class="status-dot status-dot-publico"></span>${escapeHtml(h.cliente.nome)} <span class="badge-publico">Via link</span>`;
             } else if (h.ocupado) {
                 direita.innerHTML = `<span class="status-dot status-dot-cheio"></span>${escapeHtml(h.cliente.nome)}`;
             } else if (inativo && h.ausenteNome) {
@@ -1945,6 +1972,8 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
         } else {
             linhaDuplicado.classList.add('hidden');
         }
+
+        document.getElementById('det-origem-row').classList.toggle('hidden', !horario.origemPublica);
 
         // Um agendamento já concluído ou cancelado não pode mais ser
         // cancelado/concluído de novo — só sobra "Fechar". Fora isso, as

@@ -62,6 +62,7 @@ $sql = "SELECT
             a.cobranca_duplicado,
             a.fidelidade,
             a.grupo_recorrencia,
+            a.origem_publica,
             c.idCliente,
             c.nome      AS cliente_nome,
             c.telefone  AS cliente_telefone,
@@ -126,6 +127,11 @@ $horarios = array_map(function ($linha) {
         // usado pelo frontend para mostrar o botão "Reagendar".
         'fidelidade'        => $ocupado ? $linha['fidelidade'] : null,
         'grupoRecorrencia'  => $ocupado ? $linha['grupo_recorrencia'] : null,
+        // Agendamento criado pelo cliente final no link público de
+        // agendamento (ver Publico/scripts/publico_agendar_salvar.php), não
+        // pelo barbeiro no painel — usado só pra pintar a grade numa cor
+        // diferente (ver status-dot-publico em Agendamentos/paginas/agendar.php).
+        'origemPublica'     => $ocupado ? (bool) $linha['origem_publica'] : false,
         // Nome do cliente do último atendimento CONCLUÍDO neste horário —
         // só preenchido quando o slot está livre agora (ninguém ativo
         // ocupando) E o último desfecho foi realmente uma conclusão (não

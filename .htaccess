@@ -24,3 +24,12 @@ Options -Indexes
 RedirectMatch 404 ^/scriptBD/
 RedirectMatch 404 ^/\.nixpacks/
 RedirectMatch 404 ^/includes/.*\.php$
+
+# Agendamento público por link (sem login) — ver Publico/paginas/agendar.php
+# e includes/PublicoTokenService.php. URL bonita e "inquebrável" (o token
+# de verdade que identifica o barbeiro é aleatório, não o que aparece na
+# URL): /c/agendar/<slug-token> -> Publico/paginas/agendar.php?t=<slug-token>
+# Regra equivalente para deploy via Railway/nginx em
+# .nixpacks/assets/nginx.template.conf.
+RewriteEngine On
+RewriteRule ^c/agendar/([a-z0-9-]+)/?$ Publico/paginas/agendar.php?t=$1 [L,QSA]

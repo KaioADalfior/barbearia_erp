@@ -18,6 +18,23 @@ if ($tipo === 'admin') {
     $uploads = $stmtUploads->fetchAll();
 }
 
+// ---------- Link público de agendamento (somente Barbeiro) ----------
+// Cada barbeiro tem sua própria agenda (Horario.id_barbeiro) — o link é por
+// barbeiro, não por conta de admin. Ver includes/PublicoTokenService.php e
+// Publico/paginas/agendar.php.
+$linkPublicoToken = null;
+if ($tipo === 'barbeiro') {
+    require_once __DIR__ . '/../../config/config.php';
+    $stmtLink = $pdo->prepare('SELECT link_publico FROM Barbeiro WHERE id_barbeiro = :id');
+    $stmtLink->execute(['id' => (int) $_SESSION['id']]);
+    $linkPublicoToken = $stmtLink->fetchColumn() ?: null;
+}
+$linkPublicoUrl = null;
+if ($linkPublicoToken !== null) {
+    $esquema = (!empty($_SERVER['HTTPS']) || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')) ? 'https' : 'http';
+    $linkPublicoUrl = $esquema . '://' . ($_SERVER['HTTP_HOST'] ?? '') . '/c/agendar/' . $linkPublicoToken;
+}
+
 // ---------- Reabertura do modal de upload em caso de erro ----------
 $uploadStatusGet   = $_GET['upload_status'] ?? '';
 $reabrirUpload      = in_array($uploadStatusGet, ['erro', 'duplicada'], true);
@@ -186,6 +203,35 @@ include __DIR__ . '/../../includes/toast.php';
         </div>
 
     </section>
+
+    <?php if ($tipo === 'barbeiro'): ?>
+    <section class="p-5 sm:p-8 max-w-5xl">
+        <div class="panel-card rounded-2xl p-5 sm:p-6">
+            <p class="text-sm font-semibold text-[color:var(--cream)] mb-1">Agendamento online</p>
+            <p class="settings-desc mb-5">Link público para seus clientes agendarem sozinhos, sem precisar entrar no sistema.</p>
+
+            <div id="link-publico-vazio" class="<?= $linkPublicoUrl ? 'hidden' : '' ?>">
+                <button type="button" id="btn-gerar-link" class="btn-primary h-11 px-5 rounded-xl text-sm">
+                    Gerar meu link de agendamento
+                </button>
+            </div>
+
+            <div id="link-publico-preenchido" class="<?= $linkPublicoUrl ? '' : 'hidden' ?>">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="input-link-publico" readonly
+                           value="<?= htmlspecialchars($linkPublicoUrl ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                           class="field w-full h-12 px-4 rounded-xl text-sm" onclick="this.select()">
+                    <button type="button" id="btn-copiar-link" class="btn-secondary h-12 px-5 rounded-xl text-sm shrink-0">
+                        Copiar
+                    </button>
+                </div>
+                <button type="button" id="btn-gerar-novo-link" class="text-xs mt-3" style="color:#7f8fac; text-decoration:underline;">
+                    Gerar um novo link (o link atual deixa de funcionar)
+                </button>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <?php if ($tipo === 'admin'): ?>
     <section class="p-5 sm:p-8 max-w-5xl">
@@ -380,6 +426,54 @@ toast('Senha atualizada com sucesso!');
 
 <?php if ($reabrirUpload): ?>
 openModal('modal-upload');
+<?php endif; ?>
+
+<?php if ($tipo === 'barbeiro'): ?>
+function gerarLinkPublico(mensagemConfirmacao) {
+    if (mensagemConfirmacao && !confirm(mensagemConfirmacao)) {
+        return;
+    }
+    var formData = new URLSearchParams();
+    formData.set('_csrf', <?= json_encode(csrf_token()) ?>);
+
+    fetch('../scripts/link_publico_gerar.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString(),
+    })
+        .then(function (r) { return r.json(); })
+        .then(function (resposta) {
+            if (!resposta.ok) {
+                toast(resposta.erro || 'Não foi possível gerar o link agora.', 'erro');
+                return;
+            }
+            var url = window.location.protocol + '//' + window.location.host + '/c/agendar/' + resposta.token;
+            document.getElementById('input-link-publico').value = url;
+            document.getElementById('link-publico-vazio').classList.add('hidden');
+            document.getElementById('link-publico-preenchido').classList.remove('hidden');
+            toast('Link de agendamento gerado com sucesso!');
+        })
+        .catch(function () {
+            toast('Erro de conexão. Tente novamente.', 'erro');
+        });
+}
+
+document.getElementById('btn-gerar-link').addEventListener('click', function () {
+    gerarLinkPublico(null);
+});
+document.getElementById('btn-gerar-novo-link').addEventListener('click', function () {
+    gerarLinkPublico('O link atual vai parar de funcionar. Gerar um novo mesmo assim?');
+});
+document.getElementById('btn-copiar-link').addEventListener('click', function () {
+    var campo = document.getElementById('input-link-publico');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function () {
+        toast('Link copiado!');
+    }).catch(function () {
+        document.execCommand('copy');
+        toast('Link copiado!');
+    });
+});
 <?php endif; ?>
 </script>
 
