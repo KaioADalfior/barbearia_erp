@@ -151,6 +151,9 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
     overflow:hidden;
     text-overflow:ellipsis;
 }
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-sidebar__brand-text{ display:none; }
+}
 
 .ab-sidebar__spacer{
     position:absolute;

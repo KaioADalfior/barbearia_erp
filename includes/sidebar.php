@@ -8,8 +8,8 @@ $paginaAtual = $paginaAtual ?? '';
 
     <!-- Marca -->
     <div class="ab-sidebar__brand">
-        <div class="ab-sidebar__logo">
-            <img src="../../assets/img/logoClaro.png" alt="Sistema de Gestão" class="ab-sidebar__logo-img">
+        <div class="ab-sidebar__brand-text">
+            <p class="ab-sidebar__brand-name">Barb<span>ERP</span></p>
         </div>
 
         <div class="ab-sidebar__spacer">

@@ -58,7 +58,7 @@ class RelatorioPdfBuilder extends FPDF
         $this->SetAutoPageBreak(true, 20);
         $this->AliasNbPages();
         $this->SetTitle($this->conv($tituloRelatorio));
-        $this->SetCreator('Sistema de Gestão');
+        $this->SetCreator('BarbERP');
     }
 
     /** Converte UTF-8 (padrão do resto do sistema) para o encoding das fontes core do FPDF. */

@@ -19,7 +19,7 @@ $uploads = $stmt->fetchAll();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uploads &amp; Versões — Sistema de Gestão</title>
+<title>Uploads &amp; Versões — BarbERP</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
