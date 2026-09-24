@@ -57,7 +57,12 @@ $fotoBarbeiro = null;
 if (!empty($barbeiro['foto'])) {
     $caminhoFoto = __DIR__ . '/../../assets/uploads/perfil/' . $barbeiro['foto'];
     if (is_file($caminhoFoto)) {
-        $fotoBarbeiro = '../../assets/uploads/perfil/' . rawurlencode($barbeiro['foto']);
+        // Caminho ABSOLUTO (começa com /) — obrigatório aqui: a URL que o
+        // navegador exibe é a bonita (/c/agendar/<token>), não o caminho
+        // real do arquivo (/Publico/paginas/agendar.php); um caminho
+        // relativo como '../../assets/...' seria resolvido a partir da URL
+        // exibida e quebraria (ver mesmo motivo nos fetch() abaixo).
+        $fotoBarbeiro = '/assets/uploads/perfil/' . rawurlencode($barbeiro['foto']);
     }
 }
 ?>
@@ -414,7 +419,12 @@ if (!empty($barbeiro['foto'])) {
         const podeVoltar = !(ano === HOJE.getFullYear() && mes === HOJE.getMonth() + 1);
         document.getElementById('mes-anterior').disabled = !podeVoltar;
 
-        fetch('../scripts/publico_mes_disponibilidade.php?t=' + encodeURIComponent(TOKEN) + '&mes=' + mes + '&ano=' + ano)
+        // Caminho ABSOLUTO (começa com /) — a URL exibida no navegador é a
+        // bonita (/c/agendar/<token>), não a pasta real do arquivo; um
+        // caminho relativo tipo '../scripts/...' seria resolvido a partir
+        // de /c/agendar/ e cairia em /c/scripts/ (inexistente), quebrando
+        // o carregamento do calendário.
+        fetch('/Publico/scripts/publico_mes_disponibilidade.php?t=' + encodeURIComponent(TOKEN) + '&mes=' + mes + '&ano=' + ano)
             .then(function (r) { return r.json(); })
             .then(function (resposta) {
                 if (!resposta.ok) { return; }
@@ -475,7 +485,7 @@ if (!empty($barbeiro['foto'])) {
         lista.innerHTML = '<p class="text-xs" style="color:#7f8fac;">Carregando horários…</p>';
         vazio.style.display = 'none';
 
-        fetch('../scripts/publico_horarios_buscar.php?t=' + encodeURIComponent(TOKEN) + '&data=' + data)
+        fetch('/Publico/scripts/publico_horarios_buscar.php?t=' + encodeURIComponent(TOKEN) + '&data=' + data)
             .then(function (r) { return r.json(); })
             .then(function (resposta) {
                 lista.innerHTML = '';
@@ -557,7 +567,7 @@ if (!empty($barbeiro['foto'])) {
         dados.set('observacao', observacao);
         dados.set('site', document.getElementById('input-site').value);
 
-        fetch('../scripts/publico_agendar_salvar.php', {
+        fetch('/Publico/scripts/publico_agendar_salvar.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: dados.toString(),
