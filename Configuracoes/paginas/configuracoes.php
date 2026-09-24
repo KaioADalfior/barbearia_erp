@@ -30,9 +30,16 @@ if ($tipo === 'barbeiro') {
     $linkPublicoToken = $stmtLink->fetchColumn() ?: null;
 }
 $linkPublicoUrl = null;
-if ($linkPublicoToken !== null) {
+$linkGeralUrl = null;
+if ($tipo === 'barbeiro') {
     $esquema = (!empty($_SERVER['HTTPS']) || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')) ? 'https' : 'http';
-    $linkPublicoUrl = $esquema . '://' . ($_SERVER['HTTP_HOST'] ?? '') . '/c/agendar/' . $linkPublicoToken;
+    if ($linkPublicoToken !== null) {
+        $linkPublicoUrl = $esquema . '://' . ($_SERVER['HTTP_HOST'] ?? '') . '/c/agendar/' . $linkPublicoToken;
+    }
+    // Link GERAL da barbearia (sem token) — ver Publico/paginas/escolher_barbeiro.php.
+    // Útil quando a barbearia tem mais de um barbeiro: lista todos pra o
+    // cliente escolher. Não depende de nenhum link pessoal ter sido gerado.
+    $linkGeralUrl = $esquema . '://' . ($_SERVER['HTTP_HOST'] ?? '') . '/c/agendar';
 }
 
 // ---------- Reabertura do modal de upload em caso de erro ----------
@@ -228,6 +235,18 @@ include __DIR__ . '/../../includes/toast.php';
                 <button type="button" id="btn-gerar-novo-link" class="text-xs mt-3" style="color:#7f8fac; text-decoration:underline;">
                     Gerar um novo link (o link atual deixa de funcionar)
                 </button>
+            </div>
+
+            <div class="mt-5 pt-5" style="border-top:1px solid rgba(255,255,255,0.08);">
+                <p class="text-sm font-semibold text-[color:var(--cream)] mb-1">Link geral da barbearia</p>
+                <p class="settings-desc mb-3">Se a barbearia tem mais de um barbeiro, use este link em vez do seu pessoal — o cliente escolhe com quem quer agendar antes de continuar.</p>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" readonly value="<?= htmlspecialchars($linkGeralUrl, ENT_QUOTES, 'UTF-8') ?>"
+                           class="field w-full h-12 px-4 rounded-xl text-sm" onclick="this.select()">
+                    <button type="button" id="btn-copiar-link-geral" class="btn-secondary h-12 px-5 rounded-xl text-sm shrink-0">
+                        Copiar
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -466,6 +485,16 @@ document.getElementById('btn-gerar-novo-link').addEventListener('click', functio
 });
 document.getElementById('btn-copiar-link').addEventListener('click', function () {
     var campo = document.getElementById('input-link-publico');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function () {
+        toast('Link copiado!');
+    }).catch(function () {
+        document.execCommand('copy');
+        toast('Link copiado!');
+    });
+});
+document.getElementById('btn-copiar-link-geral').addEventListener('click', function () {
+    var campo = this.parentElement.querySelector('input');
     campo.select();
     navigator.clipboard.writeText(campo.value).then(function () {
         toast('Link copiado!');

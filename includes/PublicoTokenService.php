@@ -78,6 +78,22 @@ class PublicoTokenService
         ];
     }
 
+    /**
+     * Garante que o barbeiro tenha um link público, gerando um na hora (e
+     * já gravando no banco) se ele ainda não tiver nenhum — usado pela
+     * página de "escolha seu barbeiro" (Publico/paginas/escolher_barbeiro.php),
+     * pra listar todos os barbeiros da barbearia sem exigir que cada um
+     * tenha ido em Configurações gerar o link pessoal manualmente antes.
+     */
+    public static function garantirLink(PDO $pdo, int $idBarbeiro, string $nome, ?string $linkAtual): string
+    {
+        if ($linkAtual !== null && $linkAtual !== '') {
+            return $linkAtual;
+        }
+
+        return self::gerarNovoLink($pdo, $idBarbeiro, $nome);
+    }
+
     private static function slugificar(string $texto): string
     {
         $convertido = @iconv('UTF-8', 'ASCII//TRANSLIT', $texto);

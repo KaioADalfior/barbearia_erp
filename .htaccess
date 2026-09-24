@@ -40,6 +40,15 @@ RedirectMatch 404 ^/includes/.*\.php$
 RewriteEngine On
 RewriteRule ^c/agendar/([a-z0-9-]+)/?$ Publico/paginas/agendar.php?t=$1 [L,QSA,E=VIA_LINK_PUBLICO:1]
 
+# Link GERAL da barbearia (sem token) — ver Publico/paginas/escolher_barbeiro.php.
+# Lista os barbeiros pra escolher; cada um continua tendo seu link pessoal
+# (regra acima), sem depender desta lista.
+RewriteRule ^c/agendar/?$ Publico/paginas/escolher_barbeiro.php [L,QSA,E=VIA_LINK_PUBLICO:1]
+
 RewriteCond %{REQUEST_URI} ^/Publico/paginas/agendar\.php$
+RewriteCond %{ENV:REDIRECT_VIA_LINK_PUBLICO} !^1$
+RewriteRule ^ - [F,L]
+
+RewriteCond %{REQUEST_URI} ^/Publico/paginas/escolher_barbeiro\.php$
 RewriteCond %{ENV:REDIRECT_VIA_LINK_PUBLICO} !^1$
 RewriteRule ^ - [F,L]
