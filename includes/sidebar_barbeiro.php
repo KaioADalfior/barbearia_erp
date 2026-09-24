@@ -29,7 +29,7 @@ $paginaAtual = $paginaAtual ?? '';
     <!-- Navegação -->
     <nav class="ab-sidebar__nav">
 
-        <a href="../../Painel/paginas/painel_barbeiro.php" title="Início"
+        <a href="/Painel/paginas/painel_barbeiro.php" title="Início"
            class="ab-nav-item <?= $paginaAtual === 'dashboard' ? 'is-active' : '' ?>">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,7 +65,7 @@ $paginaAtual = $paginaAtual ?? '';
             </button>
 
             <div id="grupo-cliente" class="ab-subnav <?= $paginaAtual === 'cliente-listar' ? '' : 'ab-hidden' ?>">
-                <a href="../../Clientes/paginas/cliente_listar.php"
+                <a href="/Clientes/paginas/cliente_listar.php"
                    class="ab-subnav__item <?= $paginaAtual === 'cliente-listar' ? 'is-active' : '' ?>">
                     Gerenciar Clientes
                 </a>
@@ -97,7 +97,7 @@ $paginaAtual = $paginaAtual ?? '';
             </button>
 
             <div id="grupo-servico" class="ab-subnav <?= $paginaAtual === 'servico-listar' ? '' : 'ab-hidden' ?>">
-                <a href="../../Servicos/paginas/servico_listar.php"
+                <a href="/Servicos/paginas/servico_listar.php"
                    class="ab-subnav__item <?= $paginaAtual === 'servico-listar' ? 'is-active' : '' ?>">
                     Gerenciar Serviço
                 </a>
@@ -128,11 +128,11 @@ $paginaAtual = $paginaAtual ?? '';
             </button>
 
             <div id="grupo-agendamento" class="ab-subnav <?= in_array($paginaAtual, ['agendar', 'agendamento-listar']) ? '' : 'ab-hidden' ?>">
-                <a href="../../Agendamentos/paginas/agendar.php"
+                <a href="/Agendamentos/paginas/agendar.php"
                    class="ab-subnav__item <?= $paginaAtual === 'agendar' ? 'is-active' : '' ?>">
                     Agendar
                 </a>
-                <a href="../../Agendamentos/paginas/agendamento_listar.php"
+                <a href="/Agendamentos/paginas/agendamento_listar.php"
                    class="ab-subnav__item <?= $paginaAtual === 'agendamento-listar' ? 'is-active' : '' ?>">
                     Agendamentos
                 </a>
@@ -161,26 +161,26 @@ $paginaAtual = $paginaAtual ?? '';
             </button>
 
             <div id="grupo-financeiro" class="ab-subnav <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios']) ? '' : 'ab-hidden' ?>">
-                <a href="../../Financeiro/paginas/financeiro_dashboard.php"
+                <a href="/Financeiro/paginas/financeiro_dashboard.php"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-dashboard' ? 'is-active' : '' ?>">
                     Dashboard
                 </a>
-                <a href="../../Financeiro/paginas/financeiro_baixa.php"
+                <a href="/Financeiro/paginas/financeiro_baixa.php"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-baixa' ? 'is-active' : '' ?>">
                     Cadastrar Baixa
                 </a>
-                <a href="../../Financeiro/paginas/financeiro_aReceber.php"
+                <a href="/Financeiro/paginas/financeiro_aReceber.php"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-fiados' ? 'is-active' : '' ?>">
                     Contas a Receber
                 </a>
-                <a href="../../Financeiro/paginas/financeiro_relatorios.php"
+                <a href="/Financeiro/paginas/financeiro_relatorios.php"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-relatorios' ? 'is-active' : '' ?>">
                     Relatórios
                 </a>
             </div>
         </div>
 
-        <a href="../../Perfil/paginas/perfil.php" title="Perfil"
+        <a href="/Perfil/paginas/perfil.php" title="Perfil"
            class="ab-nav-item <?= $paginaAtual === 'perfil' ? 'is-active' : '' ?>">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -191,7 +191,7 @@ $paginaAtual = $paginaAtual ?? '';
             <span class="ab-nav-item__label ab-label">Perfil</span>
         </a>
 
-        <a href="../../Configuracoes/paginas/configuracoes.php" title="Configurações"
+        <a href="/configuracoes" title="Configurações"
            class="ab-nav-item <?= $paginaAtual === 'configuracoes' ? 'is-active' : '' ?>">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -226,7 +226,7 @@ $paginaAtual = $paginaAtual ?? '';
     if (!empty($_SESSION['foto'])) {
         $ab_caminhoFoto = __DIR__ . '/../assets/uploads/perfil/' . $_SESSION['foto'];
         if (is_file($ab_caminhoFoto)) {
-            $ab_fotoRodape = '../../assets/uploads/perfil/' . rawurlencode($_SESSION['foto']);
+            $ab_fotoRodape = '/assets/uploads/perfil/' . rawurlencode($_SESSION['foto']);
         }
     }
     ?>
@@ -246,7 +246,7 @@ $paginaAtual = $paginaAtual ?? '';
                 <p class="ab-sidebar__user-role">Barbeiro</p>
             </div>
         </div>
-        <a href="../../Autenticacao/scripts/logout.php" title="Sair" class="ab-nav-item">
+        <a href="/Autenticacao/scripts/logout.php" title="Sair" class="ab-nav-item">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M9 20H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>

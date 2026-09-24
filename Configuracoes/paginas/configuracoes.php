@@ -68,7 +68,7 @@ $mensagensUpload = [
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
 
 <style>
     .modal-overlay{
@@ -179,7 +179,7 @@ include __DIR__ . '/../../includes/toast.php';
 
             <?php /* Erro de senha agora aparece como modal SweetAlert2 — ver script no fim da página */ ?>
 
-            <form action="../scripts/senha_atualizar.php" method="POST" autocomplete="off" class="flex flex-col gap-4">
+            <form action="/Configuracoes/scripts/senha_atualizar.php" method="POST" autocomplete="off" class="flex flex-col gap-4">
                 <?= csrf_field() ?>
 
                 <div>
@@ -322,7 +322,7 @@ include __DIR__ . '/../../includes/toast.php';
                 </button>
             </div>
 
-            <form action="../scripts/upload_salvar.php" method="POST" autocomplete="off">
+            <form action="/Configuracoes/scripts/upload_salvar.php" method="POST" autocomplete="off">
                 <?= csrf_field() ?>
 
                 <div class="mb-5">
@@ -455,7 +455,7 @@ function gerarLinkPublico(mensagemConfirmacao) {
     var formData = new URLSearchParams();
     formData.set('_csrf', <?= json_encode(csrf_token()) ?>);
 
-    fetch('../scripts/link_publico_gerar.php', {
+    fetch('/Configuracoes/scripts/link_publico_gerar.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString(),

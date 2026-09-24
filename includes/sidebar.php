@@ -30,7 +30,7 @@ $paginaAtual = $paginaAtual ?? '';
     <!-- Navegação -->
     <nav class="ab-sidebar__nav">
 
-        <a href="../../Painel/paginas/painel_admin.php" title="Início"
+        <a href="/Painel/paginas/painel_admin.php" title="Início"
            class="ab-nav-item <?= $paginaAtual === 'dashboard' ? 'is-active' : '' ?>">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,18 +68,18 @@ $paginaAtual = $paginaAtual ?? '';
             </button>
 
             <div id="grupo-barbeiro" class="ab-subnav <?= in_array($paginaAtual, ['barbeiro-cadastrar', 'barbeiro-listar'], true) ? '' : 'ab-hidden' ?>">
-                <a href="../../Barbeiros/paginas/barbeiro_listar.php"
+                <a href="/Barbeiros/paginas/barbeiro_listar.php"
                    class="ab-subnav__item <?= $paginaAtual === 'barbeiro-listar' ? 'is-active' : '' ?>">
                     Listar Barbeiros
                 </a>
-                <a href="../../Barbeiros/paginas/barbeiro_cadastrar.php"
+                <a href="/Barbeiros/paginas/barbeiro_cadastrar.php"
                    class="ab-subnav__item <?= $paginaAtual === 'barbeiro-cadastrar' ? 'is-active' : '' ?>">
                     Cadastrar Barbeiro
                 </a>
             </div>
         </div>
 
-        <a href="../../Configuracoes/paginas/configuracoes.php" title="Configurações"
+        <a href="/configuracoes" title="Configurações"
            class="ab-nav-item <?= $paginaAtual === 'configuracoes' ? 'is-active' : '' ?>">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -90,7 +90,7 @@ $paginaAtual = $paginaAtual ?? '';
             <span class="ab-nav-item__label ab-label">Configurações</span>
         </a>
 
-        <a href="../../Configuracoes/paginas/login_tentativas.php" title="Logins Bloqueados"
+        <a href="/Configuracoes/paginas/login_tentativas.php" title="Logins Bloqueados"
            class="ab-nav-item <?= $paginaAtual === 'login-tentativas' ? 'is-active' : '' ?>">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -114,7 +114,7 @@ $paginaAtual = $paginaAtual ?? '';
                 <p class="ab-sidebar__user-role">Administrador</p>
             </div>
         </div>
-        <a href="../../Autenticacao/scripts/logout.php" title="Sair" class="ab-nav-item">
+        <a href="/Autenticacao/scripts/logout.php" title="Sair" class="ab-nav-item">
             <span class="ab-nav-item__icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M9 20H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>

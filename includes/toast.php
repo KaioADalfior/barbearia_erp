@@ -11,7 +11,7 @@
 ?>
 <div id="toast-container" style="position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
 
-<audio id="toast-sound" src="../../assets/sound/SomPop.mp3" preload="auto"></audio>
+<audio id="toast-sound" src="/assets/sound/SomPop.mp3" preload="auto"></audio>
 
 <script>
 function toast(mensagem, tipo = 'sucesso') {

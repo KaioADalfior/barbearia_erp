@@ -15,7 +15,7 @@ if ($tipo !== 'admin' && $tipo !== 'barbeiro') {
 // Página de origem: por padrão volta para Configurações, mas o mesmo
 // formulário/endpoint também é usado pela tela Barbeiro > Perfil.
 $destinos = [
-    'configuracoes' => '../paginas/configuracoes.php',
+    'configuracoes' => '/configuracoes',
     'perfil'        => '../../Perfil/paginas/perfil.php',
 ];
 $voltarPara = $_POST['voltar'] ?? $_GET['voltar'] ?? 'configuracoes';

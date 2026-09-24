@@ -16,11 +16,11 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/configuracoes.php');
+    header('Location: /configuracoes');
     exit;
 }
 
-csrf_verificar(json: false, redirecionarPara: '../paginas/configuracoes.php');
+csrf_verificar(json: false, redirecionarPara: '/configuracoes');
 
 /**
  * Gera a próxima versão com base na última cadastrada.
@@ -76,7 +76,7 @@ $hora            = trim($_POST['hora'] ?? '');
 
 // ---------- Validação básica ----------
 if ($descricao === '' || $data === '' || $hora === '') {
-    header('Location: ../paginas/configuracoes.php?upload_status=erro'
+    header('Location: /configuracoes?upload_status=erro'
         . '&up_versao='    . urlencode($versaoInformada)
         . '&up_descricao=' . urlencode($descricao)
         . '&up_data='      . urlencode($data)
@@ -86,7 +86,7 @@ if ($descricao === '' || $data === '' || $hora === '') {
 
 $dataHoraValida = DateTime::createFromFormat('Y-m-d H:i', $data . ' ' . $hora);
 if (!$dataHoraValida) {
-    header('Location: ../paginas/configuracoes.php?upload_status=erro'
+    header('Location: /configuracoes?upload_status=erro'
         . '&up_versao='    . urlencode($versaoInformada)
         . '&up_descricao=' . urlencode($descricao)
         . '&up_data='      . urlencode($data)
@@ -102,7 +102,7 @@ if ($versaoInformada !== '') {
     $stmt = $pdo->prepare('SELECT idUpload FROM UploadVersao WHERE versao = :versao LIMIT 1');
     $stmt->execute(['versao' => $versao]);
     if ($stmt->fetch()) {
-        header('Location: ../paginas/configuracoes.php?upload_status=duplicada'
+        header('Location: /configuracoes?upload_status=duplicada'
             . '&up_versao='    . urlencode($versaoInformada)
             . '&up_descricao=' . urlencode($descricao)
             . '&up_data='      . urlencode($data)
@@ -134,5 +134,5 @@ DiscordLogger::uploads('🆕 Nova versão publicada', [
     ['name' => '📝 Descrição', 'value' => $descricao, 'inline' => false],
 ]);
 
-header('Location: ../paginas/configuracoes.php?upload_status=sucesso&up_versao=' . urlencode($versao));
+header('Location: /configuracoes?upload_status=sucesso&up_versao=' . urlencode($versao));
 exit;

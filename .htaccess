@@ -52,3 +52,10 @@ RewriteRule ^ - [F,L]
 RewriteCond %{REQUEST_URI} ^/Publico/paginas/escolher_barbeiro\.php$
 RewriteCond %{ENV:REDIRECT_VIA_LINK_PUBLICO} !^1$
 RewriteRule ^ - [F,L]
+
+# URLs curtas das páginas de gestão (login já exigido nelas mesmas — ver
+# includes/guard.php) — piloto: Configurações. A URL "feia" continua
+# funcionando também (sem bloqueio), diferente do link público acima; se
+# no futuro quisermos bloquear o acesso direto aqui também, o padrão é o
+# mesmo já usado para Publico/paginas/agendar.php.
+RewriteRule ^configuracoes/?$ Configuracoes/paginas/configuracoes.php [L,QSA]
