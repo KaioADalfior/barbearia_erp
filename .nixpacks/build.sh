@@ -1,0 +1,1 @@
+docker build /etc/easypanel/projects/projetos-de-clientes/alexbarbearia-app/code/ -f /etc/easypanel/projects/projetos-de-clientes/alexbarbearia-app/code/.nixpacks/Dockerfile -t easypanel/projetos-de-clientes/alexbarbearia-app --build-arg GIT_SHA=undefined --build-arg NIXPACKS_METADATA=php --build-arg PORT=80 --label keep=true

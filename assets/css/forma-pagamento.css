@@ -1,0 +1,99 @@
+/* assets/css/forma-pagamento.css
+   Componente reutilizável "Forma de pagamento" (grid de checkboxes).
+   Extraído de Financeiro/paginas/financeiro_baixa.php para ser incluído em
+   qualquer formulário que precise das mesmas opções e do mesmo visual:
+   Cadastrar Baixa, Concluir Agendamento e Receber Fiado.
+
+   Uso: <link rel="stylesheet" href=".../assets/css/forma-pagamento.css">
+        + includes/forma_pagamento.php (markup)
+*/
+
+.forma-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:0.6rem;
+}
+@media (min-width:480px){
+    .forma-grid{ grid-template-columns:repeat(5, 1fr); }
+}
+.forma-check{ display:none; }
+.forma-label{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:0.4rem;
+    height:76px;
+    width:100%;
+    padding:0.5rem 0.35rem;
+    border-radius:0.85rem;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,0.1);
+    background:rgba(255,255,255,0.03);
+    color:#8fa0bd;
+    font-size:11.5px;
+    font-weight:600;
+    line-height:1.15;
+    text-align:center;
+    transition:border-color .15s, background-color .15s, color .15s, opacity .15s;
+}
+.forma-label__icone{ display:flex; flex-shrink:0; }
+.forma-check:checked + .forma-label{
+    border-color:var(--gold); background:rgba(61,126,201,0.12); color:var(--gold-light);
+}
+.forma-label__check{
+    position:absolute;
+    top:6px;
+    right:6px;
+    width:14px;
+    height:14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(0,0,0,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    transition:opacity .15s, background-color .15s, border-color .15s;
+}
+.forma-check:checked + .forma-label .forma-label__check{
+    opacity:1;
+    background:linear-gradient(180deg, var(--gold-light), var(--gold));
+    border-color:transparent;
+}
+
+/* ---- Estado bloqueado (ex: quando "Fiado" está ligado — a forma de
+   pagamento só é definida no recebimento, lá em Financeiro > Fiados) ---- */
+.forma-grid.is-disabled{ opacity:0.4; }
+.forma-grid.is-disabled .forma-label{ cursor:not-allowed; pointer-events:none; }
+
+html[data-theme="light"] .forma-label{ color:#475569; }
+
+/* ---- Toggle "Fiado" (ON/OFF) — reaproveita o componente .switch já usado
+   em Configurações (assets/css/admin-theme.css), só adiciona o texto/estado
+   ao lado para o contexto de conclusão de agendamento. ---- */
+.fiado-toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    padding:0.9rem 1rem;
+    border-radius:0.85rem;
+    border:1px solid rgba(255,255,255,0.1);
+    background:rgba(255,255,255,0.03);
+}
+.fiado-toggle-row__estado{
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    padding:0.2rem 0.55rem;
+    border-radius:999px;
+    color:#7f8fac;
+    background:rgba(255,255,255,0.06);
+}
+.fiado-toggle-row__estado.is-on{
+    color:#ffffff;
+    background:linear-gradient(180deg, var(--gold-light), var(--gold));
+}
+html[data-theme="light"] .fiado-toggle-row{ border:1px solid rgba(0,0,0,0.1); background:rgba(0,0,0,0.02); }

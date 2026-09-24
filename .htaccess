@@ -1,0 +1,26 @@
+# .htaccess (raiz do projeto)
+#
+# Esta regra é redundante com o bloqueio equivalente em
+# .nixpacks/assets/nginx.template.conf (usado no deploy via Railway), mas
+# .htaccess só é lido por servidores Apache — então isto é o que protege
+# o projeto caso ele seja hospedado em algum host baseado em Apache
+# (ex.: hospedagem compartilhada), onde o nginx.template.conf não se
+# aplica.
+
+# Nunca liste o conteúdo de uma pasta que não tenha index
+Options -Indexes
+
+# Bloqueia download direto de dumps de banco, backups, configs, etc.
+<FilesMatch "\.(sql|zip|tar|tar\.gz|gz|rar|7z|bak|old|log|md|env|txt|ini|conf|yml|yaml)$">
+    Require all denied
+</FilesMatch>
+
+# Bloqueia qualquer arquivo oculto (.git, .env, .htpasswd, etc.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Pastas que não devem ser acessadas via navegador de jeito nenhum
+RedirectMatch 404 ^/scriptBD/
+RedirectMatch 404 ^/\.nixpacks/
+RedirectMatch 404 ^/includes/.*\.php$

@@ -1,0 +1,11 @@
+# Pasta de fotos de perfil enviadas pelos barbeiros: apenas arquivos de
+# imagem devem existir aqui. Por segurança, nenhum script é executado
+# mesmo que alguém consiga enviar um arquivo com extensão inesperada.
+
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|php\d|phtml|pht)$">
+    Require all denied
+</FilesMatch>

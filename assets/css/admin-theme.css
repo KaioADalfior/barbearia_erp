@@ -1,0 +1,690 @@
+/* assets/css/admin-theme.css */
+/* Sistema de design compartilhado das telas internas (pós-login) */
+
+:root{
+    --onyx:#0b0f17;
+    --charcoal:#111827;
+    --charcoal-2:#141b2b;
+    --charcoal-3:#1a2236;
+    --gold:#2f6fed;
+    --gold-light:#5b93f7;
+    --cream:#e7ebf3;
+    --pole-red:#64748b;
+    --pole-blue:#94a3b8;
+
+    /* Cores semanticas (sucesso / erro / alerta), compartilhadas por toda
+       badge, alerta e estado visual do sistema. Mantidas como variaveis
+       para os dois temas poderem ajustar o contraste sem duplicar valores
+       espalhados pelas paginas. */
+    --success:#22c55e;
+    --success-soft:rgba(34,197,94,0.14);
+    --danger:#ef4444;
+    --danger-soft:rgba(239,68,68,0.14);
+    --warning:#f59e0b;
+    --warning-soft:rgba(245,158,11,0.14);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+    font-family:'Poppins', sans-serif;
+    background-color:var(--onyx);
+    color:var(--cream);
+    min-height:100vh;
+}
+
+.display{
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    letter-spacing:-0.01em;
+}
+
+.eyebrow{
+    letter-spacing:0.3em;
+    font-size:11px;
+    font-weight:500;
+}
+
+/* Rede de segurança: se algum conteúdo da área principal um dia ficar mais
+   largo que o disponível, ela rola de lado em vez de cortar sem como arrastar. */
+main{
+    overflow-x:auto;
+}
+
+/* ---------- Sidebar ---------- */
+/* Componente autocontido: não depende de utilitários Tailwind para layout
+   crítico (flex, largura, posição, off-canvas, recolhimento). Isso evita
+   problemas de ordem de cascata entre o Tailwind (via CDN) e este arquivo. */
+
+.ab-sidebar{
+    --sidebar-w: 260px;
+    --sidebar-w-collapsed: 84px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    width:var(--sidebar-w);
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(180deg, var(--charcoal), var(--onyx));
+    border-right:1px solid rgba(47,111,237,0.12);
+    transition:width .2s ease, transform .25s ease;
+    z-index:60;
+}
+
+/* Estado "recolhido" só existe no desktop (rail com ícones). No mobile a
+   sidebar é sempre off-canvas em largura total — o atributo pode continuar
+   salvo no localStorage de uma sessão desktop anterior, então blindamos
+   tudo isso atrás de min-width:1024px para não vazar pro mobile. */
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-sidebar{ width:var(--sidebar-w-collapsed); }
+}
+
+/* ---- Marca ---- */
+
+.ab-sidebar__brand{
+    position:relative;
+    display:flex;
+    align-items:center;
+    padding:1.5rem 3.1rem 1.35rem 1.25rem;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    transition:padding .2s ease, justify-content .2s ease;
+}
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-sidebar__brand{
+        justify-content:center;
+        padding-left:0.75rem;
+        padding-right:0.75rem;
+    }
+}
+
+.ab-sidebar__logo{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+}
+.ab-sidebar__logo-img{
+    width:100%;
+    height:auto;
+    max-height:64px;
+    object-fit:contain;
+    object-position:left center;
+    /* A arte da logo é um traço preto sobre PNG transparente. Em vez de
+       manter dois arquivos de imagem (um preto, um branco) trocados via CSS
+       — o que gerava o bug de a logo "sumir" quando os dois arquivos
+       apontavam para a mesma imagem — invertemos a cor por filtro CSS:
+       branca no tema escuro (padrão) e preta (cor original) no tema claro. */
+    filter:invert(1);
+    transition:filter .2s ease;
+}
+html[data-theme="light"] .ab-sidebar__logo-img{ filter:none; }
+
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-sidebar__logo{ display:none; }
+}
+
+/* Texto de marca (usado como alternativa à logo em imagem). */
+.ab-sidebar__brand-text{
+    min-width:0;
+    line-height:1.25;
+}
+.ab-sidebar__brand-name{
+    margin:0;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:18px;
+    letter-spacing:-0.01em;
+    color:var(--cream);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.ab-sidebar__brand-name span{ color:var(--gold-light); }
+html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
+.ab-sidebar__brand-tag{
+    margin:2px 0 0;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:#7f8fac;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.ab-sidebar__spacer{
+    position:absolute;
+    top:1.1rem;
+    right:0.85rem;
+    display:flex;
+    align-items:center;
+    gap:0.4rem;
+}
+
+/* ---- Navegação ---- */
+
+.ab-sidebar__nav{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:1.25rem 0.75rem;
+    font-size:13.5px;
+    display:flex;
+    flex-direction:column;
+    gap:0.25rem;
+}
+
+.ab-nav-item{
+    display:flex;
+    align-items:center;
+    gap:0.75rem;
+    width:100%;
+    padding:0.6rem 0.75rem;
+    border-radius:0.7rem;
+    color:#8b97ac;
+    background:transparent;
+    border:none;
+    font:inherit;
+    text-align:left;
+    text-decoration:none;
+    cursor:pointer;
+    transition:background-color .15s, color .15s;
+}
+.ab-nav-item:hover{ background:rgba(255,255,255,0.04); color:var(--cream); }
+.ab-nav-item.is-active{ background:rgba(47,111,237,0.12); color:var(--gold-light); }
+
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-nav-item{ justify-content:center; }
+}
+
+.ab-nav-item__icon{ flex-shrink:0; display:flex; }
+.ab-nav-item__label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.ab-nav-item--toggle{ justify-content:space-between; }
+.ab-nav-item__main{ display:flex; align-items:center; gap:0.75rem; min-width:0; }
+.ab-nav-item__chevron{ flex-shrink:0; display:flex; transition:transform .2s ease; }
+.ab-nav-item__chevron.is-open{ transform:rotate(90deg); }
+
+.ab-subnav{
+    display:flex;
+    flex-direction:column;
+    gap:0.25rem;
+    padding-left:2.1rem;
+    margin-top:0.25rem;
+}
+.ab-subnav__item{
+    display:block;
+    padding:0.5rem 0.75rem;
+    border-radius:0.6rem;
+    font-size:13px;
+    color:#7f8fac;
+    border-left:1px solid rgba(255,255,255,0.08);
+    text-decoration:none;
+    transition:color .15s, border-color .15s, background-color .15s;
+}
+.ab-subnav__item:hover{
+    color:var(--cream);
+    border-color:rgba(47,111,237,0.4);
+    background:rgba(255,255,255,0.03);
+}
+.ab-subnav__item.is-active{
+    color:var(--gold-light);
+    border-color:var(--gold);
+    background:rgba(47,111,237,0.10);
+}
+
+/* ---- Rodapé ---- */
+
+.ab-sidebar__footer{
+    flex-shrink:0;
+    padding:1rem;
+    border-top:1px solid rgba(255,255,255,0.05);
+    display:flex;
+    flex-direction:column;
+    gap:0.25rem;
+}
+.ab-sidebar__user{
+    display:flex;
+    align-items:center;
+    gap:0.75rem;
+    padding:0.5rem;
+    border-radius:0.75rem;
+    min-width:0;
+}
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-sidebar__user{ justify-content:center; }
+}
+.ab-sidebar__avatar{
+    width:32px;
+    height:32px;
+    border-radius:999px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+    font-size:11px;
+    font-weight:600;
+    color:var(--gold-light);
+}
+
+.ab-sidebar__avatar--foto{
+    object-fit:cover;
+    display:block;
+    padding:0;
+}
+.ab-sidebar__user-info{ min-width:0; }
+.ab-sidebar__user-name{
+    font-size:13px;
+    color:var(--cream);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.ab-sidebar__user-role{ font-size:11px; color:#64748b; }
+
+/* ---- Estado recolhido: esconde rótulos/textos ---- */
+
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-label{ display:none; }
+    html[data-sidebar="collapsed"] .ab-subnav{ display:none !important; }
+}
+
+/* Utilitário próprio de "escondido", independente do Tailwind */
+.ab-hidden{ display:none !important; }
+
+/* Trava o scroll do body quando o menu mobile está aberto (independente do
+   Tailwind). Funciona em conjunto com position:fixed aplicado via JS, que é
+   a técnica confiável para travar o scroll de fundo também no Safari iOS. */
+.ab-body-lock{
+    overflow:hidden;
+    width:100%;
+}
+
+/* ---- Off-canvas (mobile/tablet, abaixo de 1024px) ---- */
+
+.ab-sidebar-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(2px);
+    z-index:59;
+}
+
+@media (max-width: 1023px){
+    .ab-sidebar{
+        position:fixed;
+        left:0;
+        top:0;
+        height:100vh;
+        width:280px;
+        transform:translateX(-100%);
+        z-index:70;
+    }
+    .ab-sidebar.is-open{ transform:translateX(0); }
+    .menu-toggle-btn.ab-sidebar__btn--collapse{ display:none; }
+}
+
+@media (min-width: 1024px){
+    .menu-toggle-btn.ab-sidebar__btn--close{ display:none; }
+}
+
+/* ---- Modais sempre acima do menu, em qualquer tela/estado ----
+   Toda tela interna usa a mesma classe .modal-overlay (position:fixed
+   inset:0) junto da utility "z-50" do Tailwind (z-index:50) — ver
+   Agendamentos/paginas/agendar.php, Clientes/paginas/cliente_listar.php,
+   Servicos/paginas/servico_listar.php, Configuracoes/paginas/configuracoes.php
+   e Financeiro/paginas/*.php.
+
+   No mobile/tablet (<1024px) a sidebar vira off-canvas e, quando aberta,
+   usa z-index:70 (.ab-sidebar acima) — maior que o z-50 do modal. Resultado:
+   com o menu aberto, um modal renderizado por cima dele (ex.: modal de
+   agendamento) ficava ATRÁS do menu, escondido, sem o barbeiro conseguir
+   interagir com ele sem antes fechar o menu manualmente.
+
+   Correção estrutural, num único lugar (compartilhado por todas as
+   páginas, não só Agendamentos): o maior z-index já usado pela sidebar em
+   qualquer estado é 70 (mobile aberta); aqui garantimos que o overlay do
+   modal fica sempre acima disso, com um valor coerente com essa escala
+   (não um número aleatório). O !important é necessário porque o Tailwind
+   CDN injeta seu <style> de utilities (.z-50) em um ponto do <head> cuja
+   ordem, na prática, pode variar; sem ele, o resultado dependeria de uma
+   corrida de cascata em vez de uma regra garantida. */
+.modal-overlay{
+    z-index:80 !important;
+    background:rgba(8,11,18,0.7) !important;
+    backdrop-filter:blur(3px);
+}
+html[data-theme="light"] .modal-overlay{ background:rgba(15,23,42,0.45) !important; }
+
+/* ---- Botões de alternância (usados também fora do sidebar, no topbar) ---- */
+
+.menu-toggle-btn{
+    width:38px;
+    height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:0.65rem;
+    border:1px solid rgba(255,255,255,0.08);
+    background:rgba(255,255,255,0.03);
+    color:#aebdd6;
+    flex-shrink:0;
+    cursor:pointer;
+    transition:background-color .15s, border-color .15s, color .15s;
+}
+.menu-toggle-btn:hover{
+    background:rgba(47,111,237,0.12);
+    border-color:rgba(47,111,237,0.35);
+    color:var(--gold-light);
+}
+.menu-toggle-btn svg{ transition:transform .2s ease; }
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-sidebar__btn--collapse svg{ transform:rotate(180deg); }
+}
+
+/* ---------- Área de conteúdo ---------- */
+
+.topbar{
+    background:linear-gradient(180deg, rgba(17,24,39,0.6), transparent);
+    border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.panel-card{
+    background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
+    border:1px solid rgba(47,111,237,0.14);
+    border-radius:1.1rem;
+}
+
+/* Faixa de destaque neutra usada no topo/rodapé de modais e alguns cards.
+   Antes era uma "listra de barbeiro" (vermelho/creme/azul) — trocada por
+   uma barra sólida na cor de destaque do sistema, sem referência temática
+   a barbearia, para servir de base genérica a qualquer cliente. */
+.barber-stripe-thin{
+    height:3px;
+    width:100%;
+    background:linear-gradient(90deg, var(--gold), var(--gold-light));
+}
+
+/* ---------- Ícones ----------
+   Os SVGs inline de todas as páginas usam duas cores fixas em atributos
+   (stroke/fill): o antigo azul de destaque (#6fa8ea) e um cinza neutro
+   (#7f8fac). Em vez de editar centenas de <svg> um a um, remapeamos essas
+   cores fixas para as variáveis atuais aqui — assim os ícones acompanham a
+   nova paleta nos dois temas automaticamente. */
+svg [stroke="#6fa8ea"]{ stroke:var(--gold-light) !important; }
+svg [fill="#6fa8ea"]{ fill:var(--gold-light) !important; }
+html[data-theme="light"] svg [stroke="#6fa8ea"]{ stroke:var(--gold) !important; }
+html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
+
+/* ---------- Formulários ---------- */
+
+.field-label{
+    font-size:12px;
+    letter-spacing:0.1em;
+    font-weight:500;
+    color:#aebdd6;
+}
+
+.field{
+    background:rgba(0,0,0,0.35);
+    border:1px solid rgba(255,255,255,0.08);
+    color:var(--cream);
+    transition:border-color .2s, box-shadow .2s, background-color .2s;
+}
+.field::placeholder{ color:#5b6f8c; }
+.field:focus{
+    outline:none;
+    border-color:var(--gold);
+    background:rgba(0,0,0,0.5);
+    box-shadow:0 0 0 4px rgba(47,111,237,0.14);
+}
+
+.btn-primary{
+    background:var(--gold);
+    color:#ffffff;
+    font-weight:600;
+    letter-spacing:0.01em;
+    transition:background-color .2s, transform .15s, box-shadow .2s;
+    box-shadow:0 6px 16px -6px rgba(47,111,237,0.55);
+}
+.btn-primary:hover{ background:var(--gold-light); }
+.btn-primary:active{ transform:scale(0.98); }
+
+.btn-secondary{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+    color:var(--cream);
+    transition:background-color .2s, border-color .2s;
+}
+.btn-secondary:hover{
+    background:rgba(255,255,255,0.07);
+    border-color:rgba(47,111,237,0.35);
+}
+
+.alert-success{
+    border:1px solid rgba(34,197,94,0.35);
+    background:var(--success-soft);
+    color:#bbf0cb;
+}
+.alert-error{
+    border:1px solid rgba(239,68,68,0.35);
+    background:var(--danger-soft);
+    color:#fecdd3;
+}
+.alert-warning{
+    border:1px solid rgba(245,158,11,0.35);
+    background:var(--warning-soft);
+    color:#fde3b8;
+}
+
+/* ---------- Badges / indicadores de status ----------
+   Base compartilhada + apelidos para os nomes de classe já usados nas
+   páginas hoje (cada uma os declarava duplicado localmente). Ao revisar
+   cada módulo, o CSS local duplicado é removido e a página passa a herdar
+   daqui — sem trocar nenhum nome de classe já referenciado por PHP/JS. */
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:0.35rem;
+    padding:0.25rem 0.65rem;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    border:1px solid transparent;
+    white-space:nowrap;
+}
+.badge-success,
+.badge-ativo,
+.badge-confirmado,
+.badge-concluido,
+.badge-quitado{
+    color:var(--success);
+    background:var(--success-soft);
+    border-color:rgba(34,197,94,0.28);
+}
+.badge-danger,
+.badge-inativo,
+.badge-cancelado,
+.badge-ausente{
+    color:var(--danger);
+    background:var(--danger-soft);
+    border-color:rgba(239,68,68,0.28);
+}
+.badge-warning,
+.badge-agendado,
+.badge-pendente,
+.badge-hash{
+    color:var(--warning);
+    background:var(--warning-soft);
+    border-color:rgba(245,158,11,0.28);
+}
+.badge-info{
+    color:var(--gold);
+    background:rgba(47,111,237,0.12);
+    border-color:rgba(47,111,237,0.28);
+}
+.badge-neutral{
+    color:#64748b;
+    background:rgba(100,116,139,0.14);
+    border-color:rgba(100,116,139,0.25);
+}
+
+/* ---------- Configurações: switches e opções ---------- */
+
+.settings-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    padding:1.1rem 0;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.settings-row:last-child{ border-bottom:none; }
+
+.settings-label{
+    font-size:14px;
+    color:var(--cream);
+    font-weight:500;
+}
+.settings-desc{
+    font-size:12.5px;
+    color:#7f8fac;
+    margin-top:2px;
+}
+
+.switch{
+    position:relative;
+    display:inline-block;
+    width:46px;
+    height:26px;
+    flex-shrink:0;
+}
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+.switch-track{
+    position:absolute;
+    cursor:pointer;
+    inset:0;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:999px;
+    transition:background-color .2s, border-color .2s;
+}
+.switch-track::before{
+    content:"";
+    position:absolute;
+    height:18px;
+    width:18px;
+    left:3px;
+    top:2.5px;
+    background:var(--cream);
+    border-radius:50%;
+    transition:transform .2s;
+}
+.switch input:checked + .switch-track{
+    background:var(--gold);
+    border-color:transparent;
+}
+.switch input:checked + .switch-track::before{
+    transform:translateX(20px);
+    background:#ffffff;
+}
+
+.theme-option{
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:1rem;
+    padding:1rem;
+    transition:border-color .2s, background-color .2s;
+}
+.theme-option:hover{ border-color:rgba(47,111,237,0.4); }
+.theme-option-active{
+    border-color:var(--gold);
+    background:rgba(47,111,237,0.10);
+}
+.theme-swatch{
+    width:100%;
+    height:56px;
+    border-radius:0.6rem;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+/* ---------- Tema claro (ativado via <html data-theme="light">) ---------- */
+
+html[data-theme="light"]{
+    --onyx:#f4f6fa;
+    --charcoal:#ffffff;
+    --charcoal-2:#fbfcfe;
+    --charcoal-3:#f1f4f9;
+    --gold:#2563eb;
+    --gold-light:#3b82f6;
+    --cream:#101828;
+}
+
+html[data-theme="light"] .ab-sidebar{
+    background:linear-gradient(180deg, #ffffff, #f4f6fa);
+    border-right:1px solid rgba(37,99,235,0.16);
+}
+html[data-theme="light"] .ab-nav-item{ color:#5a6b85; }
+html[data-theme="light"] .ab-nav-item:hover{ background:rgba(0,0,0,0.04); color:var(--cream); }
+html[data-theme="light"] .ab-nav-item.is-active{ background:rgba(37,99,235,0.10); color:#1d3f79; }
+html[data-theme="light"] .ab-subnav__item{ color:#93a4bf; border-left:1px solid rgba(0,0,0,0.08); }
+html[data-theme="light"] .ab-subnav__item:hover{ color:var(--cream); border-color:rgba(37,99,235,0.4); background:rgba(0,0,0,0.03); }
+html[data-theme="light"] .ab-subnav__item.is-active{ color:#1d3f79; border-color:var(--gold); background:rgba(37,99,235,0.08); }
+html[data-theme="light"] .topbar{ background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent); border-bottom:1px solid rgba(0,0,0,0.06); }
+html[data-theme="light"] .panel-card{ background:linear-gradient(180deg, #ffffff, #f4f6fa); border:1px solid rgba(37,99,235,0.16); }
+html[data-theme="light"] .field{ background:rgba(255,255,255,0.8); border:1px solid rgba(0,0,0,0.14); }
+html[data-theme="light"] .field::placeholder{ color:#8899b3; }
+html[data-theme="light"] .field:focus{ background:#ffffff; box-shadow:0 0 0 4px rgba(37,99,235,0.14); }
+html[data-theme="light"] .btn-secondary{ background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.1); }
+html[data-theme="light"] .btn-secondary:hover{ background:rgba(0,0,0,0.06); border-color:rgba(37,99,235,0.3); }
+html[data-theme="light"] .alert-success{ background:rgba(22,163,74,0.10); color:#166534; }
+html[data-theme="light"] .alert-error{ background:rgba(220,38,38,0.10); color:#991b1b; }
+html[data-theme="light"] .alert-warning{ background:rgba(217,119,6,0.10); color:#92400e; }
+html[data-theme="light"] .settings-row{ border-bottom:1px solid rgba(0,0,0,0.07); }
+html[data-theme="light"] .settings-desc{ color:#64748b; }
+html[data-theme="light"] .switch-track{ background:rgba(0,0,0,0.08); border:1px solid rgba(0,0,0,0.12); }
+html[data-theme="light"] .switch-track::before{ background:#ffffff; }
+html[data-theme="light"] .theme-option{ border:1px solid rgba(0,0,0,0.1); }
+html[data-theme="light"] .theme-option:hover{ border-color:rgba(37,99,235,0.35); }
+html[data-theme="light"] .theme-option-active{ border-color:var(--gold); background:rgba(37,99,235,0.08); }
+html[data-theme="light"] .menu-toggle-btn{ background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.1); color:#5a6b85; }
+html[data-theme="light"] .menu-toggle-btn:hover{ background:rgba(37,99,235,0.10); border-color:rgba(37,99,235,0.35); color:#1d3f79; }
+
+/* ---------- Tema claro: ajustes de contraste ----------
+   Várias páginas usam utilitários de cor "fixos" do Tailwind (ex.:
+   text-yellow-500/70, text-zinc-500) pensados para o fundo escuro
+   original. Como eles não seguem as variáveis do tema, ficavam
+   apagados/ilegíveis sobre o fundo claro (baixo contraste). As regras
+   abaixo interceptam esses utilitários somente quando o tema claro
+   está ativo, trocando por tons escuros com contraste adequado. */
+
+html[data-theme="light"] [class*="text-yellow-500"]{ color:#92400e !important; }
+html[data-theme="light"] [class*="text-zinc-300"]{ color:#334155 !important; }
+html[data-theme="light"] [class*="text-zinc-400"]{ color:#475569 !important; }
+html[data-theme="light"] [class*="text-zinc-500"]{ color:#64748b !important; }
+html[data-theme="light"] [class*="text-zinc-600"]{ color:#1e293b !important; }
+
+html[data-theme="light"] svg [stroke="#7f8fac"]{ stroke:#5a6b85 !important; }
+
+/* Scrollbar (Chromium/Edge/Safari) coerente com o tema claro */
+html[data-theme="light"] ::-webkit-scrollbar{ width:10px; height:10px; }
+html[data-theme="light"] ::-webkit-scrollbar-track{ background:transparent; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb{ background:rgba(37,99,235,0.25); border-radius:999px; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover{ background:rgba(37,99,235,0.4); }
+
+/* Sombra suave nos cards no tema claro — sem isso, cards ficam "flutuando"
+   sem nenhuma separação visual sobre o fundo, já que o fundo escuro original
+   dependia mais do contraste de brilho do que de sombra. */
+html[data-theme="light"] .panel-card,
+html[data-theme="light"] .kpi-card{
+    box-shadow:0 2px 10px -4px rgba(20,40,70,0.12);
+}

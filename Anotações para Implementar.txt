@@ -1,0 +1,38 @@
+- Agendamento duplicado para criança (Exemplo):
+
+
+Funcionais:
+
+* Modal > Agendar > Toogle (Separar outro horário).
+* Não cobrar duplicado, separar dois horários e utilizar como um agendamento somente, em dois horários
+
+------------------------------------------------------------------------------------------------------------
+
+- Agendar a cada 14 dias, clientes "Quinzenais".
+- Agendar a cada 20 dias, clientes em "21 dias".
+- Agendar em um ano (NOTIFICAR QUANDO CHEGAR PRÓXIMO).
+- Corrigir design de relatórios
+------------------------------------------------------------------------------------------------------------
+- gerenciar menus de forma simples.
+
+horários
+08:00 8:40, 9:20, 10:00, 10:40, 11:20 - almoço
+13:00 - 40 às 19:40
+
+------------------------------------------------------------------------------------------------------------
+
+Não funcionais:
+
+-pop up de lista de espera.
+-marcar no calendário dias de vaga e dias ocupados
+- alterar cores do tema claro.
+- cor mais forte no claro e escuro nos menus
+- alterar cores das funções
+- remover tesoura e nome e inserir logo.
+- implementar dia de entrada e saída para gerar o relatório (período).
+- adicionar um botão para novo horário somente naquele dia de agendamento, depois inativará no banco.
+- ao concluir o fiado, ele juntará todos os dias e somará no dia que pagou para valor final
+- filtro de fiados
+- conta fiado em um só
+- implementar perfil
+- no fiado, botão para entrar no contrato do cliente de uma vez.

@@ -1,0 +1,51 @@
+
+
+- [ ] Implementar perfil
+  Provavelmente um novo módulo simples (dados do barbeiro/admin: nome, foto, contato), seguindo o padrão dos módulos existentes 
+  (`Configuracoes/paginas/configuracoes.php` já mexe com senha e upload — pode servir de base).
+
+
+- [ ] Pop-up de lista de espera
+  Não existe nada disso hoje no projeto. Precisa de: nova tabela (ex.: `ListaEspera`), tela/modal para cadastrar cliente na espera, 
+  e lógica para notificar/mover ele para um horário quando abrir vaga.
+
+- [ ] Marcar no calendário dias de vaga e dias ocupados
+  Depende do calendário usado em `Agendamentos/paginas/agendar.php` (arquivo grande, 1115 linhas). É preciso criar um endpoint que 
+  retorne, por dia, se há vaga livre ou não (agregando a tabela `Horario`) e pintar isso no calendário — mais trabalhoso por mexer 
+  num arquivo já grande e sensível.
+
+- [ ] Agendamento duplicado para criança (separar em dois horários, cobrar uma vez)
+  Hoje cada linha de `Agendamentos` é independente e gera sua própria cobrança. Fazer dois registros de horário "andarem juntos" 
+  como um único agendamento (um valor, dois `idHorario`) exige alterar o schema (campo de agrupamento, ex. `idAgendamentoPai` ou `grupoAgendamento`) 
+  e ajustar toda a lógica de concluir/cobrar (`agendamento_concluir.php`, `agendamento_salvar.php`) para não duplicar o valor.
+
+- [ ] Clientes "Quinzenais" (14 dias) e "21 dias"
+  Não existe hoje nenhum campo de periodicidade em `Cliente`. Precisa de: campo de periodicidade no cadastro do cliente, e uma rotina 
+  que gere automaticamente o próximo agendamento sugerido — o que normalmente exige uma tarefa agendada (cron) rodando no servidor, 
+  algo que o projeto ainda não tem.
+
+- [ ] Agendar em 1 ano com notificação de proximidade
+  É a versão mais complexa da recorrência: mesma necessidade de campo de periodicidade + cron, mas somando um sistema de notificação 
+  o projeto já dispara webhooks pro Discord em vários pontos — `DiscordLogger` — então dá pra reaproveitar esse canal, mas ainda assim precisa 
+  de um job diário verificando "quem está chegando perto da data".
+
+
+
+### Resumo da ordem sugerida
+1. [X] Logo na sidebar 
+2. [X] Cores do tema
+3. [X] Design da tela de relatórios
+4. [X] Filtro de fiados
+5. [X] Botão fiado → contrato do cliente
+6. [] Design do PDF de relatório
+7. [X] Grade de horários com almoço
+8. [X] Horário inativar
+9. [X] Período customizado no relatório
+10.[X] Perfil
+11.[X] Lista de espera
+12.[X] Calendário com vaga/ocupado
+13.[X] Gerenciar horários pelo admin
+14.[X] Agendamento duplicado (criança)
+15.[X] Conta de fiado única
+16.[X] Clientes quinzenais/21 dias
+17.[] Agendamento anual com notificação
