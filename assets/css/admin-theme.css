@@ -163,6 +163,19 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
     align-items:center;
     gap:0.4rem;
 }
+/* Recolhido: com a logo/texto de marca escondidos, o spacer (que só sobra
+   com o botão de recolher) deixa de ser posicionado em absolute — vira um
+   item de flex normal, centralizado pelo justify-content:center que o
+   ".ab-sidebar__brand" já aplica nesse estado (regra acima). Sem isso, o
+   botão ficava "flutuando" fora de centro, colado na borda direita da
+   barra estreita, em vez de alinhado com os ícones do menu abaixo. */
+@media (min-width: 1024px){
+    html[data-sidebar="collapsed"] .ab-sidebar__spacer{
+        position:static;
+        top:auto;
+        right:auto;
+    }
+}
 
 /* ---- Navegação ---- */
 

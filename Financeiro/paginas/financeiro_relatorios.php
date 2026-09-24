@@ -16,7 +16,7 @@ $paginaAtual = 'financeiro-relatorios';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/admin-theme.css">
+<link rel="stylesheet" href="../../assets/css/admin-theme.css?v=2">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
