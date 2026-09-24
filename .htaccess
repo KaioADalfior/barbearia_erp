@@ -31,5 +31,15 @@ RedirectMatch 404 ^/includes/.*\.php$
 # URL): /c/agendar/<slug-token> -> Publico/paginas/agendar.php?t=<slug-token>
 # Regra equivalente para deploy via Railway/nginx em
 # .nixpacks/assets/nginx.template.conf.
+#
+# A flag E=VIA_LINK_PUBLICO:1 marca a requisição como tendo passado por
+# aqui; a regra logo abaixo usa essa marca pra bloquear quem tentar acessar
+# Publico/paginas/agendar.php diretamente pela URL "feia" (só a URL bonita
+# funciona). Os endpoints em Publico/scripts/*.php NÃO são afetados — eles
+# continuam acessíveis diretamente, pois são chamados pelo JS do navegador.
 RewriteEngine On
-RewriteRule ^c/agendar/([a-z0-9-]+)/?$ Publico/paginas/agendar.php?t=$1 [L,QSA]
+RewriteRule ^c/agendar/([a-z0-9-]+)/?$ Publico/paginas/agendar.php?t=$1 [L,QSA,E=VIA_LINK_PUBLICO:1]
+
+RewriteCond %{REQUEST_URI} ^/Publico/paginas/agendar\.php$
+RewriteCond %{ENV:REDIRECT_VIA_LINK_PUBLICO} !^1$
+RewriteRule ^ - [F,L]
