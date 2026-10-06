@@ -27,7 +27,7 @@ require_once __DIR__ . '/../../includes/AgendamentoPublicoThrottle.php';
 
 csrf_verificar(json: true);
 
-$ip = $_SERVER['REMOTE_ADDR'] ?? 'desconhecido';
+$ip = AgendamentoPublicoThrottle::ipCliente();
 
 if (AgendamentoPublicoThrottle::bloqueado($pdo, $ip)) {
     http_response_code(429);
@@ -62,8 +62,6 @@ if ($barbeiro === null) {
 }
 $idBarbeiro = $barbeiro['id_barbeiro'];
 
-AgendamentoPublicoThrottle::registrarTentativa($pdo, $ip);
-
 if ($idHorario <= 0 || $idServico <= 0) {
     echo json_encode(['ok' => false, 'erro' => 'Selecione o horário e o serviço.']);
     exit;
@@ -84,6 +82,11 @@ if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode(['ok' => false, 'erro' => 'Informe um e-mail válido ou deixe o campo em branco.']);
     exit;
 }
+
+// Só conta no limite por IP a partir daqui: erros de preenchimento (campo em
+// branco, telefone incompleto) não devem gastar as tentativas de quem está
+// apenas corrigindo o formulário.
+AgendamentoPublicoThrottle::registrarTentativa($pdo, $ip);
 
 try {
     $pdo->beginTransaction();
@@ -162,11 +165,22 @@ try {
     }
 
     if (FinanceiroService::clienteJaTemAgendamentoNoDia($pdo, $idCliente, $horario['data'])) {
+        // Só informa o horário do agendamento ATIVO (agendado/confirmado) que
+        // causou o bloqueio — concluído, cancelado ou ausente nunca bloqueiam.
+        $stmtAtivo = $pdo->prepare(
+            "SELECT h.hora FROM Agendamentos a JOIN Horario h ON h.idHorario = a.idHorario
+             WHERE a.idCliente = :c AND a.Data = :d AND a.Status IN ('agendado', 'confirmado')
+             ORDER BY h.hora ASC LIMIT 1"
+        );
+        $stmtAtivo->execute(['c' => $idCliente, 'd' => $horario['data']]);
+        $horaAtiva = $stmtAtivo->fetchColumn();
+
         $pdo->rollBack();
         echo json_encode([
             'ok'     => false,
             'codigo' => 'agendamento_duplicado',
             'erro'   => 'Você já tem um agendamento nesse dia.',
+            'hora'   => $horaAtiva !== false ? substr((string) $horaAtiva, 0, 5) : null,
         ]);
         exit;
     }

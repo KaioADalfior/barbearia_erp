@@ -25,6 +25,13 @@ require_once __DIR__ . '/CatalogoService.php';
 require_once __DIR__ . '/PublicoTokenService.php';
 require_once __DIR__ . '/csrf.php';
 
+// A página carrega o token CSRF da sessão do visitante: nunca pode ser guardada
+// em cache de proxy/CDN/navegador (senão o cliente envia um token velho).
+if (!headers_sent()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+}
+
 $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 
 $cfg      = CatalogoService::config($pdo);
@@ -130,6 +137,7 @@ $tesoura = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="
 <html lang="pt-br" data-tema="<?= $claro ? 'claro' : 'escuro' ?>">
 <head>
 <meta charset="UTF-8">
+<script>document.documentElement.className+=" js";</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?= $h($nomeLoja) ?> — Agendamento online</title>
 <meta name="description" content="<?= $h($cfg['slogan'] !== '' ? $cfg['slogan'] : 'Agende seu horário online em poucos passos.') ?>">
@@ -197,6 +205,8 @@ a{ color:inherit; }
 .btn:active:not(:disabled){ transform:scale(.98); }
 .btn:disabled{ opacity:.4; cursor:not-allowed; box-shadow:none; }
 .btn--sm{ height:38px; padding:0 16px; font-size:13px; border-radius:12px; }
+.js .topo .btn{ opacity:0; transform:translateY(-6px); pointer-events:none; }
+.js .topo.is-cta .btn{ opacity:1; transform:none; pointer-events:auto; }
 .btn--bloco{ width:100%; }
 .btn--sec{ background:var(--surface-2); color:var(--texto); border:1px solid var(--borda); box-shadow:none; }
 .btn--sec:hover:not(:disabled){ background:var(--surface); border-color:var(--borda-forte); filter:none; }
@@ -252,12 +262,17 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 .chip-info--aberto i{ background:var(--ok); box-shadow:0 0 0 4px rgba(34,197,94,.2); }
 .chip-info--fechado i{ background:var(--err); }
 
+.garantias{ display:flex; flex-wrap:wrap; gap:8px 20px; margin:18px 4px 0; padding-top:16px; border-top:1px solid var(--borda); font-size:12.5px; color:var(--muted); }
+.garantias span{ display:inline-flex; align-items:center; gap:7px; }
+.garantias svg{ color:var(--acc); flex-shrink:0; }
+
 /* ---------- Layout ---------- */
 .layout{ display:grid; grid-template-columns:minmax(0,1fr); gap:28px; margin-top:28px; }
 .principal, .lateral{ min-width:0; }
 @media (min-width:960px){ .layout{ grid-template-columns:minmax(0,1fr) 340px; align-items:start; } .lateral{ position:sticky; top:76px; } }
 .bloco{ margin-bottom:28px; }
-.bloco__titulo{ font-size:19px; font-weight:700; letter-spacing:-.01em; margin:0 0 4px; }
+.bloco__titulo{ font-size:19px; font-weight:700; letter-spacing:-.01em; margin:0 0 4px; display:flex; align-items:center; gap:10px; }
+.bloco__titulo::before{ content:''; width:4px; height:18px; border-radius:99px; background:var(--acc); flex-shrink:0; }
 .bloco__sub{ margin:0 0 16px; color:var(--muted); font-size:13.5px; }
 .sobre{ color:var(--muted); font-size:14.5px; line-height:1.65; white-space:pre-line; margin:0; }
 
@@ -301,8 +316,10 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 .servico__dur{ display:inline-flex; align-items:center; gap:5px; }
 .servico__acao{
     height:42px; padding:0 20px; border-radius:12px; display:inline-flex; align-items:center; font-size:13.5px; font-weight:600;
-    background:var(--acc); color:var(--acc-on); pointer-events:none;
+    background:rgba(var(--acc-rgb),.12); color:var(--acc); border:1.5px solid rgba(var(--acc-rgb),.55); pointer-events:none;
+    transition:background-color .18s, color .18s, border-color .18s;
 }
+.servico:hover .servico__acao, .servico:focus-visible .servico__acao{ background:var(--acc); color:var(--acc-on); border-color:var(--acc); }
 @media (max-width:560px){
     .servico{ grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:start; }
     .servico__foto{ width:72px; height:72px; }
@@ -346,7 +363,12 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 }
 .social:hover{ border-color:var(--acc); color:var(--acc); }
 
-.rodape{ text-align:center; font-size:12px; color:var(--muted); padding:8px 0 28px; }
+.rodape{ margin-top:12px; padding:28px 0 12px; border-top:1px solid var(--borda); text-align:center; font-size:12px; color:var(--muted); }
+.rodape__nome{ margin:0 0 4px; font-size:14px; font-weight:600; color:var(--texto); }
+.rodape__end{ margin:0 0 14px; font-size:12.5px; }
+.rodape__sociais{ display:flex; justify-content:center; gap:10px; margin-bottom:16px; }
+.rodape__sociais .social{ width:38px; height:38px; }
+.rodape__marca{ margin:0; opacity:.7; }
 
 /* ---------- Sheet de agendamento ---------- */
 .sheet{ position:fixed; inset:0; z-index:100; visibility:hidden; pointer-events:none; }
@@ -374,11 +396,19 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 .icon-btn:hover{ border-color:var(--borda-forte); background:var(--surface-2); }
 .icon-btn[hidden]{ display:none; }
 .sheet__titulo{ flex:1; text-align:center; font-size:15px; font-weight:600; margin:0; }
-.progresso{ display:flex; gap:6px; padding:14px 20px 0; }
-.progresso i{ flex:1; height:4px; border-radius:99px; background:var(--surface-2); position:relative; overflow:hidden; }
-.progresso i::after{ content:''; position:absolute; inset:0; background:var(--acc); transform:scaleX(0); transform-origin:left; transition:transform .35s; }
-.progresso i.feito::after, .progresso i.atual::after{ transform:scaleX(1); }
-.progresso i.atual::after{ opacity:.55; }
+.progresso{ display:flex; align-items:flex-start; padding:16px 20px 0; list-style:none; margin:0; }
+.progresso li{ flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; font-size:11px; font-weight:500; color:var(--muted); text-align:center; }
+.progresso li::before{ content:''; position:absolute; top:12px; right:50%; width:100%; height:2px; background:var(--borda-forte); z-index:0; }
+.progresso li:first-child::before{ display:none; }
+.progresso li.feito::before, .progresso li.atual::before{ background:var(--acc); }
+.progresso__n{
+    position:relative; z-index:1; width:26px; height:26px; border-radius:99px; display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; background:var(--bg-2); border:2px solid var(--borda-forte); color:var(--muted); transition:all .25s;
+}
+.progresso li.atual .progresso__n{ border-color:var(--acc); color:var(--acc); box-shadow:0 0 0 4px rgba(var(--acc-rgb),.16); }
+.progresso li.atual{ color:var(--texto); }
+.progresso li.feito .progresso__n{ background:var(--acc); border-color:var(--acc); color:var(--acc-on); }
+.progresso li.feito{ color:var(--texto); }
 
 .escolhido{
     display:flex; align-items:center; gap:12px; margin:14px 20px 0; padding:10px 12px; border-radius:14px;
@@ -413,6 +443,9 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 }
 .prof:hover{ border-color:rgba(var(--acc-rgb),.7); transform:translateY(-1px); }
 .prof.is-sel{ border-color:var(--acc); background:rgba(var(--acc-rgb),.12); }
+.prof{ position:relative; }
+.prof__ok{ position:absolute; top:10px; right:10px; width:22px; height:22px; border-radius:99px; background:var(--acc); color:var(--acc-on); display:none; align-items:center; justify-content:center; }
+.prof.is-sel .prof__ok{ display:flex; }
 .prof .avatar{ width:72px; height:72px; font-size:26px; margin-bottom:8px; box-shadow:0 0 0 3px transparent; transition:box-shadow .15s; }
 .prof.is-sel .avatar{ box-shadow:0 0 0 3px var(--acc); }
 .prof__nome{ font-size:14px; font-weight:600; line-height:1.25; word-break:break-word; }
@@ -457,7 +490,8 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
     height:46px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; background:var(--surface); border:1.5px solid var(--borda);
     transition:all .15s;
 }
-.hora:hover{ border-color:rgba(var(--acc-rgb),.7); }
+.hora:hover:not(:disabled){ border-color:rgba(var(--acc-rgb),.7); }
+.hora:disabled{ cursor:not-allowed; opacity:.38; background:transparent; border-style:dashed; text-decoration:line-through; text-decoration-thickness:1.5px; }
 .hora.is-sel{ background:var(--acc); border-color:var(--acc); color:var(--acc-on); box-shadow:0 10px 22px -12px rgba(var(--acc-rgb),.95); }
 .hora--sk{ border-color:transparent; background:linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%); background-size:200% 100%; animation:brilho 1.3s infinite; cursor:default; }
 .estado{
@@ -525,7 +559,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 </head>
 <body>
 
-<header class="topo">
+<header class="topo" id="topo">
     <a class="topo__marca" href="#topo-pagina" aria-label="<?= $h($nomeLoja) ?>">
         <span class="topo__logo"><?php if ($logoUrl): ?><img src="<?= $h($logoUrl) ?>" alt=""><?php else: ?><?= $h(mb_strtoupper(mb_substr($nomeLoja, 0, 1))) ?><?php endif; ?></span>
         <span class="topo__nome"><?= $h($nomeLoja) ?></span>
@@ -568,6 +602,12 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
             <?php endif; ?>
         </div>
     <?php endif; ?>
+
+    <div class="garantias" aria-label="Como funciona">
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Leva menos de 1 minuto</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Sem cadastro nem senha</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>Confirmação na hora</span>
+    </div>
 
     <div class="layout">
         <div class="principal">
@@ -735,7 +775,17 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
         <?php endif; ?>
     </div>
 
-    <p class="rodape">Agendamento online — powered by BarbERP</p>
+    <footer class="rodape">
+        <p class="rodape__nome"><?= $h($nomeLoja) ?></p>
+        <?php if ($cfg['endereco'] !== ''): ?><p class="rodape__end"><?= $h($cfg['endereco']) ?></p><?php endif; ?>
+        <?php if ($cfg['instagram'] !== '' || $cfg['facebook'] !== ''): ?>
+            <div class="rodape__sociais">
+                <?php if ($cfg['instagram'] !== ''): ?><a class="social" href="https://instagram.com/<?= $h($cfg['instagram']) ?>" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".8" fill="currentColor"/></svg></a><?php endif; ?>
+                <?php if ($cfg['facebook'] !== ''): ?><a class="social" href="<?= $h($cfg['facebook']) ?>" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 8h2.5V4.5H14a3.5 3.5 0 0 0-3.5 3.5v2H8v3.5h2.5V20H14v-6.5h2.5l.5-3.5H14V8.5A.5.5 0 0 1 14.5 8"/></svg></a><?php endif; ?>
+            </div>
+        <?php endif; ?>
+        <p class="rodape__marca">Agendamento online · BarbERP</p>
+    </footer>
 </div>
 
 <!-- ============================ SHEET DE AGENDAMENTO ============================ -->
@@ -751,7 +801,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
         </div>
-        <div class="progresso" id="progresso" aria-hidden="true"></div>
+        <ol class="progresso" id="progresso" aria-label="Etapas do agendamento"></ol>
 
         <div class="escolhido" id="escolhido">
             <span class="servico__foto" id="escolhido-foto"></span>
@@ -785,7 +835,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
                 <div class="datas" id="datas" role="listbox" aria-label="Datas"></div>
                 <div class="legenda">
                     <span><i style="background:var(--warn)"></i>Poucas vagas</span>
-                    <span><i style="background:var(--muted);opacity:.5"></i>Indisponível</span>
+                    <span><i style="background:var(--muted);opacity:.5"></i>Indisponível / ocupado</span>
                 </div>
                 <div id="area-horarios" aria-live="polite"></div>
             </section>
@@ -889,7 +939,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
         return '<span class="avatar ' + (extra || '') + '">' + (b.foto ? '<img src="' + esc(b.foto) + '" alt="">' : inicial) + '</span>';
     }
     function get(url) {
-        return fetch(url, { headers: { 'Accept': 'application/json' } }).then(function (r) {
+        return fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (r) {
             return r.json().catch(function () { throw new Error('resposta'); });
         });
     }
@@ -918,6 +968,15 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
             filtrar();
         });
     });
+
+    // Botão "Agendar agora" do topo só aparece depois que o do cabeçalho da loja sai da tela.
+    (function () {
+        const topo = $('topo'), alvo = document.querySelector('.loja__cta');
+        if (!topo || !alvo || !('IntersectionObserver' in window)) { if (topo) topo.classList.add('is-cta'); return; }
+        new IntersectionObserver(function (en) {
+            topo.classList.toggle('is-cta', !en[0].isIntersecting);
+        }, { rootMargin: '-60px 0px 0px 0px' }).observe(alvo);
+    })();
 
     // -------------------------------------------------------------- sheet
     const passoTitulos = { prof: 'Profissional', data: 'Data e horário', confirmar: 'Confirmação', sucesso: 'Pronto!' };
@@ -968,13 +1027,16 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
         corpo.scrollTop = 0;
         $('sheet-titulo').textContent = passoTitulos[passo] || 'Agendar';
 
-        // progresso
-        const total = E.passos.length;
+        // progresso (etapas numeradas; o passo "sucesso" esconde a barra)
         $('progresso').innerHTML = E.passos.map(function (p, i) {
-            return '<i class="' + (i < E.idx || passo === 'sucesso' ? 'feito' : (i === E.idx ? 'atual' : '')) + '"></i>';
+            const estado = i < E.idx ? 'feito' : (i === E.idx ? 'atual' : '');
+            const rotulo = p === 'prof' ? 'Profissional' : (p === 'data' ? 'Data e horário' : 'Confirmação');
+            const miolo = i < E.idx ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>' : (i + 1);
+            return '<li class="' + estado + '"' + (i === E.idx ? ' aria-current="step"' : '') + '><span class="progresso__n">' + miolo + '</span>' + rotulo + '</li>';
         }).join('');
         $('progresso').hidden = passo === 'sucesso';
         $('escolhido').hidden = passo === 'sucesso';
+        $('escolhido-meta').textContent = E.servico.duracao + ' min' + (E.barbeiro ? ' · ' + E.barbeiro.nome : '');
 
         // voltar: some no primeiro passo e no sucesso
         $('btn-voltar').hidden = (E.idx === 0) || passo === 'sucesso';
@@ -987,7 +1049,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 
         if (passo === 'prof') desenharProfs();
         if (passo === 'data') iniciarDatas();
-        if (passo === 'confirmar') desenharResumo();
+        if (passo === 'confirmar') { $('erro-geral').classList.remove('is-visivel'); desenharResumo(); }
     }
 
     function irPara(delta) {
@@ -1033,7 +1095,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
         }
         el.innerHTML = APP.barbeiros.map(function (b, i) {
             return '<button type="button" class="prof' + (E.barbeiro && E.barbeiro.token === b.token ? ' is-sel' : '') + '" data-i="' + i + '">'
-                + avatar(b) + '<span class="prof__nome">' + esc(b.nome) + '</span><span class="prof__cargo">' + esc(b.cargo) + '</span></button>';
+                + '<span class="prof__ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg></span>' + avatar(b) + '<span class="prof__nome">' + esc(b.nome) + '</span><span class="prof__cargo">' + esc(b.cargo) + '</span></button>';
         }).join('');
     }
     $('lista-profs').addEventListener('click', function (e) {
@@ -1165,29 +1227,36 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
             .then(function (r) {
                 if (seq !== E.seqHoras) return;
                 if (!r || !r.ok) { throw new Error('falha'); }
-                const livres = (r.horarios || []).filter(function (h) { return h.disponivel; });
+                // Mesma grade do sistema de gestão (Agendamentos > agendar.php): todos os horários do
+                // dia aparecem; os ocupados, inativados ou já passados ficam desabilitados.
+                const todos = r.horarios || [];
+                const livres = todos.filter(function (h) { return h.disponivel; });
+                let aviso = '';
                 if (!livres.length) {
                     // Dia sem horário livre: marca como indisponível e orienta.
                     E.disp[data] = { ok: false, poucas: false };
                     const bt = $('datas').querySelector('.dia[data-d="' + data + '"]');
                     if (bt) { bt.disabled = true; bt.classList.remove('is-sel'); bt.setAttribute('aria-disabled', 'true'); }
                     E.data = null; E.horario = null; $('btn-continuar').disabled = true;
-                    area.innerHTML = '<div class="estado"><strong>Sem horários livres neste dia</strong>'
+                    aviso = '<div class="estado"><strong>Sem horários livres neste dia</strong>'
                         + (r.diaBloqueado ? 'O profissional não atende neste dia.' : 'Todos os horários já foram ocupados.') + ' Escolha outra data.</div>';
-                    return;
+                    if (!todos.length) { area.innerHTML = aviso; return; }
                 }
                 const grupos = [['Manhã', 0, 12], ['Tarde', 12, 18], ['Noite', 18, 24]];
-                let html = '';
+                let html = aviso;
                 grupos.forEach(function (g) {
-                    const hs = livres.filter(function (h) { const hr = parseInt(h.hora.slice(0, 2), 10); return hr >= g[1] && hr < g[2]; });
+                    const hs = todos.filter(function (h) { const hr = parseInt(h.hora.slice(0, 2), 10); return hr >= g[1] && hr < g[2]; });
                     if (!hs.length) return;
                     html += '<div class="periodo"><div class="periodo__titulo">' + g[0] + '</div><div class="horas-grade">'
                         + hs.map(function (h) {
+                            if (!h.disponivel) {
+                                return '<button type="button" class="hora" disabled aria-label="' + h.hora + ' — indisponível">' + h.hora + '</button>';
+                            }
                             return '<button type="button" class="hora' + (E.horario && E.horario.idHorario === h.idHorario ? ' is-sel' : '') + '" data-id="' + h.idHorario + '" data-h="' + h.hora + '">' + h.hora + '</button>';
                         }).join('') + '</div></div>';
                 });
                 area.innerHTML = html;
-                if (window.matchMedia('(max-width:719px)').matches) {
+                if (livres.length && window.matchMedia('(max-width:719px)').matches) {
                     area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
             })
@@ -1251,9 +1320,9 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
         return !primeiro;
     }
 
-    function mostrarErro(texto, comAcao) {
+    function mostrarErro(texto, comAcao, tipo) {
         const box = $('erro-geral');
-        box.innerHTML = esc(texto) + (comAcao ? '<button type="button" class="link-btn" id="btn-outro-horario">Escolher outro horário</button>' : '');
+        box.innerHTML = esc(texto) + (comAcao ? '<button type="button" class="link-btn" id="btn-outro-horario">' + (tipo === 'dia' ? 'Escolher outro dia' : 'Escolher outro horário') + '</button>' : '');
         box.classList.add('is-visivel');
         box.scrollIntoView({ block: 'center', behavior: 'smooth' });
         const b = $('btn-outro-horario');
@@ -1266,47 +1335,83 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
         const botao = $('btn-confirmar');
         botao.disabled = true; botao.innerHTML = '<span class="spin"></span> Agendando…';
 
-        const dados = new URLSearchParams();
-        dados.set('t', E.barbeiro.token);
-        dados.set('_csrf', APP.csrf);
-        dados.set('idHorario', E.horario.idHorario);
-        dados.set('idServico', E.servico.id);
-        dados.set('nome', $('in-nome').value.trim());
-        dados.set('telefone', $('in-telefone').value.trim());
-        dados.set('email', $('in-email').value.trim());
-        dados.set('observacao', $('in-obs').value.trim());
-        dados.set('site', $('in-site').value);
+        const campos = {
+            t: E.barbeiro.token,
+            idHorario: E.horario.idHorario,
+            idServico: E.servico.id,
+            nome: $('in-nome').value.trim(),
+            telefone: $('in-telefone').value.trim(),
+            email: $('in-email').value.trim(),
+            observacao: $('in-obs').value.trim(),
+            site: $('in-site').value
+        };
 
-        fetch('/Publico/scripts/publico_agendar_salvar.php', {
-            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: dados.toString()
-        })
-            .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
-            .then(function (res) {
-                const r = res.j;
-                if (!r.ok) {
-                    botao.disabled = false; botao.textContent = 'Confirmar agendamento';
-                    const sugerirOutro = /hor[aá]rio|dia/i.test(r.erro || '') && r.codigo !== 'agendamento_duplicado';
-                    mostrarErro(r.erro || 'Não foi possível agendar. Tente novamente.', sugerirOutro);
+        function restaurar() { botao.disabled = false; botao.textContent = 'Confirmar agendamento'; }
+
+        // Envia; se a sessão/CSRF expirou (403), renova o token UMA vez e repete — o cliente não perde o que escolheu.
+        function enviar(jaRenovou) {
+            const dados = new URLSearchParams();
+            Object.keys(campos).forEach(function (k) { dados.set(k, campos[k]); });
+            dados.set('_csrf', APP.csrf);
+
+            return fetch('/Publico/scripts/publico_agendar_salvar.php', {
+                method: 'POST', credentials: 'same-origin', cache: 'no-store',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' }, body: dados.toString()
+            }).then(function (r) {
+                return r.text().then(function (t) {
+                    let j = null; try { j = JSON.parse(t); } catch (e) {}
+                    return { status: r.status, j: j };
+                });
+            }).then(function (res) {
+                if (res.status === 403 && !jaRenovou) {
+                    return fetch('/Publico/scripts/publico_csrf.php', { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+                        .then(function (r) { return r.json(); })
+                        .then(function (n) { if (n && n.csrf) { APP.csrf = n.csrf; } return enviar(true); });
+                }
+                return res;
+            });
+        }
+
+        enviar(false).then(function (res) {
+            const r = res.j;
+            if (!r) {
+                restaurar();
+                mostrarErro(res.status >= 500
+                    ? 'O sistema teve um problema ao salvar seu agendamento. Tente novamente em instantes.'
+                    : 'Não foi possível concluir o agendamento. Tente novamente.', false);
+                return;
+            }
+            if (!r.ok) {
+                restaurar();
+                let msg = r.erro || 'Não foi possível agendar. Tente novamente.';
+                if (r.codigo === 'agendamento_duplicado') {
+                    msg = 'Você já tem um agendamento ativo neste dia' + (r.hora ? ' (às ' + r.hora + ')' : '') + '. Escolha outro dia para marcar um novo horário.';
+                    restaurar();
+                    mostrarErro(msg, true, 'dia');
                     return;
                 }
-                E.ultimoTel = $('in-telefone').value.trim();
-                const conf = r.confirmacao || {};
-                E.confirmado = { data: conf.data || E.data, hora: conf.hora || E.horario.hora };
-                $('resumo-sucesso').innerHTML = linhasResumo().replace(/<div class="resumo__linha resumo__total">[\s\S]*$/, '')
-                    + '<div class="resumo__linha"><span class="resumo__rot">Valor</span><span class="resumo__val">' + brl(E.servico.valor) + '</span></div>';
-                const z = $('btn-zap');
-                if (z && APP.whatsapp) {
-                    const msg = 'Olá! Acabei de agendar ' + E.servico.nome + ' com ' + E.barbeiro.nome + ' em ' + dataBr(E.confirmado.data) + ' às ' + E.confirmado.hora + '.';
-                    z.href = 'https://wa.me/' + APP.whatsapp + '?text=' + encodeURIComponent(msg);
-                }
-                E.passos = ['sucesso']; E.idx = 0;
-                sheet.dataset.dir = 'avancar';
-                mostrarPasso(false);
-            })
-            .catch(function () {
-                botao.disabled = false; botao.textContent = 'Confirmar agendamento';
-                mostrarErro('Erro de conexão. Verifique sua internet e tente novamente.', false);
-            });
+                if (res.status === 403) { msg = 'Não conseguimos validar sua sessão. Se você abriu este link dentro do Instagram ou WhatsApp, abra-o no navegador do celular (Chrome/Safari) e tente de novo.'; }
+                const sugerirOutro = /hor[aá]rio|dia/i.test(r.erro || '') && r.codigo !== 'agendamento_duplicado' && res.status !== 403;
+                mostrarErro(msg, sugerirOutro);
+                return;
+            }
+            E.ultimoTel = $('in-telefone').value.trim();
+            const conf = r.confirmacao || {};
+            E.confirmado = { data: conf.data || E.data, hora: conf.hora || E.horario.hora };
+            $('resumo-sucesso').innerHTML = linhasResumo().replace(/<div class="resumo__linha resumo__total">[\s\S]*$/, '')
+                + '<div class="resumo__linha"><span class="resumo__rot">Valor</span><span class="resumo__val">' + brl(E.servico.valor) + '</span></div>';
+            const z = $('btn-zap');
+            if (z && APP.whatsapp) {
+                const msg = 'Olá! Acabei de agendar ' + E.servico.nome + ' com ' + E.barbeiro.nome + ' em ' + dataBr(E.confirmado.data) + ' às ' + E.confirmado.hora + '.';
+                z.href = 'https://wa.me/' + APP.whatsapp + '?text=' + encodeURIComponent(msg);
+            }
+            E.passos = ['sucesso']; E.idx = 0;
+            sheet.dataset.dir = 'avancar';
+            mostrarPasso(false);
+        }).catch(function () {
+            restaurar();
+            mostrarErro('Erro de conexão. Verifique sua internet e tente novamente.', false);
+        });
     });
 
     // ------------------------------------------------------------------ sucesso
