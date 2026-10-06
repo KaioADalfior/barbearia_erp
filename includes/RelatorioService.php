@@ -89,19 +89,20 @@ class RelatorioService
     public static function coletarDados(PDO $pdo, int $idBarbeiro, string $dataInicio, string $dataFim): array
     {
         // Funcionário: o financeiro dele conta só a comissão (ver
-        // FinanceiroService::fonteRecebimentos); proprietário: valor cheio.
+        // FinanceiroService::fonteRecebimentos); proprietário: o dele + a sobra
+        // dos atendimentos dos funcionários depois da comissão.
         $fonte  = FinanceiroService::fonteRecebimentos($pdo, $idBarbeiro);
         $titulo = FinanceiroService::exprTitulo($pdo, $idBarbeiro);
         $stmt = $pdo->prepare(
             "SELECT r.idRecebimento, r.idLancamento, r.tipo, {$titulo} AS titulo, l.descricao, l.quantidade,
-                    r.valor, r.forma_pagamento, l.origem, r.data
+                    r.valor, r.forma_pagamento, l.origem, r.data, l.id_barbeiro AS lanc_barbeiro
              FROM {$fonte} r
              INNER JOIN FinanceiroLancamentos l ON l.idLancamento = r.idLancamento
              WHERE r.id_barbeiro = :b AND r.data BETWEEN :ini AND :fim
              ORDER BY r.data ASC, r.idRecebimento ASC"
         );
         $stmt->execute(['b' => $idBarbeiro, 'ini' => $dataInicio, 'fim' => $dataFim]);
-        $lancamentos = $stmt->fetchAll();
+        $lancamentos = FinanceiroService::anotarComissao($pdo, $idBarbeiro, $stmt->fetchAll());
 
         $totalEntradas = 0.0;
         $totalSaidas   = 0.0;

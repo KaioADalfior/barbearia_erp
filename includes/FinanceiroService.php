@@ -372,8 +372,8 @@ class FinanceiroService
     /**
      * Fonte dos recebimentos para o financeiro de um barbeiro.
      *
-     * Proprietário: a própria tabela FinanceiroRecebimentos (comportamento de
-     * sempre — o valor cheio do serviço).
+     * Proprietário: os recebimentos dele (valor cheio) + a parte que sobra,
+     * depois da comissão, dos atendimentos dos funcionários.
      *
      * FUNCIONÁRIO: o dinheiro do serviço é da barbearia; o que entra no
      * financeiro DELE é só a comissão — e só DEPOIS de paga, isto é, depois
@@ -391,7 +391,27 @@ class FinanceiroService
     public static function fonteRecebimentos(PDO $pdo, int $idBarbeiro): string
     {
         if (AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) !== AcessoService::FUNCIONARIO) {
-            return 'FinanceiroRecebimentos';
+            // PROPRIETÁRIO: o que é dele (como sempre) MAIS o que sobra dos
+            // atendimentos dos funcionários depois da comissão — se o
+            // funcionário fica com 90 de um serviço de 100, entram 10 aqui
+            // (proporcional ao que o cliente de fato pagou, vale para fiado
+            // em parcelas). Atendimento estornado (comissão cancelada) não entra. O id é
+            // inteiro, então pode ir direto no SQL.
+            $id = (int) $idBarbeiro;
+            return "(SELECT r0.idRecebimento, r0.idLancamento, r0.id_barbeiro, r0.idCliente, r0.tipo,
+                            r0.valor, r0.forma_pagamento, r0.data
+                     FROM FinanceiroRecebimentos r0
+                     WHERE r0.id_barbeiro = {$id}
+                     UNION ALL
+                     SELECT rr.idRecebimento, rr.idLancamento, {$id}, rr.idCliente, rr.tipo,
+                            ROUND(rr.valor * (cc.valor_servico - cc.valor_comissao) / cc.valor_servico, 2),
+                            rr.forma_pagamento, rr.data
+                     FROM FinanceiroRecebimentos rr
+                     INNER JOIN FinanceiroLancamentos ll ON ll.idLancamento = rr.idLancamento AND ll.origem = 'agendamento'
+                     INNER JOIN Comissoes cc ON cc.idLancamento = rr.idLancamento
+                                            AND cc.status <> 'cancelado' AND cc.valor_servico > 0
+                     WHERE rr.id_barbeiro <> {$id}
+                    )";
         }
 
         return "(SELECT rr.idRecebimento, rr.idLancamento, rr.id_barbeiro, rr.idCliente, rr.tipo,
@@ -431,7 +451,7 @@ class FinanceiroService
         $fonte  = self::fonteRecebimentos($pdo, $idBarbeiro);
         $titulo = self::exprTitulo($pdo, $idBarbeiro);
         $sql = "SELECT r.idRecebimento, r.idLancamento, r.tipo, {$titulo} AS titulo, l.descricao, l.quantidade,
-                       r.valor, r.forma_pagamento, r.data, l.origem
+                       r.valor, r.forma_pagamento, r.data, l.origem, l.id_barbeiro AS lanc_barbeiro
                 FROM {$fonte} r
                 INNER JOIN FinanceiroLancamentos l ON l.idLancamento = r.idLancamento
                 WHERE r.id_barbeiro = :b";
@@ -452,7 +472,56 @@ class FinanceiroService
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll();
+        return self::anotarComissao($pdo, $idBarbeiro, $stmt->fetchAll());
+    }
+
+    /**
+     * Para o PROPRIETÁRIO, linhas que vêm de atendimento de funcionário
+     * mostram quem recebeu a comissão e quanto ("... · após comissão de
+     * João: R$ 90,00 (90%)") e ficam somente leitura (somente_leitura = 1:
+     * o lançamento é do funcionário, não dele). Para o FUNCIONÁRIO, a
+     * comissão paga também é somente leitura. Feito em PHP (e não no SQL)
+     * para não misturar collations de tabelas diferentes num CONCAT.
+     */
+    public static function anotarComissao(PDO $pdo, int $idBarbeiro, array $linhas): array
+    {
+        $ehFuncionario = AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) === AcessoService::FUNCIONARIO;
+
+        $ids = [];
+        foreach ($linhas as $l) {
+            if (!$ehFuncionario && ($l['origem'] ?? '') === 'agendamento' && (int) ($l['lanc_barbeiro'] ?? $idBarbeiro) !== $idBarbeiro) {
+                $ids[(int) $l['idLancamento']] = true;
+            }
+        }
+
+        $info = [];
+        if ($ids) {
+            $in = implode(',', array_keys($ids));
+            $q = $pdo->query(
+                "SELECT c.idLancamento, c.valor_comissao, c.percentual, b.nome
+                 FROM Comissoes c INNER JOIN Barbeiro b ON b.id_barbeiro = c.id_barbeiro
+                 WHERE c.idLancamento IN ({$in}) AND c.status <> 'cancelado'"
+            );
+            foreach ($q->fetchAll() as $c) {
+                $info[(int) $c['idLancamento']] = $c;
+            }
+        }
+
+        foreach ($linhas as &$l) {
+            $l['somente_leitura'] = 0;
+            if ($ehFuncionario) {
+                $l['somente_leitura'] = ($l['origem'] ?? '') === 'agendamento' ? 1 : 0;
+            } elseif (isset($info[(int) $l['idLancamento']])) {
+                $c = $info[(int) $l['idLancamento']];
+                $l['titulo'] .= ' · após comissão de ' . $c['nome'] . ': R$ '
+                    . number_format((float) $c['valor_comissao'], 2, ',', '.')
+                    . ' (' . rtrim(rtrim(number_format((float) $c['percentual'], 2, ',', ''), '0'), ',') . '%)';
+                $l['somente_leitura'] = 1;
+            }
+        }
+        unset($l);
+
+        return $linhas;
     }
 
     /**
@@ -714,14 +783,18 @@ class FinanceiroService
      */
     public static function excluirLancamento(PDO $pdo, int $idBarbeiro, int $idLancamento): bool
     {
-        // Funcionário não apaga a receita de um atendimento dele: ela é a
-        // base da comissão (quem controla a comissão é o proprietário).
-        if (AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) === AcessoService::FUNCIONARIO) {
-            $stmtOrigem = $pdo->prepare('SELECT origem FROM FinanceiroLancamentos WHERE idLancamento = :id AND id_barbeiro = :b');
-            $stmtOrigem->execute(['id' => $idLancamento, 'b' => $idBarbeiro]);
-            if ($stmtOrigem->fetchColumn() === 'agendamento') {
-                return false;
-            }
+        // O lançamento precisa ser DESTE barbeiro (o proprietário vê no extrato
+        // a sobra dos atendimentos dos funcionários, mas esses lançamentos
+        // não são dele). E funcionário não apaga a receita de um atendimento
+        // dele: ela é a base da comissão (quem controla é o proprietário).
+        $stmtOrigem = $pdo->prepare('SELECT origem FROM FinanceiroLancamentos WHERE idLancamento = :id AND id_barbeiro = :b');
+        $stmtOrigem->execute(['id' => $idLancamento, 'b' => $idBarbeiro]);
+        $origem = $stmtOrigem->fetchColumn();
+        if ($origem === false) {
+            return false;
+        }
+        if ($origem === 'agendamento' && AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) === AcessoService::FUNCIONARIO) {
+            return false;
         }
 
         $pdo->beginTransaction();

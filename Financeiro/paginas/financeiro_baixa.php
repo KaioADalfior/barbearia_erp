@@ -483,11 +483,12 @@ function renderizarExtrato(totalEntradas, totalSaidas) {
                             '<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>' +
                         '</svg>' +
                     '</button>' +
+                    (Number(b.somente_leitura) === 1 ? '' :
                     '<button type="button" onclick="excluirBaixa(' + b.idLancamento + ')" class="icon-btn icon-btn-danger" title="Excluir lançamento">' +
                         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
                             '<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0-.8 12a2 2 0 0 1-2 1.9H9.8a2 2 0 0 1-2-1.9L7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
                         '</svg>' +
-                    '</button>' +
+                    '</button>') +
                 '</div>' +
             '</td>' +
         '</tr>';
