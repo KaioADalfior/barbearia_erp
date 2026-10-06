@@ -370,6 +370,50 @@ class FinanceiroService
     }
 
     /**
+     * Fonte dos recebimentos para o financeiro de um barbeiro.
+     *
+     * Proprietário: a própria tabela FinanceiroRecebimentos (comportamento de
+     * sempre — o valor cheio do serviço).
+     *
+     * FUNCIONÁRIO: o dinheiro do serviço é da barbearia; o que entra no
+     * financeiro DELE é só a comissão. Então cada recebimento de um
+     * atendimento vira a parte da comissão (valor recebido × comissão ÷ valor
+     * do serviço — vale também para fiado pago em parcelas); atendimentos sem
+     * comissão válida (cancelada ou inexistente) não entram. Lançamentos
+     * manuais dele (ex.: uma despesa) continuam pelo valor cheio.
+     * Devolve um trecho SQL para usar como "FROM {fonte} r" — mesmas colunas
+     * da tabela original (idRecebimento, idLancamento, id_barbeiro,
+     * idCliente, tipo, valor, forma_pagamento, data).
+     */
+    public static function fonteRecebimentos(PDO $pdo, int $idBarbeiro): string
+    {
+        if (AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) !== AcessoService::FUNCIONARIO) {
+            return 'FinanceiroRecebimentos';
+        }
+
+        return "(SELECT rr.idRecebimento, rr.idLancamento, rr.id_barbeiro, rr.idCliente, rr.tipo,
+                        CASE WHEN ll.origem = 'agendamento'
+                             THEN ROUND(rr.valor * cc.valor_comissao / cc.valor_servico, 2)
+                             ELSE rr.valor END AS valor,
+                        rr.forma_pagamento, rr.data
+                 FROM FinanceiroRecebimentos rr
+                 INNER JOIN FinanceiroLancamentos ll ON ll.idLancamento = rr.idLancamento
+                 LEFT JOIN Comissoes cc ON cc.idLancamento = rr.idLancamento
+                 WHERE ll.origem <> 'agendamento'
+                    OR (cc.idComissao IS NOT NULL AND cc.status <> 'cancelado' AND cc.valor_servico > 0)
+                )";
+    }
+
+    /** Título exibido no extrato/relatório: para funcionário, lançamentos de atendimento aparecem como "Comissão · ...". */
+    public static function exprTitulo(PDO $pdo, int $idBarbeiro): string
+    {
+        if (AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) !== AcessoService::FUNCIONARIO) {
+            return 'l.titulo';
+        }
+        return "CASE WHEN l.origem = 'agendamento' THEN CONCAT('Comissão · ', l.titulo) ELSE l.titulo END";
+    }
+
+    /**
      * Extrato / Cadastrar Baixa: um RECEBIMENTO por linha (não um
      * lançamento por linha) — ver FinanceiroRecebimentos. Isso é o que
      * garante que um fiado pago em parcelas apareça como uma linha por
@@ -378,9 +422,11 @@ class FinanceiroService
      */
     public static function listarExtrato(PDO $pdo, int $idBarbeiro, string $termo = '', string $tipo = 'todos'): array
     {
-        $sql = "SELECT r.idRecebimento, r.idLancamento, r.tipo, l.titulo, l.descricao, l.quantidade,
+        $fonte  = self::fonteRecebimentos($pdo, $idBarbeiro);
+        $titulo = self::exprTitulo($pdo, $idBarbeiro);
+        $sql = "SELECT r.idRecebimento, r.idLancamento, r.tipo, {$titulo} AS titulo, l.descricao, l.quantidade,
                        r.valor, r.forma_pagamento, r.data, l.origem
-                FROM FinanceiroRecebimentos r
+                FROM {$fonte} r
                 INNER JOIN FinanceiroLancamentos l ON l.idLancamento = r.idLancamento
                 WHERE r.id_barbeiro = :b";
         $params = ['b' => $idBarbeiro];
@@ -706,11 +752,13 @@ class FinanceiroService
     {
         [$formatoAgrupamento, $inicio, $fim] = self::intervaloPeriodo($periodo, $ano);
 
+        $fonte = self::fonteRecebimentos($pdo, $idBarbeiro);
+
         $sql = "SELECT DATE_FORMAT(data, :formato) AS chave,
                        SUM(CASE WHEN tipo = 'entrada' THEN valor ELSE 0 END) AS entradas,
                        SUM(CASE WHEN tipo = 'saida' THEN valor ELSE 0 END) AS saidas,
                        COUNT(*) AS qtd
-                FROM FinanceiroRecebimentos
+                FROM {$fonte} fr
                 WHERE id_barbeiro = :b AND data BETWEEN :inicio AND :fim";
         $params = ['formato' => $formatoAgrupamento, 'b' => $idBarbeiro, 'inicio' => $inicio, 'fim' => $fim];
 
@@ -725,7 +773,7 @@ class FinanceiroService
         $stmt->execute($params);
         $serie = $stmt->fetchAll();
 
-        $sqlFormas = "SELECT forma_pagamento, valor FROM FinanceiroRecebimentos
+        $sqlFormas = "SELECT forma_pagamento, valor FROM {$fonte} fr
                       WHERE id_barbeiro = :b AND tipo = 'entrada' AND data BETWEEN :inicio AND :fim";
         $stmtFormas = $pdo->prepare($sqlFormas);
         $stmtFormas->execute(['b' => $idBarbeiro, 'inicio' => $inicio, 'fim' => $fim]);

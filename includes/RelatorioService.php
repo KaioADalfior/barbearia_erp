@@ -10,6 +10,7 @@
  */
 
 require_once __DIR__ . '/forma_pagamento.php'; // FORMAS_PAGAMENTO_LABELS
+require_once __DIR__ . '/FinanceiroService.php';
 
 class RelatorioService
 {
@@ -87,10 +88,14 @@ class RelatorioService
      */
     public static function coletarDados(PDO $pdo, int $idBarbeiro, string $dataInicio, string $dataFim): array
     {
+        // Funcionário: o financeiro dele conta só a comissão (ver
+        // FinanceiroService::fonteRecebimentos); proprietário: valor cheio.
+        $fonte  = FinanceiroService::fonteRecebimentos($pdo, $idBarbeiro);
+        $titulo = FinanceiroService::exprTitulo($pdo, $idBarbeiro);
         $stmt = $pdo->prepare(
-            "SELECT r.idRecebimento, r.idLancamento, r.tipo, l.titulo, l.descricao, l.quantidade,
+            "SELECT r.idRecebimento, r.idLancamento, r.tipo, {$titulo} AS titulo, l.descricao, l.quantidade,
                     r.valor, r.forma_pagamento, l.origem, r.data
-             FROM FinanceiroRecebimentos r
+             FROM {$fonte} r
              INNER JOIN FinanceiroLancamentos l ON l.idLancamento = r.idLancamento
              WHERE r.id_barbeiro = :b AND r.data BETWEEN :ini AND :fim
              ORDER BY r.data ASC, r.idRecebimento ASC"
