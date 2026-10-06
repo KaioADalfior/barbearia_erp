@@ -184,7 +184,7 @@ if (!empty($_SESSION['tipo'])) {
 
                 <?php /* Erro de login agora aparece como modal SweetAlert2 — ver script no fim da página */ ?>
 
-                <form action="../scripts/auth.php" method="POST" autocomplete="off">
+               <form action="/Autenticacao/scripts/auth.php" method="POST" autocomplete="off">
                     <?= csrf_field() ?>
 
                     <div class="mb-5">
