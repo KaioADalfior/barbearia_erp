@@ -1,0 +1,10 @@
+# Configuração do Nixpacks (usado pelo EasyPanel no build).
+#
+# O PHP-FPM roda como o usuário "nobody" (ver .nixpacks/assets/php-fpm.conf),
+# mas os arquivos do projeto são copiados para a imagem como root. Sem isto,
+# o upload da foto de perfil falha com "move_uploaded_file(): Unable to move".
+# Ajustamos o dono da pasta de uploads a cada inicialização do container
+# (inclusive se ela for um volume montado no EasyPanel), e só depois subimos
+# o PHP-FPM e o nginx exatamente como o Nixpacks faria por padrão.
+[start]
+cmd = "mkdir -p /app/assets/uploads/perfil && chown -R nobody /app/assets/uploads && node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"

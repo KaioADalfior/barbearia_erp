@@ -86,7 +86,15 @@ if (!isset($extensoesPermitidas[$mimeReal])) {
 }
 
 if (!is_dir($pastaUploads)) {
-    mkdir($pastaUploads, 0755, true);
+    @mkdir($pastaUploads, 0755, true);
+}
+
+// Pasta sem permissão de escrita para o usuário do PHP (ex.: criada como root
+// no deploy). Responde com JSON em vez de estourar um warning do PHP.
+if (!is_dir($pastaUploads) || !is_writable($pastaUploads)) {
+    error_log('perfil_foto_atualizar: pasta sem permissão de escrita: ' . $pastaUploads);
+    echo json_encode(['ok' => false, 'erro' => 'O servidor não conseguiu salvar a imagem (pasta sem permissão). Avise o suporte.']);
+    exit;
 }
 
 $extensao   = $extensoesPermitidas[$mimeReal];
