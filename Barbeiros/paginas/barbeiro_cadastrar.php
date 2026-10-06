@@ -17,6 +17,28 @@ $paginaAtual = 'barbeiro-cadastrar';
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<style>
+    .tipo-opcoes{ display:grid; grid-template-columns:1fr; gap:.75rem; }
+    @media (min-width:520px){ .tipo-opcoes{ grid-template-columns:1fr 1fr; } }
+    .tipo-opcao{ position:relative; display:block; cursor:pointer; }
+    .tipo-opcao input{ position:absolute; opacity:0; inset:0; width:100%; height:100%; cursor:pointer; margin:0; }
+    .tipo-opcao__card{
+        display:flex; gap:.75rem; align-items:flex-start; padding:.9rem 1rem; border-radius:.9rem;
+        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.10);
+        transition:border-color .15s, background .15s;
+    }
+    .tipo-opcao__dot{
+        flex:0 0 auto; width:18px; height:18px; margin-top:2px; border-radius:9999px;
+        border:2px solid rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center;
+    }
+    .tipo-opcao__dot::after{ content:''; width:8px; height:8px; border-radius:9999px; background:transparent; transition:background .15s; }
+    .tipo-opcao input:checked + .tipo-opcao__card{ border-color:rgba(61,126,201,0.75); background:rgba(61,126,201,0.12); }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot{ border-color:#6fa8ea; }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot::after{ background:#6fa8ea; }
+    .tipo-opcao input:focus-visible + .tipo-opcao__card{ outline:2px solid #6fa8ea; outline-offset:2px; }
+    .tipo-opcao__titulo{ font-size:14px; font-weight:600; color:var(--cream); }
+    .tipo-opcao__desc{ font-size:12px; line-height:1.45; color:#8b97ac; margin-top:2px; }
+</style>
 </head>
 <body class="flex">
 
@@ -51,6 +73,10 @@ $paginaAtual = 'barbeiro-cadastrar';
                     <div class="alert-error rounded-xl px-4 py-3 text-sm mb-6">
                         Já existe um barbeiro com esse login. Escolha outro.
                     </div>
+                <?php elseif (($_GET['status'] ?? '') === 'tipo'): ?>
+                    <div class="alert-error rounded-xl px-4 py-3 text-sm mb-6">
+                        Escolha o tipo de acesso: Proprietário ou Funcionário.
+                    </div>
                 <?php elseif (($_GET['status'] ?? '') === 'erro'): ?>
                     <div class="alert-error rounded-xl px-4 py-3 text-sm mb-6">
                         Preencha todos os campos corretamente.
@@ -76,6 +102,32 @@ $paginaAtual = 'barbeiro-cadastrar';
                             <label class="field-label block mb-2 uppercase" for="telefone">Telefone</label>
                             <input id="telefone" name="telefone" type="text" placeholder="(27) 90000-0000" required
                                    class="field w-full h-12 px-4 rounded-xl text-sm">
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <span class="field-label block mb-2 uppercase">Tipo de acesso</span>
+                        <div class="tipo-opcoes" role="radiogroup" aria-label="Tipo de acesso">
+                            <label class="tipo-opcao">
+                                <input type="radio" name="tipo_usuario" value="proprietario" required>
+                                <span class="tipo-opcao__card">
+                                    <span class="tipo-opcao__dot"></span>
+                                    <span>
+                                        <span class="tipo-opcao__titulo block">Proprietário</span>
+                                        <span class="tipo-opcao__desc block">Acesso total: todos os barbeiros, agendamentos, financeiro e comissões.</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <label class="tipo-opcao">
+                                <input type="radio" name="tipo_usuario" value="funcionario" required>
+                                <span class="tipo-opcao__card">
+                                    <span class="tipo-opcao__dot"></span>
+                                    <span>
+                                        <span class="tipo-opcao__titulo block">Funcionário</span>
+                                        <span class="tipo-opcao__desc block">Vê só os próprios atendimentos, comissão e financeiro. Recebe comissão por serviço.</span>
+                                    </span>
+                                </span>
+                            </label>
                         </div>
                     </div>
 

@@ -8,7 +8,10 @@ require_once __DIR__ . '/../../includes/session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../../includes/guard.php';
-exigirSessao(['barbeiro'], json: true);
+// Financeiro geral (receitas, despesas, baixas, relatórios): só o Proprietário.
+require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
+AcessoService::exigirProprietario($pdo, json: true);
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/FinanceiroService.php';

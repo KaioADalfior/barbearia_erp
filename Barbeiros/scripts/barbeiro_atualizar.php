@@ -19,6 +19,7 @@ $nome     = trim($_POST['nome'] ?? '');
 $login    = trim($_POST['login'] ?? '');
 $telefone = trim($_POST['telefone'] ?? '');
 $novaSenha = trim($_POST['senha'] ?? ''); // vazio = não altera a senha
+$tipoUsuario = $_POST['tipo_usuario'] ?? '';
 
 // Query string usada para reabrir o modal com os dados preenchidos caso
 // a validação falhe — igual ao padrão já usado em Servicos/Clientes.
@@ -27,19 +28,32 @@ $paramsVolta = http_build_query([
     'nome'     => $nome,
     'login'    => $login,
     'telefone' => $telefone,
+    'tipo_usuario' => $tipoUsuario,
 ]);
 
-if ($id <= 0 || $nome === '' || $login === '' || $telefone === '' || ($novaSenha !== '' && strlen($novaSenha) < 6)) {
+if ($id <= 0 || !in_array($tipoUsuario, ['proprietario', 'funcionario'], true) || $nome === '' || $login === '' || $telefone === '' || ($novaSenha !== '' && strlen($novaSenha) < 6)) {
     header('Location: /barbeiros?status=edicao-erro&' . $paramsVolta);
     exit;
 }
 
 // Confirma que o barbeiro existe
-$stmt = $pdo->prepare('SELECT id_barbeiro FROM Barbeiro WHERE id_barbeiro = :id LIMIT 1');
+$stmt = $pdo->prepare('SELECT id_barbeiro, tipo_usuario FROM Barbeiro WHERE id_barbeiro = :id LIMIT 1');
 $stmt->execute(['id' => $id]);
-if (!$stmt->fetch()) {
+$barbeiroAtual = $stmt->fetch();
+if (!$barbeiroAtual) {
     header('Location: /barbeiros?status=nao-encontrado');
     exit;
+}
+
+// Nunca deixa a barbearia sem nenhum Proprietário: sem ele ninguém consegue
+// ver o financeiro geral, as comissões nem configurar a porcentagem.
+if ($barbeiroAtual['tipo_usuario'] === 'proprietario' && $tipoUsuario === 'funcionario') {
+    $stmtOutros = $pdo->prepare("SELECT COUNT(*) FROM Barbeiro WHERE tipo_usuario = 'proprietario' AND id_barbeiro <> :id");
+    $stmtOutros->execute(['id' => $id]);
+    if ((int) $stmtOutros->fetchColumn() === 0) {
+        header('Location: /barbeiros?status=ultimo-proprietario&' . $paramsVolta);
+        exit;
+    }
 }
 
 // Login precisa continuar único, mas ignorando o próprio registro
@@ -53,23 +67,25 @@ if ($stmt->fetch()) {
 if ($novaSenha !== '') {
     $senhaHash = password_hash($novaSenha, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare(
-        'UPDATE Barbeiro SET nome = :nome, login = :login, telefone = :telefone, senha = :senha WHERE id_barbeiro = :id'
+        'UPDATE Barbeiro SET nome = :nome, login = :login, telefone = :telefone, tipo_usuario = :tipo, senha = :senha WHERE id_barbeiro = :id'
     );
     $stmt->execute([
         'nome'     => $nome,
         'login'    => $login,
         'telefone' => $telefone,
+        'tipo'     => $tipoUsuario,
         'senha'    => $senhaHash,
         'id'       => $id,
     ]);
 } else {
     $stmt = $pdo->prepare(
-        'UPDATE Barbeiro SET nome = :nome, login = :login, telefone = :telefone WHERE id_barbeiro = :id'
+        'UPDATE Barbeiro SET nome = :nome, login = :login, telefone = :telefone, tipo_usuario = :tipo WHERE id_barbeiro = :id'
     );
     $stmt->execute([
         'nome'     => $nome,
         'login'    => $login,
         'telefone' => $telefone,
+        'tipo'     => $tipoUsuario,
         'id'       => $id,
     ]);
 }
@@ -84,6 +100,7 @@ DiscordLogger::admin('✏️ Dados de barbeiro atualizados', [
     ['name' => '👤 Nome', 'value' => $nome, 'inline' => true],
     ['name' => '🔑 Login', 'value' => $login, 'inline' => true],
     ['name' => '🔒 Senha alterada?', 'value' => $novaSenha !== '' ? 'Sim' : 'Não', 'inline' => true],
+    ['name' => '🎫 Tipo de acesso', 'value' => ($barbeiroAtual['tipo_usuario'] === $tipoUsuario ? '' : ($barbeiroAtual['tipo_usuario'] === 'proprietario' ? 'Proprietário' : 'Funcionário') . ' → ') . ($tipoUsuario === 'proprietario' ? 'Proprietário' : 'Funcionário'), 'inline' => true],
     ['name' => '👑 Editado por', 'value' => $_SESSION['nome'] ?? ('#' . ($_SESSION['id'] ?? '—')), 'inline' => false],
 ]);
 

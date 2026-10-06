@@ -6,6 +6,15 @@ require_once __DIR__ . '/../../includes/csrf.php';
 $tipo = $_SESSION['tipo'] ?? null;
 $paginaAtual = 'configuracoes';
 
+// ---------- Comissão dos Barbeiros (Proprietário e Administrador) ----------
+// Porcentagem que cada FUNCIONÁRIO recebe por serviço concluído a partir de
+// agora (comissões já geradas nunca mudam). Ver includes/ComissaoService.php.
+require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
+$podeConfigurarComissao = $tipo === 'admin' || AcessoService::ehProprietario($pdo);
+$comissaoPercentual = $podeConfigurarComissao ? ComissaoService::percentualAtual($pdo) : null;
+$comissaoStatusGet = $_GET['comissao'] ?? '';
+
 // ---------- Lista de versões/uploads (somente Admin) ----------
 $uploads = [];
 if ($tipo === 'admin') {
@@ -210,6 +219,55 @@ include __DIR__ . '/../../includes/toast.php';
         </div>
 
     </section>
+
+    <?php if ($podeConfigurarComissao): ?>
+    <?php if ($comissaoStatusGet === 'ok' || $comissaoStatusGet === 'erro'): ?>
+        <script>document.addEventListener('DOMContentLoaded', function () { toast(<?= json_encode($comissaoStatusGet === 'ok' ? 'Comissão dos barbeiros atualizada. Vale para os próximos atendimentos.' : 'Informe uma porcentagem entre 0 e 100.') ?>, <?= json_encode($comissaoStatusGet === 'ok' ? 'sucesso' : 'erro') ?>); }); </script>
+    <?php endif; ?>
+    <section class="p-5 sm:p-8 pb-0 sm:pb-0 max-w-5xl">
+        <div class="panel-card rounded-2xl p-5 sm:p-6">
+            <p class="text-sm font-semibold text-[color:var(--cream)] mb-1">Comissão dos Barbeiros</p>
+            <p class="settings-desc mb-5">Porcentagem do valor de cada serviço que o funcionário recebe. Calculada automaticamente quando o atendimento é concluído. Mudar aqui vale só para os próximos atendimentos — o que já foi lançado continua com a porcentagem da época.</p>
+
+            <form action="/Configuracoes/scripts/comissao_salvar.php" method="POST" autocomplete="off" class="grid grid-cols-1 sm:grid-cols-[minmax(0,220px)_1fr] gap-5 items-start">
+                <?= csrf_field() ?>
+                <div>
+                    <label class="field-label block mb-2 uppercase" for="comissao_percentual">Comissão (%)</label>
+                    <div class="relative">
+                        <input id="comissao_percentual" name="comissao_percentual" type="number" inputmode="decimal"
+                               min="0" max="100" step="0.01" required
+                               value="<?= htmlspecialchars(rtrim(rtrim(number_format((float) $comissaoPercentual, 2, '.', ''), '0'), '.'), ENT_QUOTES, 'UTF-8') ?>"
+                               class="field w-full h-12 pl-4 pr-10 rounded-xl text-sm">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500 pointer-events-none">%</span>
+                    </div>
+                </div>
+                <div class="rounded-xl p-4 text-sm" style="background:rgba(61,126,201,0.08); border:1px solid rgba(61,126,201,0.22);">
+                    <p class="settings-label mb-1">Exemplo com um serviço de R$ 55,00</p>
+                    <p class="settings-desc">Funcionário: <strong id="comissao-ex-func" class="text-[color:var(--cream)]">—</strong> &nbsp;·&nbsp; Barbearia: <strong id="comissao-ex-casa" class="text-[color:var(--cream)]">—</strong></p>
+                    <p class="settings-desc mt-2">Atendimentos do proprietário não geram comissão.</p>
+                </div>
+                <div class="sm:col-span-2">
+                    <button type="submit" class="btn-primary h-12 px-6 rounded-xl text-sm">Salvar comissão</button>
+                </div>
+            </form>
+        </div>
+    </section>
+    <script>
+        (function () {
+            var campo = document.getElementById('comissao_percentual');
+            function moeda(v) { return 'R$ ' + v.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+            function atualizar() {
+                var p = parseFloat(String(campo.value).replace(',', '.'));
+                if (isNaN(p) || p < 0 || p > 100) { document.getElementById('comissao-ex-func').textContent = '—'; document.getElementById('comissao-ex-casa').textContent = '—'; return; }
+                var f = Math.round(55 * p) / 100;
+                document.getElementById('comissao-ex-func').textContent = moeda(f);
+                document.getElementById('comissao-ex-casa').textContent = moeda(55 - f);
+            }
+            campo.addEventListener('input', atualizar);
+            atualizar();
+        })();
+    </script>
+    <?php endif; ?>
 
     <?php if ($tipo === 'barbeiro'): ?>
     <section class="p-5 sm:p-8 max-w-5xl">

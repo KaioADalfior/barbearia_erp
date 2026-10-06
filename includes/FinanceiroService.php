@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/forma_pagamento.php'; // FORMAS_PAGAMENTO_LABELS
+require_once __DIR__ . '/ComissaoService.php';
 
 class FinanceiroService
 {
@@ -110,6 +111,27 @@ class FinanceiroService
             'status'          => $fiado ? 'pendente' : 'pago',
             'data'            => date('Y-m-d'),
         ]);
+
+        // Comissão do funcionário (só gera se quem atendeu for barbeiro do tipo
+        // Funcionário; proprietário não tem comissão). Mesma transação da
+        // conclusão e idempotente por agendamento — ver ComissaoService.
+        // Uma falha aqui NUNCA impede concluir o atendimento: é registrada
+        // no Discord e a comissão pode ser conferida depois.
+        try {
+            ComissaoService::registrarParaAtendimento($pdo, [
+                'idAgendamento' => (int) $agendamento['idAgendamento'],
+                'idLancamento'  => $idLancamento,
+                'id_barbeiro'   => $idBarbeiro,
+                'idCliente'     => $agendamento['idCliente'] ?? null,
+                'cliente'       => $agendamento['clienteNome'] ?? null,
+                'idServico'     => $agendamento['idServico'] ?? null,
+                'servico'       => $nomeServicoCompleto,
+                'valor'         => $agendamento['Valor'],
+                'forma'         => !empty($formasPagamento) ? implode(',', $formasPagamento) : null,
+            ]);
+        } catch (Throwable $e) {
+            DiscordLogger::erro('💥 Falha ao gerar comissão do atendimento #' . $agendamento['idAgendamento'], $e);
+        }
 
         // Fiado: registra automaticamente no histórico do cliente (aba
         // "Histórico" em Clientes > detalhes), já ligado a este lançamento
@@ -657,6 +679,12 @@ class FinanceiroService
             );
             $stmtLancamento->execute(['id' => $idLancamento, 'b' => $idBarbeiro]);
             $excluido = $stmtLancamento->rowCount() > 0;
+
+            // A receita do atendimento deixou de existir: a comissão ligada a
+            // ela é CANCELADA (fica no histórico, mas sai de todos os totais).
+            if ($excluido) {
+                ComissaoService::cancelarPorLancamento($pdo, $idLancamento, 'lançamento de receita excluído');
+            }
 
             $pdo->commit();
 

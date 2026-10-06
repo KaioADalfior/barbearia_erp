@@ -18,6 +18,14 @@ $nome     = trim($_POST['nome'] ?? '');
 $login    = trim($_POST['login'] ?? '');
 $telefone = trim($_POST['telefone'] ?? '');
 $senha    = trim($_POST['senha'] ?? '');
+$tipoUsuario = $_POST['tipo_usuario'] ?? '';
+
+// Tipo de acesso é obrigatório (Proprietário ou Funcionário) — sem valor
+// padrão escondido: o admin precisa escolher conscientemente.
+if (!in_array($tipoUsuario, ['proprietario', 'funcionario'], true)) {
+    header('Location: /barbeiros/cadastrar?status=tipo');
+    exit;
+}
 
 if ($nome === '' || $login === '' || $telefone === '' || $senha === '' || strlen($senha) < 6) {
     header('Location: /barbeiros/cadastrar?status=erro');
@@ -38,19 +46,21 @@ if ($stmt->fetch()) {
 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
 $stmt = $pdo->prepare(
-    'INSERT INTO Barbeiro (nome, login, senha, telefone) VALUES (:nome, :login, :senha, :telefone)'
+    'INSERT INTO Barbeiro (nome, login, senha, telefone, tipo_usuario) VALUES (:nome, :login, :senha, :telefone, :tipo)'
 );
 $stmt->execute([
     'nome'     => $nome,
     'login'    => $login,
     'senha'    => $senhaHash,
     'telefone' => $telefone,
+    'tipo'     => $tipoUsuario,
 ]);
 
 DiscordLogger::admin('✂️ Novo barbeiro cadastrado', [
     ['name' => '👤 Nome', 'value' => $nome, 'inline' => true],
     ['name' => '🔑 Login', 'value' => $login, 'inline' => true],
     ['name' => '📞 Telefone', 'value' => $telefone, 'inline' => true],
+    ['name' => '🎫 Tipo de acesso', 'value' => $tipoUsuario === 'proprietario' ? 'Proprietário' : 'Funcionário', 'inline' => true],
     ['name' => '👑 Cadastrado por', 'value' => $_SESSION['nome'] ?? ('#' . ($_SESSION['id'] ?? '—')), 'inline' => false],
 ]);
 

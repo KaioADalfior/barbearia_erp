@@ -2,6 +2,13 @@
 // includes/sidebar_barbeiro.php
 // Inclua dentro de <body>, passando $paginaAtual ('dashboard', 'agendar')
 $paginaAtual = $paginaAtual ?? '';
+
+// Menu por tipo de acesso (Proprietário x Funcionário). Só esconde o que o
+// funcionário não pode abrir — a proteção de verdade está no backend de cada
+// página/endpoint (ver includes/AcessoService.php).
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/AcessoService.php';
+$sidebarEhProprietario = AcessoService::ehProprietario($pdo);
 ?>
 <aside id="app-sidebar" class="ab-sidebar">
 
@@ -183,30 +190,43 @@ $paginaAtual = $paginaAtual ?? '';
                     </span>
                     <span class="ab-nav-item__label ab-label">Financeiro</span>
                 </span>
-                <span class="ab-nav-item__chevron ab-label <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios']) ? 'is-open' : '' ?>">
+                <span class="ab-nav-item__chevron ab-label <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios', 'financeiro-comissoes', 'financeiro-meu']) ? 'is-open' : '' ?>">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </span>
             </button>
 
-            <div id="grupo-financeiro" class="ab-subnav <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios']) ? '' : 'ab-hidden' ?>">
+            <div id="grupo-financeiro" class="ab-subnav <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios', 'financeiro-comissoes', 'financeiro-meu']) ? '' : 'ab-hidden' ?>">
+                <?php if ($sidebarEhProprietario): ?>
                 <a href="/financeiro"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-dashboard' ? 'is-active' : '' ?>">
                     Dashboard
+                </a>
+                <a href="/financeiro/comissoes"
+                   class="ab-subnav__item <?= $paginaAtual === 'financeiro-comissoes' ? 'is-active' : '' ?>">
+                    Comissões
                 </a>
                 <a href="/financeiro/baixa"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-baixa' ? 'is-active' : '' ?>">
                     Cadastrar Baixa
                 </a>
+                <?php else: ?>
+                <a href="/financeiro/meu"
+                   class="ab-subnav__item <?= $paginaAtual === 'financeiro-meu' ? 'is-active' : '' ?>">
+                    Meu Financeiro
+                </a>
+                <?php endif; ?>
                 <a href="/financeiro/a-receber"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-fiados' ? 'is-active' : '' ?>">
                     Contas a Receber
                 </a>
+                <?php if ($sidebarEhProprietario): ?>
                 <a href="/financeiro/relatorios"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-relatorios' ? 'is-active' : '' ?>">
                     Relatórios
                 </a>
+                <?php endif; ?>
             </div>
         </div>
 

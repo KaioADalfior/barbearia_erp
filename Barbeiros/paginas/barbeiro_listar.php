@@ -10,7 +10,7 @@ $paginaAtual = 'barbeiro-listar';
 
 // ---------- Busca todos os barbeiros ----------
 $stmt = $pdo->query(
-    'SELECT id_barbeiro, nome, login, telefone, foto, senha, criado_em
+    'SELECT id_barbeiro, nome, login, telefone, foto, senha, criado_em, tipo_usuario
      FROM Barbeiro
      ORDER BY nome ASC'
 );
@@ -22,6 +22,7 @@ $mensagens = [
     'edicao-erro'    => ['erro', 'Preencha nome, login e telefone corretamente.'],
     'login-existe'   => ['erro', 'Já existe outro barbeiro com esse login. Escolha outro.'],
     'nao-encontrado' => ['erro', 'Barbeiro não encontrado.'],
+    'ultimo-proprietario' => ['erro', 'A barbearia precisa ter ao menos um Proprietário. Marque outro barbeiro como Proprietário antes de mudar este.'],
 ];
 ?>
 <!DOCTYPE html>
@@ -58,6 +59,28 @@ $mensagens = [
     .badge-hash{
         color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4);
     }
+    .badge-prop{ color:#f0d18a; background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45); }
+    .badge-func{ color:#9dc4f0; background:rgba(61,126,201,0.14); border:1px solid rgba(61,126,201,0.4); }
+    .tipo-opcoes{ display:grid; grid-template-columns:1fr; gap:.6rem; }
+    @media (min-width:480px){ .tipo-opcoes{ grid-template-columns:1fr 1fr; } }
+    .tipo-opcao{ position:relative; display:block; cursor:pointer; }
+    .tipo-opcao input{ position:absolute; opacity:0; inset:0; width:100%; height:100%; cursor:pointer; margin:0; }
+    .tipo-opcao__card{
+        display:flex; gap:.6rem; align-items:flex-start; padding:.75rem .85rem; border-radius:.8rem;
+        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.10);
+        transition:border-color .15s, background .15s;
+    }
+    .tipo-opcao__dot{
+        flex:0 0 auto; width:18px; height:18px; margin-top:1px; border-radius:9999px;
+        border:2px solid rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center;
+    }
+    .tipo-opcao__dot::after{ content:''; width:8px; height:8px; border-radius:9999px; background:transparent; transition:background .15s; }
+    .tipo-opcao input:checked + .tipo-opcao__card{ border-color:rgba(61,126,201,0.75); background:rgba(61,126,201,0.12); }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot{ border-color:#6fa8ea; }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot::after{ background:#6fa8ea; }
+    .tipo-opcao input:focus-visible + .tipo-opcao__card{ outline:2px solid #6fa8ea; outline-offset:2px; }
+    .tipo-opcao__titulo{ font-size:13px; font-weight:600; color:var(--cream); }
+    .tipo-opcao__desc{ font-size:11.5px; line-height:1.4; color:#8b97ac; margin-top:1px; }
     .badge-pendente{
         color:#f0d18a; background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45);
     }
@@ -128,6 +151,7 @@ $mensagens = [
                                 <th class="px-5 py-4 text-xs uppercase tracking-wide text-zinc-500 font-medium">Barbeiro</th>
                                 <th class="px-5 py-4 text-xs uppercase tracking-wide text-zinc-500 font-medium">Login</th>
                                 <th class="px-5 py-4 text-xs uppercase tracking-wide text-zinc-500 font-medium">Telefone</th>
+                                <th class="px-5 py-4 text-xs uppercase tracking-wide text-zinc-500 font-medium">Acesso</th>
                                 <th class="px-5 py-4 text-xs uppercase tracking-wide text-zinc-500 font-medium">Cadastrado em</th>
                                 <th class="px-5 py-4 text-xs uppercase tracking-wide text-zinc-500 font-medium">Senha</th>
                                 <th class="px-5 py-4"></th>
@@ -151,7 +175,8 @@ $mensagens = [
                                 data-id="<?= (int) $b['id_barbeiro'] ?>"
                                 data-nome="<?= htmlspecialchars($b['nome'], ENT_QUOTES) ?>"
                                 data-login="<?= htmlspecialchars($b['login'], ENT_QUOTES) ?>"
-                                data-telefone="<?= htmlspecialchars($b['telefone'], ENT_QUOTES) ?>">
+                                data-telefone="<?= htmlspecialchars($b['telefone'], ENT_QUOTES) ?>"
+                                data-tipo="<?= htmlspecialchars($b['tipo_usuario'] ?? 'proprietario', ENT_QUOTES) ?>">
                                 <td class="px-5 py-3">
                                     <div class="flex items-center gap-3">
                                         <?php if (!empty($b['foto'])): ?>
@@ -164,6 +189,13 @@ $mensagens = [
                                 </td>
                                 <td class="px-5 py-3 text-zinc-300"><?= htmlspecialchars($b['login']) ?></td>
                                 <td class="px-5 py-3 text-zinc-300"><?= htmlspecialchars($b['telefone']) ?></td>
+                                <td class="px-5 py-3">
+                                    <?php if (($b['tipo_usuario'] ?? 'proprietario') === 'funcionario'): ?>
+                                        <span class="badge badge-func">Funcionário</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-prop">Proprietário</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="px-5 py-3 text-zinc-400"><?= htmlspecialchars($criadoEm) ?></td>
                                 <td class="px-5 py-3">
                                     <?php if ($senhaJaEhHash): ?>
@@ -182,7 +214,7 @@ $mensagens = [
                             </tr>
                             <?php endforeach; ?>
                             <tr id="linha-sem-resultado" class="hidden">
-                                <td colspan="6" class="px-5 py-8 text-center text-zinc-500">Nenhum barbeiro encontrado.</td>
+                                <td colspan="7" class="px-5 py-8 text-center text-zinc-500">Nenhum barbeiro encontrado.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -230,6 +262,32 @@ $mensagens = [
                         <label class="field-label block mb-2 uppercase" for="edit-telefone">Telefone</label>
                         <input id="edit-telefone" name="telefone" type="text" required
                                class="field w-full h-12 px-4 rounded-xl text-sm">
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <span class="field-label block mb-2 uppercase">Tipo de acesso</span>
+                    <div class="tipo-opcoes" role="radiogroup" aria-label="Tipo de acesso">
+                        <label class="tipo-opcao">
+                            <input type="radio" name="tipo_usuario" id="edit-tipo-proprietario" value="proprietario" required>
+                            <span class="tipo-opcao__card">
+                                <span class="tipo-opcao__dot"></span>
+                                <span>
+                                    <span class="tipo-opcao__titulo block">Proprietário</span>
+                                    <span class="tipo-opcao__desc block">Acesso total ao sistema e ao financeiro.</span>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="tipo-opcao">
+                            <input type="radio" name="tipo_usuario" id="edit-tipo-funcionario" value="funcionario" required>
+                            <span class="tipo-opcao__card">
+                                <span class="tipo-opcao__dot"></span>
+                                <span>
+                                    <span class="tipo-opcao__titulo block">Funcionário</span>
+                                    <span class="tipo-opcao__desc block">Só os próprios dados; recebe comissão.</span>
+                                </span>
+                            </span>
+                        </label>
                     </div>
                 </div>
 
@@ -283,15 +341,21 @@ $mensagens = [
         document.getElementById('edit-login').value = d.login;
         document.getElementById('edit-telefone').value = d.telefone;
         document.getElementById('edit-senha').value = '';
+        definirTipoEdicao(d.tipo);
         openModal('modal-editar');
     }
 
-    <?php if ($statusGet === 'edicao-erro' || $statusGet === 'login-existe'): ?>
+    function definirTipoEdicao(tipo) {
+        document.getElementById(tipo === 'funcionario' ? 'edit-tipo-funcionario' : 'edit-tipo-proprietario').checked = true;
+    }
+
+    <?php if (in_array($statusGet, ['edicao-erro', 'login-existe', 'ultimo-proprietario'], true)): ?>
     // reabre o modal com os dados que a pessoa tinha digitado, pra não perder o que já preencheu
     document.getElementById('edit-id').value = <?= json_encode($_GET['edit_id'] ?? '') ?>;
     document.getElementById('edit-nome').value = <?= json_encode($_GET['nome'] ?? '') ?>;
     document.getElementById('edit-login').value = <?= json_encode($_GET['login'] ?? '') ?>;
     document.getElementById('edit-telefone').value = <?= json_encode($_GET['telefone'] ?? '') ?>;
+    definirTipoEdicao(<?= json_encode($_GET['tipo_usuario'] ?? 'proprietario') ?>);
     openModal('modal-editar');
     <?php endif; ?>
 

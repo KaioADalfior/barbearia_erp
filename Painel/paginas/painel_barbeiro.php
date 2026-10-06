@@ -86,6 +86,30 @@ for ($i = 5; $i >= 0; $i--) {
     $concluidosMensal[] = $brutoMensal[$chave]['concluido'] ?? 0;
     $canceladosMensal[] = $brutoMensal[$chave]['cancelado'] ?? 0;
 }
+
+// ---------- Resumo financeiro do mês (por tipo de acesso) ----------
+// Proprietário: visão da barbearia (faturamento, comissões, funcionários).
+// Funcionário: só o que ele mesmo gerou/recebe — nada do financeiro geral.
+require_once __DIR__ . '/../../includes/AcessoService.php';
+require_once __DIR__ . '/../../includes/ComissaoService.php';
+$ehProprietarioPainel = AcessoService::ehProprietario($pdo);
+$resumoMes = null;
+try {
+    $filtroMes = [
+        'de' => date('Y-m-01'), 'ate' => date('Y-m-t'),
+        'funcionario' => $ehProprietarioPainel ? null : $idBarbeiro,
+        'status' => null, 'tipo' => 'todos',
+    ];
+    $resumoMes = ['totais' => ComissaoService::totais($pdo, $filtroMes)];
+    if ($ehProprietarioPainel) {
+        $resumoMes['visao']    = ComissaoService::visaoGeral($pdo, $filtroMes);
+        $resumoMes['ranking']  = array_slice(ComissaoService::porFuncionario($pdo, $filtroMes), 0, 3);
+        $resumoMes['qtdFunc']  = count(ComissaoService::funcionarios($pdo));
+        $resumoMes['pct']      = ComissaoService::percentualAtual($pdo);
+    }
+} catch (Throwable $e) {
+    $resumoMes = null; // estrutura de comissões indisponível: o resto do painel continua normal
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -260,6 +284,79 @@ for ($i = 5; $i >= 0; $i--) {
         </div>
         <?php endif; ?>
 
+        <?php if ($resumoMes !== null):
+            $fm = fn(float $v) => ComissaoService::fmtMoeda($v);
+            $tm = $resumoMes['totais'];
+            $mesesPt = ['01'=>'Janeiro','02'=>'Fevereiro','03'=>'Março','04'=>'Abril','05'=>'Maio','06'=>'Junho','07'=>'Julho','08'=>'Agosto','09'=>'Setembro','10'=>'Outubro','11'=>'Novembro','12'=>'Dezembro'];
+            $nomeMesAtual = $mesesPt[date('m')] . '/' . date('Y');
+        ?>
+        <!-- ==================== FINANCEIRO DO MÊS ==================== -->
+        <div class="flex items-center justify-between gap-3 mb-3">
+            <p class="eyebrow text-yellow-500/70 uppercase"><?= $ehProprietarioPainel ? 'Financeiro da barbearia' : 'Meu financeiro' ?> · <?= htmlspecialchars($nomeMesAtual) ?></p>
+            <a href="<?= $ehProprietarioPainel ? '/financeiro/comissoes' : '/financeiro/meu' ?>" class="text-xs" style="color:var(--gold-light); text-decoration:underline;">Ver detalhes</a>
+        </div>
+        <?php if ($ehProprietarioPainel): $vm = $resumoMes['visao']; ?>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Faturamento</p>
+                <p class="text-xl sm:text-2xl font-semibold text-[color:var(--cream)]"><?= $fm($vm['total_faturado']) ?></p>
+                <p class="text-xs text-zinc-500 mt-1"><?= (int) $vm['servicos_realizados'] ?> serviços realizados</p>
+            </div>
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Total de comissões</p>
+                <p class="text-xl sm:text-2xl font-semibold text-[color:var(--cream)]"><?= $fm($tm['total_comissao']) ?></p>
+                <p class="text-xs text-zinc-500 mt-1">comissão atual: <?= ComissaoService::fmtPct($resumoMes['pct']) ?></p>
+            </div>
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Pendentes</p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:#f0d18a;"><?= $fm($tm['total_pendente']) ?></p>
+                <p class="text-xs text-zinc-500 mt-1">a pagar aos funcionários</p>
+            </div>
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Pagas</p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:#7fd696;"><?= $fm($tm['total_pago']) ?></p>
+                <p class="text-xs text-zinc-500 mt-1"><?= (int) $resumoMes['qtdFunc'] ?> funcionário<?= $resumoMes['qtdFunc'] == 1 ? '' : 's' ?></p>
+            </div>
+        </div>
+        <?php if (!empty($resumoMes['ranking'])): ?>
+        <div class="panel-card rounded-2xl p-5 mb-6">
+            <p class="text-sm font-semibold text-[color:var(--cream)] mb-2">Ranking de funcionários no mês</p>
+            <?php foreach ($resumoMes['ranking'] as $i => $rk): ?>
+                <div class="legend-item">
+                    <span class="text-[color:var(--cream)]"><?= ($i + 1) ?>. <?= htmlspecialchars($rk['nome']) ?> <span class="text-zinc-500">· <?= (int) $rk['qtd_servicos'] ?> serviço<?= $rk['qtd_servicos'] == 1 ? '' : 's' ?> · <?= $fm($rk['total_servicos']) ?></span></span>
+                    <strong class="text-[color:var(--cream)]"><?= $fm($rk['total_comissao']) ?></strong>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <?php else: ?>
+        <div class="mb-6"></div>
+        <?php endif; ?>
+        <?php else: ?>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Meus atendimentos</p>
+                <p class="text-xl sm:text-2xl font-semibold text-[color:var(--cream)]"><?= (int) $tm['qtd_servicos'] ?></p>
+            </div>
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Faturamento gerado</p>
+                <p class="text-xl sm:text-2xl font-semibold text-[color:var(--cream)]"><?= $fm($tm['total_servicos']) ?></p>
+            </div>
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Minha comissão</p>
+                <p class="text-xl sm:text-2xl font-semibold text-[color:var(--cream)]"><?= $fm($tm['total_comissao']) ?></p>
+            </div>
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Paga</p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:#7fd696;"><?= $fm($tm['total_pago']) ?></p>
+            </div>
+            <div class="kpi-card rounded-2xl p-5">
+                <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Pendente</p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:#f0d18a;"><?= $fm($tm['total_pendente']) ?></p>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php endif; ?>
+
         <!-- ==================== GRÁFICOS ==================== -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
 
@@ -343,6 +440,7 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-xs text-zinc-500">Ver, filtrar e gerenciar todos os agendamentos</p>
             </a>
 
+            <?php if ($ehProprietarioPainel): ?>
             <a href="/financeiro" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -364,6 +462,18 @@ for ($i = 5; $i >= 0; $i--) {
                 <p class="text-sm font-medium text-[color:var(--cream)] mb-1">Cadastrar Baixa</p>
                 <p class="text-xs text-zinc-500">Lançar uma entrada ou saída manual</p>
             </a>
+
+            <?php else: ?>
+            <a href="/financeiro/meu" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+                <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3.5v17M16.5 7.2c0-1.6-1.6-2.7-4-2.7-2.6 0-4.3 1.2-4.3 3s1.4 2.5 4.3 3c2.9.5 4.3 1.3 4.3 3.1 0 1.8-1.8 3-4.3 3-2.2 0-4-1-4.3-2.6" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <p class="text-sm font-medium text-[color:var(--cream)] mb-1">Meu Financeiro</p>
+                <p class="text-xs text-zinc-500">Minhas comissões, valores pagos e pendentes</p>
+            </a>
+            <?php endif; ?>
 
             <a href="/financeiro/a-receber" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">

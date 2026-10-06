@@ -65,6 +65,12 @@ try {
 require_once __DIR__ . '/../includes/ImagemPersistente.php';
 ImagemPersistente::iniciar($pdo);
 
+// Estrutura de Proprietário/Funcionário e Comissões (coluna Barbeiro.tipo_usuario
+// e tabelas ConfiguracaoSistema/Comissoes): criada sozinha, uma vez por deploy,
+// antes de qualquer transação (ver includes/ComissaoService.php). Nunca derruba a página.
+require_once __DIR__ . '/../includes/ComissaoService.php';
+ComissaoService::iniciar($pdo);
+
 // A partir daqui, qualquer erro/exceção que nenhuma função do sistema tratar
 // é registrado automaticamente em logs-erros, sem precisar mexer em cada
 // função individualmente. Nunca mostra detalhes técnicos pro usuário.
