@@ -7,10 +7,7 @@
 require_once __DIR__ . '/../../includes/session.php';
 
 require_once __DIR__ . '/../../includes/guard.php';
-// Financeiro geral (receitas, despesas, baixas, relatórios): só o Proprietário.
-require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/../../includes/AcessoService.php';
-AcessoService::exigirProprietario($pdo); // sem sessão válida, redireciona para o login normalmente
+exigirSessao(['barbeiro']); // sem sessão válida, redireciona para o login normalmente
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/RelatorioService.php';

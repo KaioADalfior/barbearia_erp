@@ -1,10 +1,7 @@
 <?php
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/guard.php';
-// Financeiro geral (receitas, despesas, baixas, relatórios): só o Proprietário.
-require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/../../includes/AcessoService.php';
-AcessoService::exigirProprietario($pdo);
+exigirSessao(['barbeiro']);
 require_once __DIR__ . '/../../includes/forma_pagamento.php';
 
 $paginaAtual = 'financeiro-dashboard';

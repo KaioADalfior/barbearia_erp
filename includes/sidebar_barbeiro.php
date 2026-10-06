@@ -190,45 +190,45 @@ $sidebarEhProprietario = AcessoService::ehProprietario($pdo);
                     </span>
                     <span class="ab-nav-item__label ab-label">Financeiro</span>
                 </span>
-                <span class="ab-nav-item__chevron ab-label <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios', 'financeiro-comissoes', 'financeiro-meu']) ? 'is-open' : '' ?>">
+                <span class="ab-nav-item__chevron ab-label <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios']) ? 'is-open' : '' ?>">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </span>
             </button>
 
-            <div id="grupo-financeiro" class="ab-subnav <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios', 'financeiro-comissoes', 'financeiro-meu']) ? '' : 'ab-hidden' ?>">
-                <?php if ($sidebarEhProprietario): ?>
+            <div id="grupo-financeiro" class="ab-subnav <?= in_array($paginaAtual, ['financeiro-dashboard', 'financeiro-baixa', 'financeiro-fiados', 'financeiro-relatorios']) ? '' : 'ab-hidden' ?>">
                 <a href="/financeiro"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-dashboard' ? 'is-active' : '' ?>">
                     Dashboard
-                </a>
-                <a href="/financeiro/comissoes"
-                   class="ab-subnav__item <?= $paginaAtual === 'financeiro-comissoes' ? 'is-active' : '' ?>">
-                    Comissões
                 </a>
                 <a href="/financeiro/baixa"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-baixa' ? 'is-active' : '' ?>">
                     Cadastrar Baixa
                 </a>
-                <?php else: ?>
-                <a href="/financeiro/meu"
-                   class="ab-subnav__item <?= $paginaAtual === 'financeiro-meu' ? 'is-active' : '' ?>">
-                    Meu Financeiro
-                </a>
-                <?php endif; ?>
                 <a href="/financeiro/a-receber"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-fiados' ? 'is-active' : '' ?>">
                     Contas a Receber
                 </a>
-                <?php if ($sidebarEhProprietario): ?>
                 <a href="/financeiro/relatorios"
                    class="ab-subnav__item <?= $paginaAtual === 'financeiro-relatorios' ? 'is-active' : '' ?>">
                     Relatórios
                 </a>
-                <?php endif; ?>
             </div>
         </div>
+
+        <!-- Comissões (aba separada): proprietário vê a visão geral; funcionário, só as dele -->
+        <a href="<?= $sidebarEhProprietario ? '/financeiro/comissoes' : '/financeiro/meu' ?>" title="Comissões"
+           class="ab-nav-item <?= in_array($paginaAtual, ['financeiro-comissoes', 'financeiro-meu'], true) ? 'is-active' : '' ?>">
+            <span class="ab-nav-item__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.4"/>
+                    <path d="M15.2 8.2a5.5 5.5 0 1 1-6.9 6.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    <path d="M9 7v4M10.6 7.9c-.3-.5-.9-.8-1.6-.8-.9 0-1.6.5-1.6 1.2s.6 1 1.6 1.2c1 .2 1.6.5 1.6 1.2s-.7 1.2-1.6 1.2c-.7 0-1.3-.3-1.6-.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span class="ab-nav-item__label ab-label">Comissões</span>
+        </a>
 
         <a href="/perfil" title="Perfil"
            class="ab-nav-item <?= $paginaAtual === 'perfil' ? 'is-active' : '' ?>">

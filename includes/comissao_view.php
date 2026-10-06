@@ -48,7 +48,7 @@ $formasTxt = function (?string $csv) {
 $temFiltro = ($filtros['de'] ?? null) || ($filtros['ate'] ?? null) || ($filtros['status'] ?? null)
     || ($ehProprietarioView && (($filtros['funcionario'] ?? null) || ($filtros['tipo'] ?? 'todos') !== 'todos'));
 
-$tituloPagina = $ehProprietarioView ? 'Comissões' : 'Meu Financeiro';
+$tituloPagina = 'Comissões';
 $nomeFiltrado = null;
 if ($ehProprietarioView && !empty($filtros['funcionario'])) {
     foreach ($listaFuncionarios as $lf) {
@@ -136,7 +136,7 @@ if ($ehProprietarioView && !empty($filtros['funcionario'])) {
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Financeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75"><?= $ehProprietarioView ? 'Financeiro' : 'Meus ganhos' ?></p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">
                 <?= htmlspecialchars($tituloPagina) ?><?= $nomeFiltrado ? ' — ' . htmlspecialchars($nomeFiltrado) : '' ?>
             </h1>

@@ -292,7 +292,7 @@ try {
         ?>
         <!-- ==================== FINANCEIRO DO MÊS ==================== -->
         <div class="flex items-center justify-between gap-3 mb-3">
-            <p class="eyebrow text-yellow-500/70 uppercase"><?= $ehProprietarioPainel ? 'Financeiro da barbearia' : 'Meu financeiro' ?> · <?= htmlspecialchars($nomeMesAtual) ?></p>
+            <p class="eyebrow text-yellow-500/70 uppercase"><?= $ehProprietarioPainel ? 'Financeiro da barbearia' : 'Minhas comissões' ?> · <?= htmlspecialchars($nomeMesAtual) ?></p>
             <a href="<?= $ehProprietarioPainel ? '/financeiro/comissoes' : '/financeiro/meu' ?>" class="text-xs" style="color:var(--gold-light); text-decoration:underline;">Ver detalhes</a>
         </div>
         <?php if ($ehProprietarioPainel): $vm = $resumoMes['visao']; ?>
@@ -440,7 +440,6 @@ try {
                 <p class="text-xs text-zinc-500">Ver, filtrar e gerenciar todos os agendamentos</p>
             </a>
 
-            <?php if ($ehProprietarioPainel): ?>
             <a href="/financeiro" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -463,17 +462,16 @@ try {
                 <p class="text-xs text-zinc-500">Lançar uma entrada ou saída manual</p>
             </a>
 
-            <?php else: ?>
-            <a href="/financeiro/meu" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
+            <a href="<?= $ehProprietarioPainel ? '/financeiro/comissoes' : '/financeiro/meu' ?>" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 3.5v17M16.5 7.2c0-1.6-1.6-2.7-4-2.7-2.6 0-4.3 1.2-4.3 3s1.4 2.5 4.3 3c2.9.5 4.3 1.3 4.3 3.1 0 1.8-1.8 3-4.3 3-2.2 0-4-1-4.3-2.6" stroke="#6fa8ea" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="9" cy="9" r="5.5" stroke="#6fa8ea" stroke-width="1.5"/>
+                        <path d="M15.2 8.2a5.5 5.5 0 1 1-6.9 6.9" stroke="#6fa8ea" stroke-width="1.5" stroke-linecap="round"/>
                     </svg>
                 </div>
-                <p class="text-sm font-medium text-[color:var(--cream)] mb-1">Meu Financeiro</p>
-                <p class="text-xs text-zinc-500">Minhas comissões, valores pagos e pendentes</p>
+                <p class="text-sm font-medium text-[color:var(--cream)] mb-1">Comissões</p>
+                <p class="text-xs text-zinc-500"><?= $ehProprietarioPainel ? 'Comissões da equipe, baixa e visão geral' : 'Minhas comissões, valores pagos e pendentes' ?></p>
             </a>
-            <?php endif; ?>
 
             <a href="/financeiro/a-receber" class="panel-card block rounded-2xl p-6 hover:border-yellow-600/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-4">
