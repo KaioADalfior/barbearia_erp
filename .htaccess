@@ -58,6 +58,7 @@ RewriteRule ^ - [F,L]
 # bloqueio), diferente do link público acima; se no futuro quisermos
 # bloquear o acesso direto aqui também, o padrão é o mesmo já usado para
 # Publico/paginas/agendar.php.
+RewriteRule ^login/?$ Autenticacao/paginas/login.php [L,QSA]
 RewriteRule ^configuracoes/?$ Configuracoes/paginas/configuracoes.php [L,QSA]
 RewriteRule ^login-tentativas/?$ Configuracoes/paginas/login_tentativas.php [L,QSA]
 RewriteRule ^painel/?$ Painel/paginas/painel_admin.php [L,QSA]
