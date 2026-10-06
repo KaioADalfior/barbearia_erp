@@ -13,6 +13,7 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/PublicoTokenService.php';
 require_once __DIR__ . '/../../includes/HorarioService.php';
+require_once __DIR__ . '/../../includes/CatalogoService.php';
 
 $token = trim($_GET['t'] ?? '');
 $barbeiro = PublicoTokenService::resolverBarbeiro($pdo, $token);
@@ -38,7 +39,10 @@ if ($data < (new DateTimeImmutable('today'))->format('Y-m-d')) {
     exit;
 }
 
-if (HorarioService::diaBloqueado($pdo, $idBarbeiro, $data)) {
+// Horário de atendimento do Catálogo > Configurar: dia da semana fechado = dia bloqueado.
+$horariosCatalogo = CatalogoService::config($pdo)['horarios'];
+
+if (HorarioService::diaBloqueado($pdo, $idBarbeiro, $data) || !CatalogoService::diaAbertoPublico($horariosCatalogo, $data)) {
     echo json_encode(['ok' => true, 'data' => $data, 'horarios' => [], 'diaBloqueado' => true]);
     exit;
 }
@@ -62,7 +66,7 @@ $minutoAgora = ((int) $agora->format('H')) * 60 + (int) $agora->format('i');
 $horarios = [];
 foreach ($stmt->fetchAll() as $linha) {
     $ocupado = $linha['idAgendamento'] !== null;
-    $livre = !$ocupado && (bool) $linha['disponivel'];
+    $livre = !$ocupado && (bool) $linha['disponivel'] && CatalogoService::horaAbertaPublico($horariosCatalogo, $data, $linha['hora']);
 
     if ($livre && $ehHoje) {
         $horaMin = (int) substr($linha['hora'], 0, 2) * 60 + (int) substr($linha['hora'], 3, 2);

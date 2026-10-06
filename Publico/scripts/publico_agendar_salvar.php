@@ -23,6 +23,7 @@ require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/PublicoTokenService.php';
 require_once __DIR__ . '/../../includes/HorarioService.php';
 require_once __DIR__ . '/../../includes/FinanceiroService.php';
+require_once __DIR__ . '/../../includes/CatalogoService.php';
 require_once __DIR__ . '/../../includes/AgendamentoPublicoThrottle.php';
 
 csrf_verificar(json: true);
@@ -83,6 +84,10 @@ if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+// Horário de atendimento (Catálogo > Configurar). Lido ANTES da transação: a
+// primeira leitura pode criar as tabelas do catálogo (DDL faz commit implícito).
+$horariosCatalogo = CatalogoService::config($pdo)['horarios'];
+
 // Só conta no limite por IP a partir daqui: erros de preenchimento (campo em
 // branco, telefone incompleto) não devem gastar as tentativas de quem está
 // apenas corrigindo o formulário.
@@ -108,6 +113,18 @@ try {
     if ($horario['data'] < (new DateTimeImmutable('today'))->format('Y-m-d')) {
         $pdo->rollBack();
         echo json_encode(['ok' => false, 'erro' => 'Esse horário já passou. Escolha outro.']);
+        exit;
+    }
+
+    if (!CatalogoService::diaAbertoPublico($horariosCatalogo, $horario['data'])) {
+        $pdo->rollBack();
+        echo json_encode(['ok' => false, 'erro' => 'A barbearia não atende nesse dia. Escolha outro dia.']);
+        exit;
+    }
+
+    if (!CatalogoService::horaAbertaPublico($horariosCatalogo, $horario['data'], $horario['hora'])) {
+        $pdo->rollBack();
+        echo json_encode(['ok' => false, 'erro' => 'Esse horário está fora do horário de atendimento. Escolha outro horário.']);
         exit;
     }
 
@@ -164,23 +181,31 @@ try {
         $idCliente = (int) $pdo->lastInsertId();
     }
 
-    if (FinanceiroService::clienteJaTemAgendamentoNoDia($pdo, $idCliente, $horario['data'])) {
-        // Só informa o horário do agendamento ATIVO (agendado/confirmado) que
-        // causou o bloqueio — concluído, cancelado ou ausente nunca bloqueiam.
-        $stmtAtivo = $pdo->prepare(
-            "SELECT h.hora FROM Agendamentos a JOIN Horario h ON h.idHorario = a.idHorario
-             WHERE a.idCliente = :c AND a.Data = :d AND a.Status IN ('agendado', 'confirmado')
-             ORDER BY h.hora ASC LIMIT 1"
-        );
-        $stmtAtivo->execute(['c' => $idCliente, 'd' => $horario['data']]);
-        $horaAtiva = $stmtAtivo->fetchColumn();
+    // Regra existente: 1 agendamento ATIVO (agendado/confirmado) por cliente por dia.
+    // A conferência usa o horário REAL do agendamento (Horario.data/hora — a mesma
+    // fonte da grade do sistema de gestão), e não considera um agendamento cujo
+    // horário de hoje já começou/passou (o atendimento já aconteceu; o barbeiro
+    // só não chegou a concluir). Concluído, cancelado e ausente nunca bloqueiam.
+    $stmtAtivo = $pdo->prepare(
+        "SELECT h.hora, b.nome AS profissional
+         FROM Agendamentos a
+         JOIN Horario h ON h.idHorario = a.idHorario
+         JOIN Barbeiro b ON b.id_barbeiro = h.id_barbeiro
+         WHERE a.idCliente = :c AND h.data = :d AND a.Status IN ('agendado', 'confirmado')
+           AND (h.data > CURDATE() OR h.hora > CURTIME())
+         ORDER BY h.hora ASC LIMIT 1"
+    );
+    $stmtAtivo->execute(['c' => $idCliente, 'd' => $horario['data']]);
+    $ativo = $stmtAtivo->fetch();
 
+    if ($ativo) {
         $pdo->rollBack();
         echo json_encode([
-            'ok'     => false,
-            'codigo' => 'agendamento_duplicado',
-            'erro'   => 'Você já tem um agendamento nesse dia.',
-            'hora'   => $horaAtiva !== false ? substr((string) $horaAtiva, 0, 5) : null,
+            'ok'           => false,
+            'codigo'       => 'agendamento_duplicado',
+            'erro'         => 'Você já tem um agendamento nesse dia.',
+            'hora'         => substr((string) $ativo['hora'], 0, 5),
+            'profissional' => $ativo['profissional'],
         ]);
         exit;
     }

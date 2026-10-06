@@ -13,6 +13,7 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/PublicoTokenService.php';
 require_once __DIR__ . '/../../includes/HorarioService.php';
+require_once __DIR__ . '/../../includes/CatalogoService.php';
 
 $token = trim($_GET['t'] ?? '');
 $barbeiro = PublicoTokenService::resolverBarbeiro($pdo, $token);
@@ -72,6 +73,10 @@ function publicoStatusDisponibilidade(int $vagas): string
     return 'verde';
 }
 
+// Horário de atendimento configurado em Catálogo > Configurar: dia da semana
+// fechado ali fica bloqueado aqui também.
+$horariosCatalogo = CatalogoService::config($pdo)['horarios'];
+
 $hojeStr = $hoje->format('Y-m-d');
 $dias = [];
 $totalDias = (int) date('t', strtotime($inicio));
@@ -90,7 +95,7 @@ for ($d = 1; $d <= $totalDias; $d++) {
     $dias[$dataChave] = [
         'vagas'     => $vagas,
         'status'    => publicoStatusDisponibilidade($vagas),
-        'bloqueado' => isset($diasBloqueados[$dataChave]),
+        'bloqueado' => isset($diasBloqueados[$dataChave]) || !CatalogoService::diaAbertoPublico($horariosCatalogo, $dataChave),
     ];
 }
 

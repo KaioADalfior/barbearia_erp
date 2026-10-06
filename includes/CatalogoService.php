@@ -20,6 +20,8 @@
 
 require_once __DIR__ . '/ServicoFoto.php';
 
+require_once __DIR__ . '/ImagemPersistente.php';
+
 final class CatalogoService
 {
     public const PASTA_IMAGENS = 'assets/uploads/catalogo/';
@@ -387,6 +389,8 @@ final class CatalogoService
             if (!move_uploaded_file($arquivo['tmp_name'], $pasta . $novo)) {
                 return ['ok' => false, 'erro' => 'Não foi possível salvar a imagem no servidor.'];
             }
+            // Cópia no banco: a pasta de uploads some a cada redeploy (ver ImagemPersistente).
+            ImagemPersistente::guardar('catalogo/' . $novo);
         }
 
         // Garante a linha única de configuração antes de atualizar a coluna.
@@ -394,8 +398,11 @@ final class CatalogoService
         $col = $tipo === 'logo' ? 'logo' : 'capa';
         $pdo->prepare("UPDATE CatalogoConfig SET {$col} = :v WHERE id = 1")->execute(['v' => $novo]);
 
-        if ($atual && self::nomeImagemValido($atual) && is_file(self::pastaImagens() . $atual)) {
-            @unlink(self::pastaImagens() . $atual);
+        if ($atual && self::nomeImagemValido($atual)) {
+            if (is_file(self::pastaImagens() . $atual)) {
+                @unlink(self::pastaImagens() . $atual);
+            }
+            ImagemPersistente::remover('catalogo/' . $atual);
         }
 
         return ['ok' => true, 'nome' => $novo, 'url' => self::imagemUrl($novo)];
@@ -466,6 +473,43 @@ final class CatalogoService
             ];
         }
         return $lista;
+    }
+
+    // ------------------------------------------- regra pública (horário de atendimento)
+
+    /**
+     * O dia da semana de $data está aberto no horário de atendimento do catálogo?
+     * Sem horário configurado (array vazio) não há restrição.
+     */
+    public static function diaAbertoPublico(array $horarios, string $data): bool
+    {
+        if (!$horarios) {
+            return true;
+        }
+        $dia = (string) date('w', strtotime($data));
+        return !empty($horarios[$dia]['aberto']);
+    }
+
+    /**
+     * O horário "HH:MM" cabe em algum turno do dia? O 2º valor do turno é o
+     * último horário agendável (mesma semântica da grade de agendar.php).
+     */
+    public static function horaAbertaPublico(array $horarios, string $data, string $hora): bool
+    {
+        if (!$horarios) {
+            return true;
+        }
+        if (!self::diaAbertoPublico($horarios, $data)) {
+            return false;
+        }
+        $dia = (string) date('w', strtotime($data));
+        $hora = substr($hora, 0, 5);
+        foreach ($horarios[$dia]['turnos'] ?? [] as $t) {
+            if ($hora >= $t[0] && $hora <= $t[1]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // --------------------------------------------------------------- helpers

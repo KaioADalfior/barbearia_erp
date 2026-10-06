@@ -1239,7 +1239,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
                     if (bt) { bt.disabled = true; bt.classList.remove('is-sel'); bt.setAttribute('aria-disabled', 'true'); }
                     E.data = null; E.horario = null; $('btn-continuar').disabled = true;
                     aviso = '<div class="estado"><strong>Sem horários livres neste dia</strong>'
-                        + (r.diaBloqueado ? 'O profissional não atende neste dia.' : 'Todos os horários já foram ocupados.') + ' Escolha outra data.</div>';
+                        + (r.diaBloqueado ? 'Não há atendimento neste dia.' : 'Todos os horários já foram ocupados.') + ' Escolha outra data.</div>';
                     if (!todos.length) { area.innerHTML = aviso; return; }
                 }
                 const grupos = [['Manhã', 0, 12], ['Tarde', 12, 18], ['Noite', 18, 24]];
@@ -1385,7 +1385,7 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
                 restaurar();
                 let msg = r.erro || 'Não foi possível agendar. Tente novamente.';
                 if (r.codigo === 'agendamento_duplicado') {
-                    msg = 'Você já tem um agendamento ativo neste dia' + (r.hora ? ' (às ' + r.hora + ')' : '') + '. Escolha outro dia para marcar um novo horário.';
+                    msg = 'Você já tem um agendamento ativo neste dia' + (r.hora ? ', às ' + r.hora : '') + (r.profissional ? ' com ' + r.profissional : '') + '. Escolha outro dia para marcar um novo horário.';
                     restaurar();
                     mostrarErro(msg, true, 'dia');
                     return;

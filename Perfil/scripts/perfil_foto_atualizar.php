@@ -10,6 +10,7 @@ exigirSessao(['barbeiro'], json: true);
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
+require_once __DIR__ . '/../../includes/ImagemPersistente.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -37,6 +38,7 @@ if ($acao === 'remover') {
         if (is_file($caminhoAntigo)) {
             @unlink($caminhoAntigo);
         }
+        ImagemPersistente::remover('perfil/' . $fotoAtual);
     }
 
     $stmt = $pdo->prepare('UPDATE Barbeiro SET foto = NULL WHERE id_barbeiro = :id');
@@ -106,6 +108,9 @@ if (!move_uploaded_file($arquivo['tmp_name'], $destino)) {
     exit;
 }
 
+// Cópia no banco: a pasta de uploads some a cada redeploy (ver includes/ImagemPersistente.php).
+ImagemPersistente::guardar('perfil/' . $nomeNovo);
+
 $stmt = $pdo->prepare('UPDATE Barbeiro SET foto = :foto WHERE id_barbeiro = :id');
 $stmt->execute(['foto' => $nomeNovo, 'id' => $idBarbeiro]);
 
@@ -115,6 +120,7 @@ if ($fotoAtual) {
     if (is_file($caminhoAntigo)) {
         @unlink($caminhoAntigo);
     }
+    ImagemPersistente::remover('perfil/' . $fotoAtual);
 }
 
 $_SESSION['foto'] = $nomeNovo;

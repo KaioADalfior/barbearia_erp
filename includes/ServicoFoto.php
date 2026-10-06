@@ -4,6 +4,8 @@
 // assets/uploads/servicos/ com nome aleatório; o banco guarda somente o
 // nome do arquivo (coluna Servico.foto).
 
+require_once __DIR__ . '/ImagemPersistente.php';
+
 final class ServicoFoto
 {
     private const MAX_BYTES = 3 * 1024 * 1024; // 3MB
@@ -99,14 +101,20 @@ final class ServicoFoto
             return ['ok' => false, 'erro' => 'salvar'];
         }
 
+        // Cópia no banco: a pasta de uploads some a cada redeploy (ver ImagemPersistente).
+        ImagemPersistente::guardar('servicos/' . $nome);
+
         return ['ok' => true, 'nome' => $nome];
     }
 
     /** Apaga o arquivo da foto (ignora nomes inesperados e arquivos inexistentes). */
     public static function remover(?string $nome): void
     {
-        if (self::nomeValido($nome) && is_file(self::pasta() . $nome)) {
-            @unlink(self::pasta() . $nome);
+        if (self::nomeValido($nome)) {
+            if (is_file(self::pasta() . $nome)) {
+                @unlink(self::pasta() . $nome);
+            }
+            ImagemPersistente::remover('servicos/' . $nome);
         }
     }
 

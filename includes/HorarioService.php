@@ -20,6 +20,23 @@ class HorarioService
     ];
 
     /**
+     * Turnos da grade padrão em "HH:MM" — [['08:00','11:20'], ['13:00','19:40']].
+     * O 2º valor de cada turno é o ÚLTIMO horário (início de atendimento) da
+     * grade, não o fechamento. Usado pelo Catálogo > Configurar para mostrar/
+     * preencher o horário de atendimento com a MESMA grade de agendar.php.
+     */
+    public static function turnosPadrao(): array
+    {
+        $fmt = static fn(int $min): string => sprintf('%02d:%02d', intdiv($min, 60), $min % 60);
+        return array_map(static fn(array $t): array => [$fmt($t['inicio']), $fmt($t['fim'])], self::TURNOS);
+    }
+
+    public static function passoMinutos(): int
+    {
+        return self::PASSO_MINUTOS;
+    }
+
+    /**
      * Garante que a grade padrão do dia já existe na tabela Horario para o
      * barbeiro informado. Não faz nada se o dia já tiver algum horário
      * cadastrado (evita sobrescrever grades já ajustadas manualmente).

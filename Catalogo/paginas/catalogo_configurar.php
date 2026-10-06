@@ -12,6 +12,7 @@ exigirSessao(['barbeiro']);
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/CatalogoService.php';
+require_once __DIR__ . '/../../includes/HorarioService.php';
 require_once __DIR__ . '/../../includes/PublicoTokenService.php';
 
 $paginaAtual = 'catalogo-configurar';
@@ -459,19 +460,33 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
                 </div>
             </div>
 
+            <?php
+                // Mesma grade de Agendamentos > agendar.php (HorarioService). Sem nada salvo ainda,
+                // o formulário já vem preenchido com ela (Seg–Sáb) como sugestão.
+                $gradeTurnos = HorarioService::turnosPadrao();
+                $semHorarios = empty($cfg['horarios']);
+                $txtGrade = implode(' e ', array_map(fn($t) => $t[0] . ' – ' . $t[1], $gradeTurnos));
+            ?>
             <!-- ================= HORÁRIOS ================= -->
             <div class="cg-painel" data-painel="horarios">
                 <div class="panel-card cg-card">
                     <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start; margin-bottom:6px;">
                         <div>
                             <h2>Horário de atendimento</h2>
-                            <p class="cg-card__sub" style="margin-bottom:0">Informativo para o cliente. Os horários disponíveis para agendar continuam vindo da agenda de cada profissional.</p>
+                            <p class="cg-card__sub" style="margin-bottom:0">Define os dias e horários em que a página pública aceita agendamentos. <strong>Dia fechado aqui = dia bloqueado na página pública.</strong> Os horários livres de cada profissional continuam vindo da agenda dele.</p>
+                            <p class="cg-hint" style="margin-top:8px">Grade da agenda (Agendamentos): <strong><?= $h($txtGrade) ?></strong>, a cada <?= (int) HorarioService::passoMinutos() ?> min. O horário depois do "às" é o <em>último</em> horário que o cliente pode escolher no período.</p>
                         </div>
-                        <button type="button" class="cg-btn cg-btn--sm" id="cg-copiar-horario">Copiar o 1º dia aberto para os outros</button>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button type="button" class="cg-btn cg-btn--sm" id="cg-usar-grade">Usar a grade da agenda</button>
+                            <button type="button" class="cg-btn cg-btn--sm" id="cg-copiar-horario">Copiar o 1º dia aberto para os outros</button>
+                        </div>
                     </div>
                     <div id="cg-dias">
                         <?php foreach (CatalogoService::DIAS_ORDEM as $dia):
                             $d = $cfg['horarios'][(string) $dia] ?? ['aberto' => false, 'turnos' => []];
+                            if ($semHorarios) {
+                                $d = $dia === 0 ? ['aberto' => false, 'turnos' => []] : ['aberto' => true, 'turnos' => $gradeTurnos];
+                            }
                             $t = $d['turnos'] ?? [];
                         ?>
                             <div class="cg-dia <?= !empty($d['aberto']) ? '' : 'is-fechado' ?>" data-dia="<?= $dia ?>">
@@ -688,6 +703,26 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
             }
         });
     });
+    const GRADE = <?= json_encode($gradeTurnos) ?>;
+    function preencherGrade(linha) {
+        const mapa = { t1_ini: GRADE[0][0], t1_fim: GRADE[0][1], t2_ini: (GRADE[1] || ['',''])[0], t2_fim: (GRADE[1] || ['',''])[1] };
+        Object.keys(mapa).forEach(function (c) { linha.querySelector('[name$="[' + c + ']"]').value = mapa[c]; });
+    }
+    document.getElementById('cg-usar-grade').addEventListener('click', function () {
+        document.querySelectorAll('.cg-dia').forEach(function (l) {
+            if (l.querySelector('.cg-switch input').checked) preencherGrade(l);
+        });
+        marcarSujo(true);
+        toast('Horários dos dias abertos ajustados para a grade da agenda.', 'sucesso');
+    });
+    // Ao abrir um dia que está em branco, já preenche com a grade da agenda.
+    document.querySelectorAll('.cg-dia .cg-switch input').forEach(function (chk) {
+        chk.addEventListener('change', function () {
+            const l = chk.closest('.cg-dia');
+            if (chk.checked && !l.querySelector('[name$="[t1_ini]"]').value) preencherGrade(l);
+        });
+    });
+
     document.getElementById('cg-copiar-horario').addEventListener('click', function () {
         const linhas = Array.from(document.querySelectorAll('.cg-dia'));
         const origem = linhas.find(function (l) { return l.querySelector('.cg-switch input').checked; });

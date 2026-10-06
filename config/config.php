@@ -58,6 +58,13 @@ try {
     http_response_code(500);
     die('Erro ao conectar ao banco de dados. Já registramos o problema.');
 }
+// Imagens enviadas (foto de perfil, de serviço, logo/capa do catálogo): cada
+// deploy cria um container novo e a pasta assets/uploads/ some. Aqui as
+// imagens que faltam no disco são recriadas a partir da cópia guardada no
+// banco (ver includes/ImagemPersistente.php). Nunca derruba a página.
+require_once __DIR__ . '/../includes/ImagemPersistente.php';
+ImagemPersistente::iniciar($pdo);
+
 // A partir daqui, qualquer erro/exceção que nenhuma função do sistema tratar
 // é registrado automaticamente em logs-erros, sem precisar mexer em cada
 // função individualmente. Nunca mostra detalhes técnicos pro usuário.
