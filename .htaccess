@@ -68,6 +68,8 @@ RewriteRule ^barbeiros/cadastrar/?$ Barbeiros/paginas/barbeiro_cadastrar.php [L,
 RewriteRule ^barbeiros/?$ Barbeiros/paginas/barbeiro_listar.php [L,QSA]
 RewriteRule ^clientes/?$ Clientes/paginas/cliente_listar.php [L,QSA]
 RewriteRule ^servicos/?$ Servicos/paginas/servico_listar.php [L,QSA]
+RewriteRule ^catalogo/configurar/?$ Catalogo/paginas/catalogo_configurar.php [L,QSA]
+RewriteRule ^catalogo/?$ Catalogo/paginas/catalogo_configurar.php [L,QSA]
 RewriteRule ^agendar/?$ Agendamentos/paginas/agendar.php [L,QSA]
 RewriteRule ^agendamentos/?$ Agendamentos/paginas/agendamento_listar.php [L,QSA]
 RewriteRule ^financeiro/a-receber/?$ Financeiro/paginas/financeiro_aReceber.php [L,QSA]

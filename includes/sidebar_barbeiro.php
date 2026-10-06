@@ -104,6 +104,36 @@ $paginaAtual = $paginaAtual ?? '';
             </div>
         </div>
 
+        <!-- Grupo: Catálogo (vitrine pública /c/agendar) -->
+        <div>
+            <button type="button"
+                    class="ab-nav-item ab-nav-item--toggle"
+                    title="Catálogo"
+                    onclick="alternarGrupoSidebar('grupo-catalogo', this)">
+                <span class="ab-nav-item__main">
+                    <span class="ab-nav-item__icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 9.5 5.6 5h12.8L20 9.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                            <path d="M4 9.5a2.67 2.67 0 0 0 5.33 0 2.67 2.67 0 0 0 5.34 0 2.67 2.67 0 0 0 5.33 0M5.5 12.5V19h13v-6.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="ab-nav-item__label ab-label">Catálogo</span>
+                </span>
+                <span class="ab-nav-item__chevron ab-label <?= $paginaAtual === 'catalogo-configurar' ? 'is-open' : '' ?>">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </button>
+
+            <div id="grupo-catalogo" class="ab-subnav <?= $paginaAtual === 'catalogo-configurar' ? '' : 'ab-hidden' ?>">
+                <a href="/catalogo/configurar"
+                   class="ab-subnav__item <?= $paginaAtual === 'catalogo-configurar' ? 'is-active' : '' ?>">
+                    Configurar
+                </a>
+            </div>
+        </div>
+
         <!-- Grupo: Agendamento -->
         <div>
             <button type="button"
