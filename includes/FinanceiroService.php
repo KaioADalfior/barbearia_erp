@@ -382,6 +382,8 @@ class FinanceiroService
      * baixa (pago_em). Comissão pendente, cancelada ou desfeita (reaberta)
      * não conta. Lançamentos manuais dele (ex.: uma despesa) continuam
      * entrando pelo valor cheio.
+     * (A forma de pagamento da comissão vem da própria FinanceiroRecebimentos,
+     * e não de Comissoes, para o UNION nunca misturar collations diferentes.)
      * Devolve um trecho SQL para usar como "FROM {fonte} r" — mesmas colunas
      * da tabela original (idRecebimento, idLancamento, id_barbeiro,
      * idCliente, tipo, valor, forma_pagamento, data).
@@ -399,7 +401,10 @@ class FinanceiroService
                  WHERE ll.origem <> 'agendamento'
                  UNION ALL
                  SELECT cc.idComissao + 1000000000, cc.idLancamento, cc.id_barbeiro, cc.idCliente, 'entrada',
-                        cc.valor_comissao, cc.forma_pagamento, DATE(cc.pago_em)
+                        cc.valor_comissao,
+                        (SELECT rf.forma_pagamento FROM FinanceiroRecebimentos rf
+                          WHERE rf.idLancamento = cc.idLancamento ORDER BY rf.idRecebimento LIMIT 1),
+                        DATE(cc.pago_em)
                  FROM Comissoes cc
                  WHERE cc.status = 'pago' AND cc.pago_em IS NOT NULL AND cc.idLancamento IS NOT NULL
                 )";
