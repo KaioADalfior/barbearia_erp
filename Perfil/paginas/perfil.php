@@ -33,6 +33,8 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
@@ -99,6 +101,35 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         transition:color .15s;
     }
     .perfil-remover-foto:hover{ color:#e0a2a8; }
+    .recorte-overlay{
+        position:fixed; inset:0; z-index:200;
+        display:none; align-items:center; justify-content:center;
+        padding:16px; background:rgba(5,8,14,0.82);
+    }
+    .recorte-overlay.aberto{ display:flex; }
+    .recorte-modal{
+        width:100%; max-width:440px;
+        background:linear-gradient(180deg, var(--charcoal), var(--charcoal-2));
+        border:1px solid rgba(61,126,201,0.25);
+        border-radius:20px; padding:20px;
+        box-shadow:0 24px 60px -12px rgba(0,0,0,0.8);
+    }
+    .recorte-area{
+        width:100%; height:min(60vw, 320px);
+        background:#05080e; border-radius:12px; overflow:hidden;
+    }
+    .recorte-area img{ display:block; max-width:100%; }
+    .recorte-modal .cropper-view-box, .recorte-modal .cropper-face{ border-radius:50%; }
+    .recorte-modal .cropper-view-box{ outline:2px solid rgba(91,147,247,0.9); }
+    .recorte-zoom{ width:100%; accent-color:var(--gold-light); }
+    .recorte-btn{
+        height:42px; padding:0 18px; border-radius:12px;
+        font-size:14px; font-weight:600; cursor:pointer; transition:filter .15s;
+    }
+    .recorte-btn:hover{ filter:brightness(1.1); }
+    .recorte-btn-sec{ background:rgba(255,255,255,0.06); color:#c9d3e6; border:1px solid rgba(255,255,255,0.1); }
+    .recorte-btn-pri{ background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:#fff; border:none; }
+    .recorte-btn[disabled]{ opacity:.6; cursor:wait; }
     .badge-usuario{
         display:inline-flex;
         align-items:center;
@@ -241,40 +272,157 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 
 </main>
 
+<div id="recorte-overlay" class="recorte-overlay" role="dialog" aria-modal="true" aria-labelledby="recorte-titulo">
+    <div class="recorte-modal">
+        <p id="recorte-titulo" class="text-sm font-semibold text-[color:var(--cream)] mb-1">Ajustar foto</p>
+        <p class="text-xs mb-3" style="color:#8fa0bd">Arraste para posicionar e use o controle para aproximar ou afastar.</p>
+        <div class="recorte-area"><img id="recorte-img" alt="Pré-visualização"></div>
+        <div class="flex items-center gap-3 mt-4">
+            <span class="text-xs" style="color:#8fa0bd">&minus;</span>
+            <input type="range" id="recorte-zoom" class="recorte-zoom" min="0" max="1" step="0.01" value="0" aria-label="Zoom">
+            <span class="text-xs" style="color:#8fa0bd">+</span>
+        </div>
+        <div class="flex justify-end gap-3 mt-5">
+            <button type="button" id="recorte-cancelar" class="recorte-btn recorte-btn-sec">Cancelar</button>
+            <button type="button" id="recorte-salvar" class="recorte-btn recorte-btn-pri">Salvar foto</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.getElementById('perfil-foto-input').addEventListener('change', async function () {
-        const arquivo = this.files[0];
-        if (!arquivo) return;
+    // ---------- Foto de perfil: escolher -> ajustar/redimensionar -> enviar ----------
+    (function () {
+        const input    = document.getElementById('perfil-foto-input');
+        const overlay  = document.getElementById('recorte-overlay');
+        const imgEl    = document.getElementById('recorte-img');
+        const zoomEl   = document.getElementById('recorte-zoom');
+        const btnSalvar   = document.getElementById('recorte-salvar');
+        const btnCancelar = document.getElementById('recorte-cancelar');
+        const TAMANHO_FINAL = 512; // px (quadrado)
+        let cropper = null;
+        let urlTemp = null;
+        let baseRatio = 0;
 
-        const formData = new FormData();
-        formData.set('foto', arquivo);
-        formData.set('_csrf', document.querySelector('meta[name="csrf-token"]').content);
+        function fechar() {
+            overlay.classList.remove('aberto');
+            if (cropper) { cropper.destroy(); cropper = null; }
+            baseRatio = 0;
+            if (urlTemp) { URL.revokeObjectURL(urlTemp); urlTemp = null; }
+            imgEl.removeAttribute('src');
+            input.value = '';
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = 'Salvar foto';
+        }
 
-        try {
-            const resposta = await fetch('/Perfil/scripts/perfil_foto_atualizar.php', { method: 'POST', body: formData });
-            const dados = await resposta.json();
+        input.addEventListener('change', function () {
+            const arquivo = this.files[0];
+            if (!arquivo) return;
 
-            if (!dados.ok) {
-                toast(dados.erro || 'Não foi possível enviar a foto.', 'erro');
+            if (!/^image\/(jpeg|png|webp)$/.test(arquivo.type)) {
+                toast('Formato inválido. Envie uma imagem JPG, PNG ou WEBP.', 'erro');
+                this.value = '';
+                return;
+            }
+            if (typeof Cropper === 'undefined') {
+                toast('Não foi possível carregar o editor de imagem. Recarregue a página.', 'erro');
                 this.value = '';
                 return;
             }
 
-            const url = URL.createObjectURL(arquivo);
-            const img = document.getElementById('perfil-avatar-img');
-            const letra = document.getElementById('perfil-avatar-letra');
-            img.src = url;
-            img.classList.remove('hidden');
-            if (letra) letra.classList.add('hidden');
-            document.getElementById('perfil-remover-foto').classList.remove('hidden');
+            urlTemp = URL.createObjectURL(arquivo);
+            imgEl.src = urlTemp;
+            overlay.classList.add('aberto');
 
-            toast('Foto atualizada com sucesso.', 'sucesso');
-        } catch (e) {
-            toast('Erro de conexão. Tente novamente.', 'erro');
-        }
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(imgEl, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.9,
+                background: false,
+                guides: false,
+                center: false,
+                highlight: false,
+                cropBoxMovable: false,
+                cropBoxResizable: false,
+                toggleDragModeOnDblclick: false,
+                ready: function () {
+                    zoomEl.value = 0;
+                    baseRatio = cropper.getImageData().width / cropper.getImageData().naturalWidth;
+                },
+                zoom: function (e) {
+                    // mantém o controle em sincronia com zoom por scroll/pinça
+                    if (!baseRatio) return;
+                    const v = (e.detail.ratio / baseRatio - 1) / 3;
+                    zoomEl.value = Math.min(1, Math.max(0, v));
+                }
+            });
+        });
 
-        this.value = '';
-    });
+        zoomEl.addEventListener('input', function () {
+            if (!cropper || !baseRatio) return;
+            // 0 => encaixe inicial; 1 => 4x mais aproximado
+            cropper.zoomTo(baseRatio * (1 + parseFloat(this.value) * 3));
+        });
+
+        btnCancelar.addEventListener('click', fechar);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) fechar(); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && overlay.classList.contains('aberto')) fechar();
+        });
+
+        btnSalvar.addEventListener('click', function () {
+            if (!cropper) return;
+            btnSalvar.disabled = true;
+            btnSalvar.textContent = 'Salvando...';
+
+            const canvas = cropper.getCroppedCanvas({
+                width: TAMANHO_FINAL,
+                height: TAMANHO_FINAL,
+                fillColor: '#ffffff',
+                imageSmoothingQuality: 'high'
+            });
+
+            canvas.toBlob(async function (blob) {
+                if (!blob) {
+                    toast('Não foi possível processar a imagem.', 'erro');
+                    btnSalvar.disabled = false;
+                    btnSalvar.textContent = 'Salvar foto';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.set('foto', blob, 'foto.jpg');
+                formData.set('_csrf', document.querySelector('meta[name="csrf-token"]').content);
+
+                try {
+                    const resposta = await fetch('/Perfil/scripts/perfil_foto_atualizar.php', { method: 'POST', body: formData });
+                    const dados = await resposta.json();
+
+                    if (!dados.ok) {
+                        toast(dados.erro || 'Não foi possível enviar a foto.', 'erro');
+                        btnSalvar.disabled = false;
+                        btnSalvar.textContent = 'Salvar foto';
+                        return;
+                    }
+
+                    const img = document.getElementById('perfil-avatar-img');
+                    const letra = document.getElementById('perfil-avatar-letra');
+                    img.src = canvas.toDataURL('image/jpeg', 0.9);
+                    img.classList.remove('hidden');
+                    if (letra) letra.classList.add('hidden');
+                    document.getElementById('perfil-remover-foto').classList.remove('hidden');
+
+                    fechar();
+                    toast('Foto atualizada com sucesso.', 'sucesso');
+                } catch (e) {
+                    toast('Erro de conexão. Tente novamente.', 'erro');
+                    btnSalvar.disabled = false;
+                    btnSalvar.textContent = 'Salvar foto';
+                }
+            }, 'image/jpeg', 0.9);
+        });
+    })();
 
     document.getElementById('perfil-remover-foto').addEventListener('click', async function () {
         const confirmacao = await Swal.fire({
