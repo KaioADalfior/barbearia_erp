@@ -24,5 +24,8 @@ RUN  mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx
 # start
 COPY . /app
 
-CMD ["node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"]
+# O PHP-FPM roda como "nobody": a pasta de fotos de perfil precisa ser dele
+RUN mkdir -p /app/assets/uploads/perfil && chown -R nobody /app/assets/uploads && chmod -R u+rwX /app/assets/uploads
+
+CMD ["mkdir -p /app/assets/uploads/perfil && chown -R nobody /app/assets/uploads && node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"]
 
