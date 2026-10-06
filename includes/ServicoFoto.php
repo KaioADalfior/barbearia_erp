@@ -32,7 +32,7 @@ final class ServicoFoto
     /** URL pública (caminho absoluto) da foto, ou null se não houver arquivo. */
     public static function url(?string $nome): ?string
     {
-        if (!self::nomeValido($nome) || !is_file(self::pasta() . $nome)) {
+        if (!self::nomeValido($nome) || !ImagemPersistente::garantir('servicos/' . $nome)) {
             return null;
         }
         return '/assets/uploads/servicos/' . rawurlencode($nome);

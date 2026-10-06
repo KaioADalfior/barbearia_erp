@@ -275,7 +275,7 @@ $sidebarEhProprietario = AcessoService::ehProprietario($pdo);
     $ab_fotoRodape = null;
     if (!empty($_SESSION['foto'])) {
         $ab_caminhoFoto = __DIR__ . '/../assets/uploads/perfil/' . $_SESSION['foto'];
-        if (is_file($ab_caminhoFoto)) {
+        if (is_file($ab_caminhoFoto) || ImagemPersistente::garantir('perfil/' . basename((string) $_SESSION['foto']))) {
             $ab_fotoRodape = '/assets/uploads/perfil/' . rawurlencode($_SESSION['foto']);
         }
     }

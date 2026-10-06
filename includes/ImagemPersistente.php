@@ -43,22 +43,35 @@ final class ImagemPersistente
         }
     }
 
-    /** Guarda (ou atualiza) no banco a cópia de um arquivo que acabou de ser gravado em disco. */
-    public static function guardar(string $rel): void
+    /**
+     * Guarda (ou atualiza) no banco a cópia de um arquivo que acabou de ser
+     * gravado em disco. Devolve true só se a cópia foi conferida no banco
+     * (mesmo tamanho). Qualquer falha é registrada (log + Discord) em vez de
+     * ficar em silêncio — sem a cópia, a imagem some no próximo deploy.
+     */
+    public static function guardar(string $rel): bool
     {
+        $emulacao = null;
         try {
             if (!self::caminhoValido($rel) || self::$pdo === null) {
-                return;
+                return false;
             }
             $arquivo = self::raiz() . $rel;
             if (!is_file($arquivo)) {
-                return;
+                return false;
             }
             $dados = file_get_contents($arquivo);
             if ($dados === false || $dados === '') {
-                return;
+                return false;
             }
             self::garantirTabela();
+
+            // Prepared statement NATIVO: os bytes da imagem vão como binário,
+            // sem passar por escape/charset do texto (com emulação, alguns
+            // servidores MySQL rejeitam ou alteram bytes que não são UTF-8 válido).
+            $emulacao = self::$pdo->getAttribute(PDO::ATTR_EMULATE_PREPARES);
+            self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
             $stmt = self::$pdo->prepare(
                 'INSERT INTO ArquivoUpload (caminho, mime, tamanho, dados) VALUES (:c, :m, :t, :d)
                  ON DUPLICATE KEY UPDATE mime = VALUES(mime), tamanho = VALUES(tamanho), dados = VALUES(dados)'
@@ -68,8 +81,100 @@ final class ImagemPersistente
             $stmt->bindValue(':t', strlen($dados), PDO::PARAM_INT);
             $stmt->bindValue(':d', $dados, PDO::PARAM_LOB);
             $stmt->execute();
+
+            $conf = self::$pdo->prepare('SELECT LENGTH(dados) FROM ArquivoUpload WHERE caminho = :c');
+            $conf->execute(['c' => $rel]);
+            if ((int) $conf->fetchColumn() !== strlen($dados)) {
+                throw new RuntimeException('cópia no banco com tamanho diferente do arquivo (' . $rel . ')');
+            }
+            return true;
         } catch (Throwable $e) {
-            error_log('ImagemPersistente::guardar: ' . $e->getMessage());
+            self::registrarFalha('guardar ' . $rel, $e);
+            return false;
+        } finally {
+            if ($emulacao !== null) {
+                try { self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulacao); } catch (Throwable $e) {}
+            }
+        }
+    }
+
+    /**
+     * Garante que o arquivo exista em disco: se faltar, recria a partir do
+     * banco (só esse arquivo). Use no lugar de is_file() onde uma imagem
+     * enviada é exibida — assim ela aparece mesmo que a restauração geral
+     * de depois do deploy não tenha rodado ou tenha falhado.
+     */
+    public static function garantir(string $rel): bool
+    {
+        $destino = self::raiz() . $rel;
+        if (is_file($destino)) {
+            return true;
+        }
+        try {
+            if (!self::caminhoValido($rel) || self::$pdo === null) {
+                return false;
+            }
+            self::garantirTabela();
+            $stmt = self::$pdo->prepare('SELECT dados FROM ArquivoUpload WHERE caminho = :c');
+            $stmt->execute(['c' => $rel]);
+            $dados = $stmt->fetchColumn();
+            if ($dados === false || $dados === null || $dados === '') {
+                return false;
+            }
+            $pasta = dirname($destino);
+            if (!is_dir($pasta)) {
+                @mkdir($pasta, 0775, true);
+            }
+            if (@file_put_contents($destino, $dados) === false) {
+                self::registrarFalha('restaurar ' . $rel, new RuntimeException('sem permissão para gravar em ' . $pasta));
+                return false;
+            }
+            @chmod($destino, 0664);
+            return is_file($destino);
+        } catch (Throwable $e) {
+            self::registrarFalha('garantir ' . $rel, $e);
+            return false;
+        }
+    }
+
+    /**
+     * Entrega a imagem direto do banco (usado por Uploads/scripts/imagem_servir.php
+     * quando o arquivo não está em disco). Também recria o arquivo no disco.
+     */
+    public static function enviarDoBanco(string $rel): bool
+    {
+        try {
+            if (!self::caminhoValido($rel) || self::$pdo === null) {
+                return false;
+            }
+            self::garantirTabela();
+            $stmt = self::$pdo->prepare('SELECT mime, dados FROM ArquivoUpload WHERE caminho = :c');
+            $stmt->execute(['c' => $rel]);
+            $linha = $stmt->fetch();
+            if (!$linha || $linha['dados'] === null || $linha['dados'] === '') {
+                return false;
+            }
+            self::garantir($rel);
+            header('Content-Type: ' . $linha['mime']);
+            header('Content-Length: ' . strlen($linha['dados']));
+            header('Cache-Control: public, max-age=3600');
+            header('X-Content-Type-Options: nosniff');
+            echo $linha['dados'];
+            return true;
+        } catch (Throwable $e) {
+            self::registrarFalha('enviarDoBanco ' . $rel, $e);
+            return false;
+        }
+    }
+
+    private static function registrarFalha(string $onde, Throwable $e): void
+    {
+        error_log('ImagemPersistente::' . $onde . ': ' . $e->getMessage());
+        try {
+            if (class_exists('DiscordLogger')) {
+                DiscordLogger::erro('🖼️ Imagem sem cópia permanente no banco (' . $onde . ')', $e);
+            }
+        } catch (Throwable $ignorado) {
         }
     }
 
@@ -99,6 +204,11 @@ final class ImagemPersistente
         if (is_file($marcador)) {
             return;
         }
+        // Se a última tentativa falhou, espera um pouco antes de tentar de novo.
+        $retry = $marcador . '.retry';
+        if (is_file($retry) && (time() - (int) @filemtime($retry)) < 60) {
+            return;
+        }
 
         $trava = @fopen($marcador . '.lock', 'c');
         if ($trava === false || !flock($trava, LOCK_EX)) {
@@ -109,6 +219,7 @@ final class ImagemPersistente
             return;
         }
 
+        $falhou = false;
         try {
             self::garantirTabela();
 
@@ -130,8 +241,12 @@ final class ImagemPersistente
                 $stmt->execute(['c' => $rel]);
                 $dados = $stmt->fetchColumn();
                 if ($dados !== false && $dados !== null && $dados !== '') {
-                    @file_put_contents($destino, $dados);
-                    @chmod($destino, 0664);
+                    if (@file_put_contents($destino, $dados) === false) {
+                        $falhou = true;
+                        error_log('ImagemPersistente: não consegui gravar ' . $destino);
+                    } else {
+                        @chmod($destino, 0664);
+                    }
                 }
             }
 
@@ -145,12 +260,19 @@ final class ImagemPersistente
                 foreach (scandir($dir) ?: [] as $nome) {
                     $rel = $pasta . '/' . $nome;
                     if (!isset($conhecidos[$rel]) && self::caminhoValido($rel) && is_file($dir . $nome)) {
-                        self::guardar($rel);
+                        if (!self::guardar($rel)) {
+                            $falhou = true;
+                        }
                     }
                 }
             }
 
-            @touch($marcador);
+            // Só marca como sincronizado se deu tudo certo; senão tenta de novo na próxima requisição.
+            if (!$falhou) {
+                @touch($marcador);
+            } else {
+                @touch($retry);
+            }
         } finally {
             flock($trava, LOCK_UN);
             fclose($trava);

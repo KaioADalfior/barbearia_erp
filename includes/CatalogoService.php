@@ -338,7 +338,7 @@ final class CatalogoService
 
     public static function imagemUrl(?string $nome): ?string
     {
-        if (!self::nomeImagemValido($nome) || !is_file(self::pastaImagens() . $nome)) {
+        if (!self::nomeImagemValido($nome) || !ImagemPersistente::garantir('catalogo/' . $nome)) {
             return null;
         }
         return '/' . self::PASTA_IMAGENS . rawurlencode($nome);
@@ -459,7 +459,7 @@ final class CatalogoService
         $lista = [];
         foreach ($pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) as $l) {
             $foto = null;
-            if (!empty($l['foto']) && is_file(__DIR__ . '/../assets/uploads/perfil/' . $l['foto'])) {
+            if (!empty($l['foto']) && ImagemPersistente::garantir('perfil/' . $l['foto'])) {
                 $foto = '/assets/uploads/perfil/' . rawurlencode($l['foto']);
             }
             $lista[] = [

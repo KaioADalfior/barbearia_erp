@@ -38,6 +38,13 @@ RedirectMatch 404 ^/includes/.*\.php$
 # funciona). Os endpoints em Publico/scripts/*.php NÃO são afetados — eles
 # continuam acessíveis diretamente, pois são chamados pelo JS do navegador.
 RewriteEngine On
+
+# Imagens enviadas (perfil, serviços, logo/capa do catálogo): se o arquivo não
+# está em disco (deploy novo), entrega a cópia guardada no banco — ver
+# includes/ImagemPersistente.php e Uploads/scripts/imagem_servir.php.
+# Equivalente no nginx: .nixpacks/assets/nginx.template.conf.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^assets/uploads/((perfil|servicos|catalogo)/[A-Za-z0-9_][A-Za-z0-9_.-]*\.(jpg|jpeg|png|webp))$ Uploads/scripts/imagem_servir.php?c=$1 [L,QSA]
 RewriteRule ^c/agendar/([a-z0-9-]+)/?$ Publico/paginas/agendar.php?t=$1 [L,QSA,E=VIA_LINK_PUBLICO:1]
 
 # Link GERAL da barbearia (sem token) — ver Publico/paginas/escolher_barbeiro.php.

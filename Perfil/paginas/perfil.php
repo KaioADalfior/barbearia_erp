@@ -18,7 +18,7 @@ if (!$barbeiro) {
     exit;
 }
 
-$temFoto     = !empty($barbeiro['foto']) && is_file(__DIR__ . '/../../assets/uploads/perfil/' . $barbeiro['foto']);
+$temFoto     = !empty($barbeiro['foto']) && (!preg_match('#[/\\\\]#', $barbeiro['foto']) && ImagemPersistente::garantir('perfil/' . $barbeiro['foto']));
 $fotoUrl     = $temFoto ? '/assets/uploads/perfil/' . rawurlencode($barbeiro['foto']) . '?v=' . filemtime(__DIR__ . '/../../assets/uploads/perfil/' . $barbeiro['foto']) : null;
 $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 ?>
