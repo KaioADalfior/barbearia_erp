@@ -376,11 +376,12 @@ class FinanceiroService
      * sempre — o valor cheio do serviço).
      *
      * FUNCIONÁRIO: o dinheiro do serviço é da barbearia; o que entra no
-     * financeiro DELE é só a comissão. Então cada recebimento de um
-     * atendimento vira a parte da comissão (valor recebido × comissão ÷ valor
-     * do serviço — vale também para fiado pago em parcelas); atendimentos sem
-     * comissão válida (cancelada ou inexistente) não entram. Lançamentos
-     * manuais dele (ex.: uma despesa) continuam pelo valor cheio.
+     * financeiro DELE é só a comissão — e só DEPOIS de paga, isto é, depois
+     * que o proprietário deu a baixa (Comissoes.status = 'pago'). Cada
+     * comissão paga vira UMA entrada, no valor da comissão e na data da
+     * baixa (pago_em). Comissão pendente, cancelada ou desfeita (reaberta)
+     * não conta. Lançamentos manuais dele (ex.: uma despesa) continuam
+     * entrando pelo valor cheio.
      * Devolve um trecho SQL para usar como "FROM {fonte} r" — mesmas colunas
      * da tabela original (idRecebimento, idLancamento, id_barbeiro,
      * idCliente, tipo, valor, forma_pagamento, data).
@@ -392,15 +393,15 @@ class FinanceiroService
         }
 
         return "(SELECT rr.idRecebimento, rr.idLancamento, rr.id_barbeiro, rr.idCliente, rr.tipo,
-                        CASE WHEN ll.origem = 'agendamento'
-                             THEN ROUND(rr.valor * cc.valor_comissao / cc.valor_servico, 2)
-                             ELSE rr.valor END AS valor,
-                        rr.forma_pagamento, rr.data
+                        rr.valor, rr.forma_pagamento, rr.data
                  FROM FinanceiroRecebimentos rr
                  INNER JOIN FinanceiroLancamentos ll ON ll.idLancamento = rr.idLancamento
-                 LEFT JOIN Comissoes cc ON cc.idLancamento = rr.idLancamento
                  WHERE ll.origem <> 'agendamento'
-                    OR (cc.idComissao IS NOT NULL AND cc.status <> 'cancelado' AND cc.valor_servico > 0)
+                 UNION ALL
+                 SELECT cc.idComissao + 1000000000, cc.idLancamento, cc.id_barbeiro, cc.idCliente, 'entrada',
+                        cc.valor_comissao, cc.forma_pagamento, DATE(cc.pago_em)
+                 FROM Comissoes cc
+                 WHERE cc.status = 'pago' AND cc.pago_em IS NOT NULL AND cc.idLancamento IS NOT NULL
                 )";
     }
 
@@ -708,6 +709,16 @@ class FinanceiroService
      */
     public static function excluirLancamento(PDO $pdo, int $idBarbeiro, int $idLancamento): bool
     {
+        // Funcionário não apaga a receita de um atendimento dele: ela é a
+        // base da comissão (quem controla a comissão é o proprietário).
+        if (AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) === AcessoService::FUNCIONARIO) {
+            $stmtOrigem = $pdo->prepare('SELECT origem FROM FinanceiroLancamentos WHERE idLancamento = :id AND id_barbeiro = :b');
+            $stmtOrigem->execute(['id' => $idLancamento, 'b' => $idBarbeiro]);
+            if ($stmtOrigem->fetchColumn() === 'agendamento') {
+                return false;
+            }
+        }
+
         $pdo->beginTransaction();
 
         try {
