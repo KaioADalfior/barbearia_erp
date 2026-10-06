@@ -131,6 +131,13 @@ $appJs = [
 ];
 $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
 
+$icoZap = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>';
+$icoInsta = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>';
+$icoFace = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.6V21h2.9Z"/></svg>';
+$icoFone = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>';
+$icoSeta = '<svg class="contato__ir" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+$instaUrl = $cfg['instagram'] !== '' ? 'https://instagram.com/' . rawurlencode($cfg['instagram']) : '';
+
 $tesoura = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6.5 5.5a2.5 2.5 0 1 1 3.4 3.4L18 17.5"/><path d="M6.5 18.5a2.5 2.5 0 1 0 3.4-3.4L18 6.5"/></svg>';
 ?>
 <!DOCTYPE html>
@@ -356,6 +363,23 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 .pilulas{ display:flex; flex-wrap:wrap; gap:8px; }
 .pilula{ display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:999px; font-size:12.5px; background:var(--surface-2); border:1px solid var(--borda); }
 .pilula svg{ color:var(--acc); }
+.contato{ display:flex; flex-direction:column; gap:8px; }
+.contato__item{
+    display:flex; align-items:center; gap:12px; padding:9px 10px; margin:0 -10px; border-radius:14px; text-decoration:none; color:var(--texto);
+    transition:background-color .15s;
+}
+a.contato__item:hover{ background:var(--surface-2); }
+.contato__ico{
+    width:38px; height:38px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(var(--acc-rgb),.14); color:var(--acc);
+}
+.contato__ico--zap{ background:rgba(37,211,102,.15); color:#25d366; }
+.contato__ico--insta{ background:rgba(225,48,108,.14); color:#e1306c; }
+.contato__ico--face{ background:rgba(24,119,242,.15); color:#3b8bff; }
+.contato__txt{ display:flex; flex-direction:column; min-width:0; line-height:1.3; }
+.contato__rot{ font-size:11.5px; color:var(--muted); }
+.contato__val{ font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.contato__ir{ margin-left:auto; color:var(--muted); flex-shrink:0; }
 .sociais{ display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; }
 .social{
     width:44px; height:44px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;
@@ -366,8 +390,13 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
 .rodape{ margin-top:12px; padding:28px 0 12px; border-top:1px solid var(--borda); text-align:center; font-size:12px; color:var(--muted); }
 .rodape__nome{ margin:0 0 4px; font-size:14px; font-weight:600; color:var(--texto); }
 .rodape__end{ margin:0 0 14px; font-size:12.5px; }
-.rodape__sociais{ display:flex; justify-content:center; gap:10px; margin-bottom:16px; }
-.rodape__sociais .social{ width:38px; height:38px; }
+.rodape__sociais{ display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+.rodape__link{
+    display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 14px 0 10px; border-radius:999px; font-size:12.5px; font-weight:500;
+    text-decoration:none; color:var(--texto); background:var(--surface); border:1px solid var(--borda); transition:border-color .15s;
+}
+.rodape__link:hover{ border-color:var(--borda-forte); }
+.rodape__link svg{ flex-shrink:0; }
 .rodape__marca{ margin:0; opacity:.7; }
 
 /* ---------- Sheet de agendamento ---------- */
@@ -743,32 +772,36 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
             <?php if ($wa !== '' || $cfg['telefone'] !== '' || $cfg['instagram'] !== '' || $cfg['facebook'] !== ''): ?>
                 <div class="cartao">
                     <h3 class="cartao__titulo">Contato</h3>
-                    <?php if ($wa !== ''): ?>
-                        <div class="linha-info">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 18.8L4 20Z"/></svg>
-                            <a href="https://wa.me/<?= $h($waDigitos) ?>" target="_blank" rel="noopener"><?= $h($fmtTelefone($wa)) ?> <span style="color:var(--muted);font-weight:400">· WhatsApp</span></a>
-                        </div>
-                    <?php endif; ?>
-                    <?php if ($cfg['telefone'] !== ''): ?>
-                        <div class="linha-info">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>
-                            <a href="tel:<?= $h(preg_replace('/[^\d+]/', '', $cfg['telefone'])) ?>"><?= $h($cfg['telefone']) ?></a>
-                        </div>
-                    <?php endif; ?>
-                    <?php if ($cfg['instagram'] !== '' || $cfg['facebook'] !== ''): ?>
-                        <div class="sociais" style="margin-top:14px">
-                            <?php if ($cfg['instagram'] !== ''): ?>
-                                <a class="social" href="https://instagram.com/<?= $h($cfg['instagram']) ?>" target="_blank" rel="noopener" aria-label="Instagram @<?= $h($cfg['instagram']) ?>">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".8" fill="currentColor"/></svg>
-                                </a>
-                            <?php endif; ?>
-                            <?php if ($cfg['facebook'] !== ''): ?>
-                                <a class="social" href="<?= $h($cfg['facebook']) ?>" target="_blank" rel="noopener" aria-label="Facebook">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 8h2.5V4.5H14a3.5 3.5 0 0 0-3.5 3.5v2H8v3.5h2.5V20H14v-6.5h2.5l.5-3.5H14V8.5A.5.5 0 0 1 14.5 8"/></svg>
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
+                    <div class="contato">
+                        <?php if ($wa !== ''): ?>
+                            <a class="contato__item" href="https://wa.me/<?= $h($waDigitos) ?>" target="_blank" rel="noopener">
+                                <span class="contato__ico contato__ico--zap"><?= $icoZap ?></span>
+                                <span class="contato__txt"><span class="contato__rot">WhatsApp</span><span class="contato__val"><?= $h($fmtTelefone($wa)) ?></span></span>
+                                <?= $icoSeta ?>
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($cfg['telefone'] !== ''): ?>
+                            <a class="contato__item" href="tel:<?= $h(preg_replace('/[^\d+]/', '', $cfg['telefone'])) ?>">
+                                <span class="contato__ico"><?= $icoFone ?></span>
+                                <span class="contato__txt"><span class="contato__rot">Telefone</span><span class="contato__val"><?= $h($cfg['telefone']) ?></span></span>
+                                <?= $icoSeta ?>
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($instaUrl !== ''): ?>
+                            <a class="contato__item" href="<?= $h($instaUrl) ?>" target="_blank" rel="noopener">
+                                <span class="contato__ico contato__ico--insta"><?= $icoInsta ?></span>
+                                <span class="contato__txt"><span class="contato__rot">Instagram</span><span class="contato__val">@<?= $h($cfg['instagram']) ?></span></span>
+                                <?= $icoSeta ?>
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($cfg['facebook'] !== ''): ?>
+                            <a class="contato__item" href="<?= $h($cfg['facebook']) ?>" target="_blank" rel="noopener">
+                                <span class="contato__ico contato__ico--face"><?= $icoFace ?></span>
+                                <span class="contato__txt"><span class="contato__rot">Facebook</span><span class="contato__val">Ver página</span></span>
+                                <?= $icoSeta ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             <?php endif; ?>
         </aside>
@@ -778,10 +811,11 @@ a.chip-info:hover{ border-color:var(--borda-forte); color:var(--texto); }
     <footer class="rodape">
         <p class="rodape__nome"><?= $h($nomeLoja) ?></p>
         <?php if ($cfg['endereco'] !== ''): ?><p class="rodape__end"><?= $h($cfg['endereco']) ?></p><?php endif; ?>
-        <?php if ($cfg['instagram'] !== '' || $cfg['facebook'] !== ''): ?>
+        <?php if ($wa !== '' || $instaUrl !== '' || $cfg['facebook'] !== ''): ?>
             <div class="rodape__sociais">
-                <?php if ($cfg['instagram'] !== ''): ?><a class="social" href="https://instagram.com/<?= $h($cfg['instagram']) ?>" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".8" fill="currentColor"/></svg></a><?php endif; ?>
-                <?php if ($cfg['facebook'] !== ''): ?><a class="social" href="<?= $h($cfg['facebook']) ?>" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 8h2.5V4.5H14a3.5 3.5 0 0 0-3.5 3.5v2H8v3.5h2.5V20H14v-6.5h2.5l.5-3.5H14V8.5A.5.5 0 0 1 14.5 8"/></svg></a><?php endif; ?>
+                <?php if ($wa !== ''): ?><a class="rodape__link" href="https://wa.me/<?= $h($waDigitos) ?>" target="_blank" rel="noopener"><span style="color:#25d366;display:flex"><?= str_replace('width="20" height="20"', 'width="18" height="18"', $icoZap) ?></span>WhatsApp</a><?php endif; ?>
+                <?php if ($instaUrl !== ''): ?><a class="rodape__link" href="<?= $h($instaUrl) ?>" target="_blank" rel="noopener"><span style="color:#e1306c;display:flex"><?= str_replace('width="20" height="20"', 'width="18" height="18"', $icoInsta) ?></span>Instagram</a><?php endif; ?>
+                <?php if ($cfg['facebook'] !== ''): ?><a class="rodape__link" href="<?= $h($cfg['facebook']) ?>" target="_blank" rel="noopener"><span style="color:#3b8bff;display:flex"><?= str_replace('width="20" height="20"', 'width="18" height="18"', $icoFace) ?></span>Facebook</a><?php endif; ?>
             </div>
         <?php endif; ?>
         <p class="rodape__marca">Agendamento online · BarbERP</p>
