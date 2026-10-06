@@ -7,6 +7,7 @@ exigirSessao(['barbeiro']);
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
+require_once __DIR__ . '/../../includes/ServicoFoto.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /servicos');
@@ -57,22 +58,66 @@ if (!$servicoAntigo) {
 
 /*
 |--------------------------------------------------------------------------
+| Foto opcional: nova foto, remoção ou manter a atual
+|--------------------------------------------------------------------------
+*/
+
+$enviouFoto   = isset($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE;
+$removerFoto  = ($_POST['remover_foto'] ?? '0') === '1';
+$colunaFoto   = ServicoFoto::colunaExiste($pdo);
+$fotoAntiga   = $colunaFoto ? ($servicoAntigo['foto'] ?? null) : null;
+$fotoNova     = null;      // nome do arquivo recém-enviado
+$mudouFoto    = null;      // 'adicionada' | 'trocada' | 'removida' | null
+
+if ($colunaFoto && $enviouFoto) {
+    $resultadoFoto = ServicoFoto::processarUpload($_FILES['foto']);
+
+    if (!$resultadoFoto['ok']) {
+        header('Location: /servicos?status=edicao-erro-foto&foto_erro=' . $resultadoFoto['erro'] . '&' . $paramsVolta);
+        exit;
+    }
+
+    $fotoNova  = $resultadoFoto['nome'];
+    $mudouFoto = $fotoAntiga ? 'trocada' : 'adicionada';
+} elseif ($colunaFoto && $removerFoto && $fotoAntiga) {
+    $mudouFoto = 'removida';
+}
+
+/*
+|--------------------------------------------------------------------------
 | Atualiza o serviço
 |--------------------------------------------------------------------------
 */
 
-$stmt = $pdo->prepare(
-    'UPDATE Servico
-     SET nome = :nome, duracao_minutos = :duracao_minutos, valor = :valor, ativo = :ativo
-     WHERE idServico = :id'
-);
-$stmt->execute([
+$sql = 'UPDATE Servico
+        SET nome = :nome, duracao_minutos = :duracao_minutos, valor = :valor, ativo = :ativo';
+$parametros = [
     'nome'            => $nome,
     'duracao_minutos' => $duracaoMinutos,
     'valor'           => $valor,
     'ativo'           => $ativo,
     'id'              => $id,
-]);
+];
+
+if ($mudouFoto !== null) {
+    $sql .= ', foto = :foto';
+    $parametros['foto'] = $fotoNova; // NULL quando a foto foi removida
+}
+
+$sql .= ' WHERE idServico = :id';
+
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($parametros);
+} catch (Throwable $e) {
+    ServicoFoto::remover($fotoNova);
+    throw $e;
+}
+
+// Só apaga o arquivo antigo depois que o banco já aponta para a foto nova.
+if ($mudouFoto !== null) {
+    ServicoFoto::remover($fotoAntiga);
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -84,14 +129,23 @@ if ($stmt->rowCount() > 0) {
     $valorAntigo = number_format((float) $servicoAntigo['valor'], 2, ',', '.');
     $valorNovo   = number_format($valor, 2, ',', '.');
 
-    DiscordLogger::servicos('✏️ Serviço editado', [
+    $camposLog = [
         ['name' => '🆔 Serviço', 'value' => "#{$id}", 'inline' => true],
         ['name' => '💈 Nome', 'value' => "**Antes:** {$servicoAntigo['nome']}\n**Depois:** {$nome}", 'inline' => false],
         ['name' => '⏱️ Duração', 'value' => "**Antes:** {$servicoAntigo['duracao_minutos']} min\n**Depois:** {$duracaoMinutos} min", 'inline' => false],
         ['name' => '💰 Valor', 'value' => "**Antes:** R$ {$valorAntigo}\n**Depois:** R$ {$valorNovo}", 'inline' => false],
         ['name' => '📌 Status', 'value' => "**Antes:** " . ($servicoAntigo['ativo'] ? '🟢 Ativo' : '🔴 Inativo') . "\n**Depois:** " . ($ativo ? '🟢 Ativo' : '🔴 Inativo'), 'inline' => false],
-    ], DiscordLogger::COR_EDICAO);
+    ];
+
+    if ($mudouFoto !== null) {
+        $camposLog[] = ['name' => '🖼️ Foto', 'value' => ucfirst($mudouFoto), 'inline' => false];
+    }
+
+    DiscordLogger::servicos('✏️ Serviço editado', $camposLog, DiscordLogger::COR_EDICAO);
 }
 
-header('Location: /servicos?status=edicao-sucesso&nome=' . urlencode($nome));
+// Mexeu na foto, mas o banco ainda não tem a coluna (e não foi possível criá-la).
+$statusFinal = (!$colunaFoto && ($enviouFoto || $removerFoto)) ? 'edicao-sucesso-semfoto' : 'edicao-sucesso';
+
+header('Location: /servicos?status=' . $statusFinal . '&nome=' . urlencode($nome));
 exit;

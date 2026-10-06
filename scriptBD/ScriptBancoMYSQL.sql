@@ -52,7 +52,8 @@ CREATE TABLE Servico (
     nome VARCHAR(80) NOT NULL,
     duracao_minutos INT NOT NULL DEFAULT 40,
     valor DECIMAL(10,2) NOT NULL,
-    ativo TINYINT(1) NOT NULL DEFAULT 1
+    ativo TINYINT(1) NOT NULL DEFAULT 1,
+    foto VARCHAR(255) NULL -- foto opcional (ver scriptBD/atualizacao_servico_foto.sql)
 );
 
 -- Serviços padrão (originalmente scriptBD/atualizacao_servicos.sql),

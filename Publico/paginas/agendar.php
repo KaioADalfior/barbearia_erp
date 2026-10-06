@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/PublicoTokenService.php';
+require_once __DIR__ . '/../../includes/ServicoFoto.php';
 
 $token = trim($_GET['t'] ?? '');
 $barbeiro = PublicoTokenService::resolverBarbeiro($pdo, $token);
@@ -48,7 +49,9 @@ if ($barbeiro === null) {
 // só para o primeiro passo aparecer) — Publico/scripts/publico_info.php
 // continua existindo como endpoint independente, usado por qualquer
 // atualização futura sem recarregar a página inteira.
-$stmtServicos = $pdo->prepare('SELECT idServico, nome, duracao_minutos, valor FROM Servico WHERE ativo = 1 ORDER BY nome ASC');
+// A foto do serviço é opcional (coluna Servico.foto); sem a coluna a página segue normal.
+$temColunaFoto = ServicoFoto::colunaExiste($pdo);
+$stmtServicos = $pdo->prepare('SELECT idServico, nome, duracao_minutos, valor' . ($temColunaFoto ? ', foto' : '') . ' FROM Servico WHERE ativo = 1 ORDER BY nome ASC');
 $stmtServicos->execute();
 $servicos = $stmtServicos->fetchAll();
 
@@ -161,6 +164,8 @@ if (!empty($barbeiro['foto'])) {
         background:rgba(255,255,255,0.02); cursor:pointer; transition:border-color .15s, background-color .15s;
     }
     .servico-card:hover{ background:rgba(255,255,255,0.05); }
+    .servico-card__foto{ width:72px; height:54px; border-radius:0.65rem; object-fit:cover; flex-shrink:0; display:block; background:rgba(255,255,255,0.04); }
+    .servico-card__info{ display:flex; align-items:center; gap:12px; min-width:0; }
     .servico-card.is-selecionado{ border-color:var(--gold-light); background:rgba(47,111,237,0.10); }
     .servico-card__radio{
         width:18px; height:18px; border-radius:999px; border:2px solid rgba(255,255,255,0.25); flex-shrink:0;
@@ -259,14 +264,21 @@ if (!empty($barbeiro['foto'])) {
         <div class="barber-stripe absolute inset-x-0 top-0" style="position:relative; margin:-24px -24px 20px -24px; width:calc(100% + 48px);"></div>
         <h2 class="text-sm font-semibold mb-4" style="color:#aebdd6;">Escolha o serviço</h2>
         <div class="flex flex-col gap-2.5" id="lista-servicos">
-            <?php foreach ($servicos as $s): ?>
+            <?php foreach ($servicos as $s):
+                $fotoServico = $temColunaFoto ? ServicoFoto::url($s['foto'] ?? null) : null;
+            ?>
                 <div class="servico-card"
                      data-id-servico="<?= (int) $s['idServico'] ?>"
                      data-nome-servico="<?= htmlspecialchars($s['nome']) ?>"
                      data-valor-servico="<?= htmlspecialchars(number_format((float) $s['valor'], 2, ',', '.')) ?>">
-                    <div>
-                        <p class="text-sm font-medium"><?= htmlspecialchars($s['nome']) ?></p>
-                        <p class="text-xs mt-0.5" style="color:#7f8fac;"><?= (int) $s['duracao_minutos'] ?> min</p>
+                    <div class="servico-card__info">
+                        <?php if ($fotoServico): ?>
+                            <img class="servico-card__foto" src="<?= htmlspecialchars($fotoServico) ?>" alt="<?= htmlspecialchars($s['nome']) ?>" loading="lazy">
+                        <?php endif; ?>
+                        <div>
+                            <p class="text-sm font-medium"><?= htmlspecialchars($s['nome']) ?></p>
+                            <p class="text-xs mt-0.5" style="color:#7f8fac;"><?= (int) $s['duracao_minutos'] ?> min</p>
+                        </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-sm font-semibold" style="color:var(--gold-light);">R$ <?= number_format((float) $s['valor'], 2, ',', '.') ?></span>

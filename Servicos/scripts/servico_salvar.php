@@ -6,6 +6,7 @@ exigirSessao(['barbeiro']);
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
+require_once __DIR__ . '/../../includes/ServicoFoto.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /servicos');
@@ -32,22 +33,65 @@ if ($nome === '' || $duracaoMinutos <= 0 || $valor <= 0) {
     exit;
 }
 
-$stmt = $pdo->prepare(
-    'INSERT INTO Servico (nome, duracao_minutos, valor, ativo) VALUES (:nome, :duracao_minutos, :valor, 1)'
-);
-$stmt->execute([
-    'nome'            => $nome,
-    'duracao_minutos' => $duracaoMinutos,
-    'valor'           => $valor,
-]);
+/*
+|--------------------------------------------------------------------------
+| Foto opcional do serviço (ex.: foto de um degradê)
+|--------------------------------------------------------------------------
+*/
+
+$enviouFoto = isset($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE;
+$colunaFoto = ServicoFoto::colunaExiste($pdo);
+$fotoNome   = null;
+
+if ($enviouFoto && $colunaFoto) {
+    $resultadoFoto = ServicoFoto::processarUpload($_FILES['foto']);
+
+    if (!$resultadoFoto['ok']) {
+        header('Location: /servicos?status=cadastro-erro-foto&foto_erro=' . $resultadoFoto['erro'] . '&' . $paramsVolta);
+        exit;
+    }
+
+    $fotoNome = $resultadoFoto['nome'];
+}
+
+try {
+    if ($colunaFoto) {
+        $stmt = $pdo->prepare(
+            'INSERT INTO Servico (nome, duracao_minutos, valor, ativo, foto) VALUES (:nome, :duracao_minutos, :valor, 1, :foto)'
+        );
+        $stmt->execute([
+            'nome'            => $nome,
+            'duracao_minutos' => $duracaoMinutos,
+            'valor'           => $valor,
+            'foto'            => $fotoNome,
+        ]);
+    } else {
+        $stmt = $pdo->prepare(
+            'INSERT INTO Servico (nome, duracao_minutos, valor, ativo) VALUES (:nome, :duracao_minutos, :valor, 1)'
+        );
+        $stmt->execute([
+            'nome'            => $nome,
+            'duracao_minutos' => $duracaoMinutos,
+            'valor'           => $valor,
+        ]);
+    }
+} catch (Throwable $e) {
+    // Não deixa uma foto órfã na pasta se o cadastro falhou.
+    ServicoFoto::remover($fotoNome);
+    throw $e;
+}
 
 DiscordLogger::servicos('🆕 Serviço cadastrado', [
     ['name' => '🆔 ID', 'value' => '#' . $pdo->lastInsertId(), 'inline' => true],
     ['name' => '💈 Nome', 'value' => $nome, 'inline' => true],
     ['name' => '⏱️ Duração', 'value' => $duracaoMinutos . ' min', 'inline' => true],
     ['name' => '💰 Valor', 'value' => 'R$ ' . number_format($valor, 2, ',', '.'), 'inline' => true],
+    ['name' => '🖼️ Foto', 'value' => $fotoNome !== null ? 'Sim' : 'Não', 'inline' => true],
     ['name' => '👤 Cadastrado por', 'value' => $_SESSION['nome'] ?? ('#' . ($_SESSION['id'] ?? '—')), 'inline' => true],
 ]);
 
-header('Location: /servicos?status=cadastro-sucesso&nome=' . urlencode($nome));
+// Enviou foto, mas o banco ainda não tem a coluna (e não foi possível criá-la).
+$statusFinal = ($enviouFoto && !$colunaFoto) ? 'cadastro-sucesso-semfoto' : 'cadastro-sucesso';
+
+header('Location: /servicos?status=' . $statusFinal . '&nome=' . urlencode($nome));
 exit;
