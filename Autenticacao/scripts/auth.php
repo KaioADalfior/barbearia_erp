@@ -9,19 +9,19 @@ require_once __DIR__ . '/../../includes/LoginThrottle.php';
 
 // Aceita apenas requisições POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../paginas/login.php');
+    header('Location: /login');
     exit;
 }
 
 // Token CSRF do form de login (proteção contra login CSRF / forçar a
 // vítima a logar numa conta escolhida pelo atacante).
-csrf_verificar(json: false, redirecionarPara: '../paginas/login.php');
+csrf_verificar(json: false, redirecionarPara: '/login');
 
 $login = trim($_POST['login'] ?? '');
 $senha = trim($_POST['senha'] ?? '');
 
 if ($login === '' || $senha === '') {
-    header('Location: ../paginas/login.php?erro=1');
+    header('Location: /login?erro=1');
     exit;
 }
 
@@ -35,7 +35,7 @@ if ($statusBloqueio['bloqueado']) {
         ['name' => '🌐 IP', 'value' => $_SERVER['REMOTE_ADDR'] ?? '—', 'inline' => true],
         ['name' => '⏳ Minutos restantes', 'value' => (string) $statusBloqueio['minutosRestantes'], 'inline' => true],
     ]);
-    header('Location: ../paginas/login.php?erro=bloqueado');
+    header('Location: /login?erro=bloqueado');
     exit;
 }
 
@@ -126,5 +126,5 @@ DiscordLogger::login(false, '❌ Tentativa de login falhou', [
     ['name' => '🌐 IP', 'value' => $_SERVER['REMOTE_ADDR'] ?? '—', 'inline' => true],
 ]);
 
-header('Location: ../paginas/login.php?erro=1');
+header('Location: /login?erro=1');
 exit;

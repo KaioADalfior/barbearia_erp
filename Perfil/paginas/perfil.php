@@ -14,7 +14,7 @@ $stmt->execute(['id' => $idBarbeiro]);
 $barbeiro = $stmt->fetch();
 
 if (!$barbeiro) {
-    header('Location: /Autenticacao/paginas/login.php');
+    header('Location: /login');
     exit;
 }
 

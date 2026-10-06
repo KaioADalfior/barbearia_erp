@@ -52,6 +52,6 @@ function exigirSessao(array $tiposPermitidos, bool $json = false): void
         exit;
     }
 
-    header('Location: ../../Autenticacao/paginas/login.php');
+    header('Location: /login');
     exit;
 }

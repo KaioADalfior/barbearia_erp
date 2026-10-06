@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/csrf.php';
 
 $tipo = $_SESSION['tipo'] ?? null;
 if ($tipo !== 'admin' && $tipo !== 'barbeiro') {
-    header('Location: ../../Autenticacao/paginas/login.php');
+    header('Location: /login');
     exit;
 }
 

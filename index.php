@@ -1,3 +1,3 @@
 <?php
-header('Location: Autenticacao/paginas/login.php');
+header('Location: /login');
 exit;
