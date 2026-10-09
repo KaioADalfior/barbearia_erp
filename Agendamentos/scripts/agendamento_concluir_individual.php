@@ -30,6 +30,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token é enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/FinanceiroService.php';
 
@@ -185,6 +191,12 @@ try {
         'fiado'        => $fiado,
         'promovido'    => $promovido,
     ]);
+} catch (AgendamentoJaProcessadoException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    http_response_code(409);
+    echo json_encode(['ok' => false, 'erro' => 'Esse agendamento já foi concluído, cancelado ou marcado como ausente. Atualize a página.']);
 } catch (\Throwable $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();

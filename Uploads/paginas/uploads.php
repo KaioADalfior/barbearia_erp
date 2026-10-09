@@ -21,97 +21,68 @@ $uploads = $stmt->fetchAll();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uploads &amp; Versões — BarbERP</title>
 
+<?php require_once __DIR__ . '/../../includes/theme-init.php'; ?>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
-    :root{
-        --onyx:#0b0f17;
-        --charcoal:#111827;
-        --charcoal-2:#141b2b;
-        --charcoal-3:#1a2236;
-        --gold:#2f6fed;
-        --gold-light:#5b93f7;
-        --cream:#e7ebf3;
-        --pole-red:#64748b;
-        --pole-blue:#94a3b8;
-    }
-
-    *{ box-sizing:border-box; }
-
-    body{
-        font-family:'Poppins', sans-serif;
-        background-color:var(--onyx);
+    /* Tokens, tipografia (.display, .eyebrow) e tema claro/escuro vêm de
+       assets/css/admin-theme.css; aqui só as peças exclusivas desta tela. */
+    body.up-body{
         background-image:
-            radial-gradient(ellipse at 50% 0%, rgba(47,111,237,0.10), transparent 55%),
-            radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.65), transparent 60%),
-            repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 6px);
-        min-height:100vh;
+            radial-gradient(ellipse at 50% 0%, rgba(var(--accent-rgb),0.11), transparent 55%),
+            radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.35), transparent 60%),
+            repeating-linear-gradient(45deg, rgba(255,236,205,0.014) 0, rgba(255,236,205,0.014) 1px, transparent 1px, transparent 7px);
+    }
+    html[data-theme="light"] body.up-body{
+        background-image:radial-gradient(ellipse at 50% 0%, rgba(var(--accent-rgb),0.16), transparent 55%);
     }
 
-    .display{
-        font-family:'Poppins', sans-serif;
-        font-weight:700;
-        letter-spacing:-0.01em;
-    }
-
-    .eyebrow{
-        font-family:'Poppins', sans-serif;
-        letter-spacing:0.35em;
-        font-size:11px;
-        font-weight:500;
-    }
-
-    .emblem{
+    .up-emblem{
         background:
             radial-gradient(circle at 35% 30%, rgba(255,255,255,0.10), transparent 45%),
-            linear-gradient(145deg, #17233a, #0b0f17);
-        border:1px solid rgba(47,111,237,0.55);
-        box-shadow:
-            0 0 0 4px rgba(47,111,237,0.08),
-            0 12px 30px -8px rgba(0,0,0,0.7),
-            inset 0 1px 1px rgba(255,255,255,0.05);
+            linear-gradient(145deg, var(--surface-3), var(--bg));
+        border:1px solid rgba(var(--accent-rgb),0.55);
+        box-shadow:0 0 0 4px rgba(var(--accent-rgb),0.08), var(--shadow-1), inset 0 1px 1px rgba(255,255,255,0.05);
     }
 
-    /* Faixa de destaque neutra — mesmo tratamento de assets/css/admin-theme.css
-       (.barber-stripe-thin): barra sólida na cor de destaque do sistema, sem
-       referência temática a barbearia. */
-    .barber-stripe{
+    .up-stripe{
         height:4px;
         width:100%;
-        background:linear-gradient(90deg, var(--gold), var(--gold-light));
+        background:linear-gradient(90deg, var(--accent-lo), var(--accent), var(--accent-hi), var(--accent), var(--accent-lo));
     }
 
-    .card{
-        background:linear-gradient(180deg, var(--charcoal), var(--charcoal-2));
-        border:1px solid rgba(47,111,237,0.14);
+    .up-card{
+        background:linear-gradient(180deg, var(--surface-2), var(--surface));
+        border:1px solid var(--line-strong);
+        box-shadow:var(--shadow-2);
     }
 
     .version-item{
-        border:1px solid rgba(255,255,255,0.07);
-        background:rgba(255,255,255,0.02);
+        border:1px solid var(--line);
+        background:var(--surface-3);
         transition:border-color .2s, background-color .2s;
     }
     .version-item:hover{
-        border-color:rgba(47,111,237,0.3);
-        background:rgba(47,111,237,0.04);
+        border-color:rgba(var(--accent-rgb),0.35);
     }
     .version-item:first-child{
-        border-color:rgba(47,111,237,0.45);
-        background:rgba(47,111,237,0.07);
+        border-color:rgba(var(--accent-rgb),0.5);
+        background:rgba(var(--accent-rgb),0.08);
     }
 
     .badge-versao{
         display:inline-flex;
         align-items:center;
-        font-family:'Poppins', sans-serif;
         font-weight:600;
         letter-spacing:0.02em;
         font-size:14px;
-        color:var(--gold-light);
-        background:rgba(47,111,237,0.12);
-        border:1px solid rgba(47,111,237,0.4);
+        color:var(--accent-strong);
+        background:rgba(var(--accent-rgb),0.12);
+        border:1px solid rgba(var(--accent-rgb),0.4);
         border-radius:999px;
         padding:0.2rem 0.9rem;
     }
@@ -123,58 +94,58 @@ $uploads = $stmt->fetchAll();
         font-weight:600;
         letter-spacing:0.1em;
         text-transform:uppercase;
-        color:#bfe6c7;
-        background:rgba(66,140,82,0.14);
+        color:var(--success-text);
+        background:var(--success-soft);
         border:1px solid rgba(66,140,82,0.4);
         border-radius:999px;
         padding:0.2rem 0.6rem;
     }
 
-    .divider-tick{
+    .up-tick{
         width:1px;
         height:14px;
-        background:rgba(47,111,237,0.4);
+        background:rgba(var(--accent-rgb),0.5);
     }
 </style>
 </head>
 
-<body class="flex items-center justify-center px-6 py-10">
+<body class="up-body flex items-center justify-center px-6 py-10">
 
 <div class="w-full max-w-2xl">
 
     <!-- Emblema -->
     <div class="flex flex-col items-center mb-7">
-        <div class="emblem w-16 h-16 rounded-full flex items-center justify-center mb-4">
+        <div class="up-emblem w-16 h-16 rounded-full flex items-center justify-center mb-4">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="5" y="11" width="14" height="9" rx="2" stroke="var(--gold-light)" stroke-width="1.4"/>
-                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="var(--gold-light)" stroke-width="1.4" stroke-linecap="round"/>
-                <circle cx="12" cy="15.4" r="1.3" fill="var(--gold-light)"/>
+                <rect x="5" y="11" width="14" height="9" rx="2" stroke="var(--accent-strong)" stroke-width="1.4"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="var(--accent-strong)" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="12" cy="15.4" r="1.3" fill="var(--accent-strong)"/>
             </svg>
         </div>
 
-        <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Plataforma de Gestão</p>
+        <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Plataforma de Gestão</p>
         <h1 class="display text-4xl text-[color:var(--cream)] leading-none">
-            UPLOADS <span style="color:var(--gold-light)">&amp; VERSÕES</span>
+            UPLOADS <span style="color:var(--accent-strong)">&amp; VERSÕES</span>
         </h1>
-        <div class="flex items-center gap-3 mt-3 text-[11px] text-zinc-500 tracking-wider">
+        <div class="flex items-center gap-3 mt-3 text-[11px] tracking-wider" style="color:var(--text-muted)">
             <span>HISTÓRICO DE ATUALIZAÇÕES</span>
-            <span class="divider-tick"></span>
+            <span class="up-tick"></span>
             <span>SOMENTE VISUALIZAÇÃO</span>
         </div>
     </div>
 
     <!-- Card -->
-    <div class="card rounded-3xl shadow-2xl overflow-hidden">
+    <div class="up-card rounded-3xl shadow-2xl overflow-hidden">
 
-        <div class="barber-stripe"></div>
+        <div class="up-stripe"></div>
 
         <div class="p-6 sm:p-8">
 
             <?php if (empty($uploads)): ?>
 
                 <div class="text-center py-10">
-                    <p class="text-sm text-zinc-500">Nenhuma versão foi publicada ainda.</p>
-                    <p class="text-xs text-zinc-600 mt-1">Assim que o desenvolvedor lançar um upload, ele aparecerá aqui.</p>
+                    <p class="text-sm" style="color:var(--text-muted)">Nenhuma versão foi publicada ainda.</p>
+                    <p class="text-xs mt-1" style="color:var(--text-muted)">Assim que o desenvolvedor lançar um upload, ele aparecerá aqui.</p>
                 </div>
 
             <?php else: ?>
@@ -189,7 +160,7 @@ $uploads = $stmt->fetchAll();
                                 <?php endif; ?>
                             </div>
                             <p class="text-sm text-[color:var(--cream)] leading-relaxed mb-3"><?= nl2br(htmlspecialchars($u['descricao'])) ?></p>
-                            <p class="text-xs text-zinc-500">
+                            <p class="text-xs" style="color:var(--text-muted)">
                                 <?= date('d/m/Y \à\s H:i', strtotime($u['data_hora'])) ?>
                             </p>
                         </div>
@@ -200,11 +171,11 @@ $uploads = $stmt->fetchAll();
 
         </div>
 
-        <div class="barber-stripe"></div>
+        <div class="up-stripe"></div>
     </div>
 
-    <p class="text-center text-xs text-zinc-600 mt-8 font-light">
-        <a href="/login" class="hover:text-yellow-500/70 transition-colors">&larr; Voltar para o login</a>
+    <p class="text-center text-xs mt-8 font-light" style="color:var(--text-muted)">
+        <a href="/login" class="transition-colors" style="color:var(--accent-strong)">&larr; Voltar para o login</a>
     </p>
 
 </div>

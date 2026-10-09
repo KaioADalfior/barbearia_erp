@@ -27,7 +27,7 @@ function toast(mensagem, tipo = 'sucesso') {
         min-width:260px;
         max-width:340px;
         background:linear-gradient(180deg, var(--charcoal), var(--charcoal-2));
-        border:1px solid rgba(47,111,237,0.14);
+        border:1px solid rgba(var(--accent-rgb),0.14);
         border-left:4px solid ${c.borda};
         color:var(--cream);
         font-family:'Poppins', sans-serif;

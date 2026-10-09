@@ -23,6 +23,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token é enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/FinanceiroService.php';
 require_once __DIR__ . '/../../includes/HorarioService.php';
@@ -43,12 +49,12 @@ if ($idAgendamento <= 0) {
     exit;
 }
 
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $novaData)) {
+if (!HorarioService::dataValida($novaData)) {
     echo json_encode(['ok' => false, 'erro' => 'Selecione a nova data.']);
     exit;
 }
 
-if (!preg_match('/^\d{2}:\d{2}$/', $novaHoraRaw)) {
+if (!HorarioService::horaValida($novaHoraRaw)) {
     echo json_encode(['ok' => false, 'erro' => 'Selecione o novo horário.']);
     exit;
 }

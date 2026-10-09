@@ -13,6 +13,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token é enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/forma_pagamento.php';
 require_once __DIR__ . '/../../includes/RelatorioService.php';
@@ -29,7 +35,8 @@ $nomeBarbeiro = $_SESSION['nome'] ?? 'Barbeiro';
 
 $tipo = $_POST['tipo'] ?? '';
 
-$tiposValidos = array_keys(RelatorioService::TIPOS_LABELS);
+// 'periodo' (intervalo livre) é tratado abaixo e não tem entrada em TIPOS_LABELS.
+$tiposValidos = array_merge(array_keys(RelatorioService::TIPOS_LABELS), ['periodo']);
 if (!in_array($tipo, $tiposValidos, true)) {
     echo json_encode(['ok' => false, 'erro' => 'Tipo de relatório inválido.']);
     exit;
@@ -57,6 +64,13 @@ if ($tipo === 'periodo') {
 
     if ($dataInicio > $dataFim) {
         echo json_encode(['ok' => false, 'erro' => 'A data de início não pode ser depois da data de fim.']);
+        exit;
+    }
+
+    // Limite de intervalo: evita relatórios gigantes (consumo de memória/CPU).
+    $dias = (new DateTime($dataInicio))->diff(new DateTime($dataFim))->days;
+    if ($dias > 366) {
+        echo json_encode(['ok' => false, 'erro' => 'O período do relatório não pode passar de 1 ano.']);
         exit;
     }
 } else {

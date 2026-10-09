@@ -37,6 +37,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token é enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -84,12 +90,16 @@ try {
     // exatamente como Clientes/scripts/cliente_status.php já faz ao
     // inativar. Histórico (concluído) e o passado nunca entram aqui.
     $stmtFuturos = $pdo->prepare(
-        "SELECT idAgendamento, idHorario
-         FROM Agendamentos
-         WHERE idCliente = :c AND Data >= :hoje AND Status IN ('agendado', 'confirmado')
+        "SELECT a.idAgendamento, a.idHorario
+         FROM Agendamentos a
+         INNER JOIN Horario h ON h.idHorario = a.idHorario
+         WHERE a.idCliente = :c AND a.Data >= :hoje AND a.Status IN ('agendado', 'confirmado')
+           AND h.id_barbeiro = :b
          FOR UPDATE"
     );
-    $stmtFuturos->execute(['c' => $idCliente, 'hoje' => $hoje]);
+    // Só os agendamentos DESTE barbeiro: o cliente pode ter horários marcados
+    // com outros barbeiros, e eles não são do barbeiro logado cancelar.
+    $stmtFuturos->execute(['c' => $idCliente, 'hoje' => $hoje, 'b' => $idBarbeiro]);
     $futuros = $stmtFuturos->fetchAll();
 
     $totalCancelados = 0;

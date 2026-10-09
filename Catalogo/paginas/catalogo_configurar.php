@@ -10,7 +10,10 @@ require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro']);
 
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
 require_once __DIR__ . '/../../includes/csrf.php';
+// Vitrine pública: só o proprietário configura.
+AcessoService::exigirProprietario($pdo);
 require_once __DIR__ . '/../../includes/CatalogoService.php';
 require_once __DIR__ . '/../../includes/HorarioService.php';
 require_once __DIR__ . '/../../includes/PublicoTokenService.php';
@@ -43,7 +46,7 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
@@ -59,58 +62,62 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
     }
     .cg-link__url code{
         display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-        padding:8px 12px; border-radius:.7rem; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.08);
+        padding:8px 12px; border-radius:.7rem; background:rgba(0,0,0,.28); border:1px solid var(--line);
         flex:1; min-width:0; font-size:12.5px;
     }
     .cg-btn{
         display:inline-flex; align-items:center; justify-content:center; gap:8px;
         height:40px; padding:0 16px; border-radius:.8rem; font-size:13px; font-weight:600; cursor:pointer;
-        border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); color:var(--cream);
+        border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--cream);
         text-decoration:none; transition:background-color .15s, border-color .15s, filter .15s; white-space:nowrap;
     }
     .cg-btn:hover{ background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.2); }
-    .cg-btn--pri{ background:linear-gradient(180deg,var(--gold-light),var(--gold)); border-color:transparent; color:#fff; }
+    .cg-btn--pri{ background:linear-gradient(180deg,var(--gold-light),var(--gold)); border-color:transparent; color:var(--accent-on); }
     .cg-btn--pri:hover{ filter:brightness(1.08); background:linear-gradient(180deg,var(--gold-light),var(--gold)); }
+    /* Botões sobre a foto da capa: vidro escuro com texto claro nos dois temas */
+    .cg-hero__capa-acoes .cg-btn{ background:rgba(16,12,9,.74); border-color:rgba(255,236,205,.22); color:#f3ebdc; }
+    .cg-hero__capa-acoes .cg-btn--perigo{ color:#ff958b; }
+    .cg-hero__capa-acoes .cg-btn:hover{ background:rgba(16,12,9,.9); }
     .cg-btn--sm{ height:34px; padding:0 12px; font-size:12px; border-radius:.65rem; }
-    .cg-btn--perigo{ color:#f0a2a8; }
+    .cg-btn--perigo{ color:var(--danger-text); }
     .cg-btn[disabled]{ opacity:.55; cursor:wait; }
 
     .cg-tabs{
         display:flex; gap:6px; overflow-x:auto; padding:5px; border-radius:1rem; margin-bottom:18px;
-        background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); scrollbar-width:none;
+        background:rgba(255,255,255,.03); border:1px solid var(--line); scrollbar-width:none;
     }
     .cg-tabs::-webkit-scrollbar{ display:none; }
     .cg-tab{
         flex:0 0 auto; height:38px; padding:0 16px; border-radius:.75rem; border:none; cursor:pointer;
-        font-size:13px; font-weight:500; color:#8fa0bd; background:transparent; transition:background-color .15s, color .15s;
+        font-size:13px; font-weight:500; color:var(--text-muted); background:transparent; transition:background-color .15s, color .15s;
         font-family:inherit;
     }
     .cg-tab:hover{ color:var(--cream); }
-    .cg-tab.is-ativa{ background:rgba(61,126,201,.18); color:var(--cream); box-shadow:inset 0 0 0 1px rgba(91,147,247,.35); }
+    .cg-tab.is-ativa{ background:rgba(var(--accent-rgb),.18); color:var(--cream); box-shadow:inset 0 0 0 1px rgba(91,147,247,.35); }
     .cg-painel{ display:none; }
     .cg-painel.is-ativo{ display:block; animation:cgFade .25s ease; }
     @keyframes cgFade{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
 
     .cg-card{ border-radius:1.2rem; padding:22px; margin-bottom:18px; }
     .cg-card h2{ font-size:15px; font-weight:600; color:var(--cream); margin:0 0 4px; }
-    .cg-card__sub{ font-size:12.5px; color:#8fa0bd; margin:0 0 18px; line-height:1.5; }
+    .cg-card__sub{ font-size:12.5px; color:var(--text-muted); margin:0 0 18px; line-height:1.5; }
     .cg-grid{ display:grid; gap:16px; grid-template-columns:repeat(2, minmax(0,1fr)); }
     .cg-grid .cg-full{ grid-column:1 / -1; }
     @media (max-width:720px){ .cg-grid{ grid-template-columns:1fr; } .cg-card{ padding:18px; } }
-    .cg-label{ display:block; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:500; color:#aebdd6; margin-bottom:7px; }
-    .cg-label small{ text-transform:none; letter-spacing:0; color:#7f8fac; font-weight:400; }
+    .cg-label{ display:block; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:500; color:var(--text-soft); margin-bottom:7px; }
+    .cg-label small{ text-transform:none; letter-spacing:0; color:var(--text-muted); font-weight:400; }
     .cg-input, .cg-textarea{
         width:100%; border-radius:.8rem; padding:0 14px; font-size:14px; font-family:inherit; color:var(--cream);
-        background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.09); transition:border-color .2s, box-shadow .2s;
+        background:rgba(0,0,0,.28); border:1px solid var(--line); transition:border-color .2s, box-shadow .2s;
     }
     .cg-input{ height:46px; }
     .cg-textarea{ padding:12px 14px; min-height:92px; resize:vertical; line-height:1.5; }
-    .cg-input:focus, .cg-textarea:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 4px rgba(47,111,237,.14); }
+    .cg-input:focus, .cg-textarea:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 4px rgba(var(--accent-rgb),.14); }
     .cg-input::placeholder, .cg-textarea::placeholder{ color:#5b6f8c; }
-    .cg-hint{ font-size:11.5px; color:#7f8fac; margin-top:6px; }
+    .cg-hint{ font-size:11.5px; color:var(--text-muted); margin-top:6px; }
 
     /* ---------- Pré-visualização da vitrine (capa + logo) ---------- */
-    .cg-hero{ position:relative; border-radius:1.1rem; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:var(--charcoal-3); }
+    .cg-hero{ position:relative; border-radius:1.1rem; overflow:hidden; border:1px solid var(--line); background:var(--charcoal-3); }
     .cg-hero__capa{
         height:190px; background-color:#0e1523; background-size:cover; background-position:center; position:relative;
         display:flex; align-items:center; justify-content:center; color:#5b6f8c; font-size:13px;
@@ -121,12 +128,12 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
     .cg-logo{
         width:84px; height:84px; border-radius:999px; flex-shrink:0; overflow:hidden; position:relative;
         background:linear-gradient(145deg,#17233a,#0b0f17); border:3px solid var(--charcoal-2);
-        display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:700; color:var(--gold-light);
+        display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:700; color:var(--accent-strong);
         box-shadow:0 8px 22px -8px rgba(0,0,0,.7);
     }
     .cg-logo img{ width:100%; height:100%; object-fit:cover; display:block; }
     .cg-hero__nome{ font-size:18px; font-weight:600; color:var(--cream); margin:0; line-height:1.2; }
-    .cg-hero__slogan{ font-size:12.5px; color:#9fb0cc; margin:3px 0 0; }
+    .cg-hero__slogan{ font-size:12.5px; color:var(--text-muted); margin:3px 0 0; }
     .cg-hero__logo-acoes{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-self:flex-end; }
     @media (max-width:560px){
         .cg-hero__capa{ height:140px; }
@@ -145,36 +152,36 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
     .cg-cor-custom{ width:38px; height:38px; padding:0; border:none; background:none; cursor:pointer; border-radius:999px; }
     .cg-temas{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .cg-tema{
-        border-radius:.9rem; padding:12px; cursor:pointer; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.02);
+        border-radius:.9rem; padding:12px; cursor:pointer; border:1px solid var(--line); background:rgba(255,255,255,.02);
         display:flex; align-items:center; gap:12px; font-size:13px; color:var(--cream); transition:border-color .15s, background-color .15s;
     }
     .cg-tema input{ position:absolute; opacity:0; pointer-events:none; }
-    .cg-tema.is-ativo{ border-color:var(--gold-light); background:rgba(47,111,237,.1); }
-    .cg-tema__amostra{ width:44px; height:32px; border-radius:.5rem; border:1px solid rgba(255,255,255,.18); flex-shrink:0; }
+    .cg-tema.is-ativo{ border-color:var(--gold-light); background:rgba(var(--accent-rgb),.1); }
+    .cg-tema__amostra{ width:44px; height:32px; border-radius:.5rem; border:1px solid var(--line); flex-shrink:0; }
 
     /* ---------- Chips selecionáveis ---------- */
     .cg-chips{ display:flex; flex-wrap:wrap; gap:10px; }
     .cg-chip{
         display:inline-flex; align-items:center; gap:9px; padding:10px 14px; border-radius:999px; cursor:pointer; font-size:13px;
-        border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.02); color:#b9c6dc; user-select:none;
+        border:1px solid var(--line); background:rgba(255,255,255,.02); color:var(--text-soft); user-select:none;
         transition:border-color .15s, background-color .15s, color .15s;
     }
     .cg-chip input{ position:absolute; opacity:0; pointer-events:none; }
     .cg-chip:hover{ border-color:rgba(255,255,255,.22); }
-    .cg-chip.is-ativo{ border-color:var(--gold-light); background:rgba(47,111,237,.14); color:var(--cream); }
+    .cg-chip.is-ativo{ border-color:var(--gold-light); background:rgba(var(--accent-rgb),.14); color:var(--cream); }
     .cg-chip svg{ flex-shrink:0; }
 
     /* ---------- Horários ---------- */
     .cg-dia{
         display:grid; grid-template-columns:170px 1fr; gap:12px 16px; align-items:center;
-        padding:14px 0; border-top:1px solid rgba(255,255,255,.06);
+        padding:14px 0; border-top:1px solid var(--line);
     }
     .cg-dia:first-of-type{ border-top:none; }
     .cg-dia__nome{ display:flex; align-items:center; gap:12px; font-size:14px; color:var(--cream); font-weight:500; }
     .cg-dia__turnos{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
     .cg-dia__turnos .cg-input{ width:112px; height:40px; padding:0 10px; }
-    .cg-dia__sep{ color:#7f8fac; font-size:12px; }
-    .cg-dia__fechado{ font-size:13px; color:#7f8fac; }
+    .cg-dia__sep{ color:var(--text-muted); font-size:12px; }
+    .cg-dia__fechado{ font-size:13px; color:var(--text-muted); }
     .cg-dia.is-fechado .cg-dia__turnos{ display:none; }
     .cg-dia:not(.is-fechado) .cg-dia__fechado{ display:none; }
     @media (max-width:640px){ .cg-dia{ grid-template-columns:1fr; } }
@@ -192,17 +199,17 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
     .cg-lista{ display:flex; flex-direction:column; gap:12px; }
     .cg-item{
         display:grid; grid-template-columns:auto 56px minmax(0,1fr) minmax(0,1.4fr) auto; gap:14px; align-items:center;
-        padding:14px; border-radius:1rem; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.02);
+        padding:14px; border-radius:1rem; border:1px solid var(--line); background:rgba(255,255,255,.02);
         transition:opacity .2s, border-color .2s;
     }
     .cg-item.is-oculto{ opacity:.55; }
     .cg-item--barbeiro{ grid-template-columns:auto 56px minmax(0,1fr) minmax(0,1fr) auto; }
     .cg-item__ordem{ display:flex; flex-direction:column; gap:4px; }
     .cg-item__ordem button{
-        width:28px; height:24px; border-radius:.5rem; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03);
-        color:#8fa0bd; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+        width:28px; height:24px; border-radius:.5rem; border:1px solid var(--line); background:rgba(255,255,255,.03);
+        color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
     }
-    .cg-item__ordem button:hover:not(:disabled){ color:var(--gold-light); border-color:rgba(91,147,247,.5); }
+    .cg-item__ordem button:hover:not(:disabled){ color:var(--accent-strong); border-color:rgba(91,147,247,.5); }
     .cg-item__ordem button:disabled{ opacity:.3; cursor:default; }
     .cg-item__thumb{
         width:56px; height:56px; border-radius:.8rem; overflow:hidden; background:rgba(255,255,255,.05);
@@ -211,10 +218,10 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
     .cg-item__thumb--redondo{ border-radius:999px; }
     .cg-item__thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
     .cg-item__nome{ font-size:14px; font-weight:600; color:var(--cream); margin:0; }
-    .cg-item__meta{ font-size:12px; color:#8fa0bd; margin:3px 0 0; }
+    .cg-item__meta{ font-size:12px; color:var(--text-muted); margin:3px 0 0; }
     .cg-item__campos{ display:flex; flex-direction:column; gap:8px; min-width:0; }
     .cg-item__campos .cg-input{ height:38px; font-size:13px; }
-    .cg-item__vis{ display:flex; align-items:center; gap:8px; font-size:12px; color:#8fa0bd; flex-direction:column; }
+    .cg-item__vis{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-muted); flex-direction:column; }
     @media (max-width:820px){
         .cg-item, .cg-item--barbeiro{ grid-template-columns:auto 52px minmax(0,1fr) auto; }
         .cg-item__campos{ grid-column:1 / -1; }
@@ -228,14 +235,14 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3)); border:1px solid rgba(91,147,247,.25);
         box-shadow:0 -12px 32px -14px rgba(0,0,0,.7);
     }
-    .cg-barra__estado{ font-size:13px; color:#8fa0bd; display:flex; align-items:center; gap:8px; }
+    .cg-barra__estado{ font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:8px; }
     .cg-barra__estado i{ width:8px; height:8px; border-radius:999px; background:#4b5a75; display:inline-block; }
     .cg-barra.is-suja .cg-barra__estado{ color:#fbbf24; }
     .cg-barra.is-suja .cg-barra__estado i{ background:#f59e0b; }
 
     .cg-aviso{
         border-radius:.9rem; padding:12px 14px; font-size:13px; line-height:1.5; margin-bottom:18px;
-        border:1px solid rgba(245,158,11,.4); background:rgba(245,158,11,.1); color:#fcd9a0;
+        border:1px solid rgba(245,158,11,.4); background:rgba(245,158,11,.1); color:var(--warning-text);
     }
 
     /* ---------- Modal de recorte ---------- */
@@ -246,7 +253,7 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
     .recorte-overlay.aberto{ display:flex; }
     .recorte-modal{
         width:100%; max-width:560px; background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,.25); border-radius:20px; padding:20px; box-shadow:0 24px 60px -12px rgba(0,0,0,.8);
+        border:1px solid rgba(var(--accent-rgb),.25); border-radius:20px; padding:20px; box-shadow:0 24px 60px -12px rgba(0,0,0,.8);
     }
     .recorte-area{ width:100%; height:min(62vw, 340px); background:#05080e; border-radius:12px; overflow:hidden; }
     .recorte-area img{ display:block; max-width:100%; }
@@ -274,7 +281,7 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Catálogo</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Catálogo</p>
             <h1 class="display text-2xl sm:text-4xl text-[color:var(--cream)] leading-tight">Configurar catálogo</h1>
         </div>
     </header>
@@ -292,7 +299,7 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
         <!-- Link da vitrine -->
         <div class="panel-card cg-link">
             <div class="cg-link__url">
-                <span style="color:#8fa0bd; white-space:nowrap;">Sua página de agendamento</span>
+                <span style="color:var(--text-muted); white-space:nowrap;">Sua página de agendamento</span>
                 <code id="cg-url"><?= $h($urlPublica) ?></code>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -392,7 +399,7 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
                                 </label>
                                 <label class="cg-tema <?= $cfg['tema'] === 'claro' ? 'is-ativo' : '' ?>">
                                     <input type="radio" name="tema" value="claro" <?= $cfg['tema'] === 'claro' ? 'checked' : '' ?>>
-                                    <span class="cg-tema__amostra" style="background:linear-gradient(135deg,#ffffff,#eef2f8)"></span>Claro
+                                    <span class="cg-tema__amostra" style="background:linear-gradient(135deg,#ffffff,var(--text-soft))"></span>Claro
                                 </label>
                             </div>
                         </div>
@@ -519,7 +526,7 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
                     <h2>Serviços do catálogo</h2>
                     <p class="cg-card__sub">
                         Escolha o que aparece na página, a ordem, a categoria e uma descrição curta. Nome, preço, duração e foto são editados em
-                        <a href="/servicos" style="color:var(--gold-light)">Serviços</a>; serviços inativos não aparecem.
+                        <a href="/servicos" style="color:var(--accent-strong)">Serviços</a>; serviços inativos não aparecem.
                     </p>
                     <?php if (!$servicos): ?>
                         <p class="cg-hint">Nenhum serviço ativo cadastrado ainda.</p>
@@ -610,12 +617,12 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 <div id="recorte-overlay" class="recorte-overlay" role="dialog" aria-modal="true" aria-labelledby="recorte-titulo">
     <div class="recorte-modal" id="recorte-modal">
         <p id="recorte-titulo" style="font-size:14px; font-weight:600; color:var(--cream); margin:0 0 4px;">Ajustar imagem</p>
-        <p style="font-size:12px; color:#8fa0bd; margin:0 0 12px;">Arraste para posicionar e use o controle para aproximar ou afastar.</p>
+        <p style="font-size:12px; color:var(--text-muted); margin:0 0 12px;">Arraste para posicionar e use o controle para aproximar ou afastar.</p>
         <div class="recorte-area"><img id="recorte-img" alt="Pré-visualização"></div>
         <div style="display:flex; align-items:center; gap:12px; margin-top:16px;">
-            <span style="font-size:12px; color:#8fa0bd">&minus;</span>
+            <span style="font-size:12px; color:var(--text-muted)">&minus;</span>
             <input type="range" id="recorte-zoom" class="recorte-zoom" min="0" max="1" step="0.01" value="0" aria-label="Zoom">
-            <span style="font-size:12px; color:#8fa0bd">+</span>
+            <span style="font-size:12px; color:var(--text-muted)">+</span>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
             <button type="button" class="cg-btn" id="recorte-cancelar">Cancelar</button>

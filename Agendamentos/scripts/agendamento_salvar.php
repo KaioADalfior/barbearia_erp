@@ -10,6 +10,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token é enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/FinanceiroService.php';
 require_once __DIR__ . '/../../includes/HorarioService.php';
@@ -94,7 +100,7 @@ try {
     sort($idsParaTravar);
     $marcadores = implode(',', array_fill(0, count($idsParaTravar), '?'));
     $stmtHorario = $pdo->prepare(
-        "SELECT idHorario, data, hora FROM Horario WHERE idHorario IN ($marcadores) AND id_barbeiro = ? ORDER BY idHorario FOR UPDATE"
+        "SELECT idHorario, data, hora, disponivel FROM Horario WHERE idHorario IN ($marcadores) AND id_barbeiro = ? ORDER BY idHorario FOR UPDATE"
     );
     $stmtHorario->execute([...$idsParaTravar, $idBarbeiro]);
     $horariosTravados = [];
@@ -146,6 +152,21 @@ try {
             $pdo->rollBack();
             echo json_encode(['ok' => false, 'erro' => 'O segundo horário precisa ser o próximo horário consecutivo da grade.']);
             exit;
+        }
+    }
+
+    // Horário inativado manualmente pelo barbeiro (Horario.disponivel = 0 e
+    // sem agendamento ativo — ver horario_status.php): o backend também
+    // recusa, não só a interface. (Horário ocupado cai na checagem abaixo.)
+    foreach ($horariosTravados as $h) {
+        if (!(bool) $h['disponivel']) {
+            $stmtAtivo = $pdo->prepare("SELECT 1 FROM Agendamentos WHERE idHorario = :h AND Status IN ('agendado', 'confirmado') LIMIT 1");
+            $stmtAtivo->execute(['h' => $h['idHorario']]);
+            if (!$stmtAtivo->fetch()) {
+                $pdo->rollBack();
+                echo json_encode(['ok' => false, 'erro' => 'Esse horário está indisponível (inativado pelo barbeiro). Escolha outro.']);
+                exit;
+            }
         }
     }
 
@@ -214,7 +235,7 @@ try {
         echo json_encode([
             'ok'     => false,
             'codigo' => 'agendamento_duplicado',
-            'erro'   => 'Este cliente já possui um agendamento hoje.',
+            'erro'   => 'Este cliente já possui um agendamento nesse dia.',
         ]);
         exit;
     }

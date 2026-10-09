@@ -6,6 +6,8 @@ require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/LoginThrottle.php';
+require_once __DIR__ . '/../../includes/SenhaService.php';
+require_once __DIR__ . '/../../includes/IpCliente.php';
 
 // Aceita apenas requisições POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -32,7 +34,7 @@ $statusBloqueio = LoginThrottle::verificarBloqueio($pdo, $login);
 if ($statusBloqueio['bloqueado']) {
     DiscordLogger::alerta('🔒 Login bloqueado por excesso de tentativas', [
         ['name' => '🔑 Login tentado', 'value' => $login, 'inline' => true],
-        ['name' => '🌐 IP', 'value' => $_SERVER['REMOTE_ADDR'] ?? '—', 'inline' => true],
+        ['name' => '🌐 IP', 'value' => IpCliente::obter(), 'inline' => true],
         ['name' => '⏳ Minutos restantes', 'value' => (string) $statusBloqueio['minutosRestantes'], 'inline' => true],
     ]);
     header('Location: /login?erro=bloqueado');
@@ -49,7 +51,7 @@ if ($statusBloqueio['bloqueado']) {
  */
 function upgradeSenhaSeNecessario(PDO $pdo, string $tabela, string $colId, $id, string $senhaDigitada, string $senhaArmazenada): void
 {
-    if (password_verify($senhaDigitada, $senhaArmazenada)) {
+    if (SenhaService::ehHash($senhaArmazenada)) {
         return; // já é hash válido, nada a fazer
     }
     // Chegou até aqui e a senha bateu (ver chamada abaixo) então
@@ -64,7 +66,7 @@ $stmt = $pdo->prepare('SELECT id_Admin, nome, login, senha FROM Administrador WH
 $stmt->execute(['login' => $login]);
 $admin = $stmt->fetch();
 
-$senhaAdminOk = $admin && (password_verify($senha, $admin['senha']) || hash_equals((string) $admin['senha'], $senha));
+$senhaAdminOk = SenhaService::confere($senha, $admin ? (string) $admin['senha'] : null) && $admin;
 
 if ($senhaAdminOk) {
     upgradeSenhaSeNecessario($pdo, 'Administrador', 'id_Admin', $admin['id_Admin'], $senha, $admin['senha']);
@@ -94,7 +96,7 @@ $stmt = $pdo->prepare('SELECT id_barbeiro, nome, login, senha, foto FROM Barbeir
 $stmt->execute(['login' => $login]);
 $barbeiro = $stmt->fetch();
 
-$senhaBarbeiroOk = $barbeiro && (password_verify($senha, $barbeiro['senha']) || hash_equals((string) $barbeiro['senha'], $senha));
+$senhaBarbeiroOk = SenhaService::confere($senha, $barbeiro ? (string) $barbeiro['senha'] : null) && $barbeiro;
 
 if ($senhaBarbeiroOk) {
     upgradeSenhaSeNecessario($pdo, 'Barbeiro', 'id_barbeiro', $barbeiro['id_barbeiro'], $senha, $barbeiro['senha']);
@@ -123,7 +125,7 @@ LoginThrottle::registrarFalha($pdo, $login);
 
 DiscordLogger::login(false, '❌ Tentativa de login falhou', [
     ['name' => '🔑 Login tentado', 'value' => $login, 'inline' => true],
-    ['name' => '🌐 IP', 'value' => $_SERVER['REMOTE_ADDR'] ?? '—', 'inline' => true],
+    ['name' => '🌐 IP', 'value' => IpCliente::obter(), 'inline' => true],
 ]);
 
 header('Location: /login?erro=1');

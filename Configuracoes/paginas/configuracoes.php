@@ -15,6 +15,15 @@ $podeConfigurarComissao = $tipo === 'admin' || AcessoService::ehProprietario($pd
 $comissaoPercentual = $podeConfigurarComissao ? ComissaoService::percentualAtual($pdo) : null;
 $comissaoStatusGet = $_GET['comissao'] ?? '';
 
+// ---------- Cor da barbearia (Proprietário e Administrador) ----------
+// Cor de destaque do sistema interno, por barbearia (ver includes/TemaService.php).
+require_once __DIR__ . '/../../includes/TemaService.php';
+require_once __DIR__ . '/../../includes/CatalogoService.php';
+$podePersonalizarCor = $podeConfigurarComissao;
+$corTema        = TemaService::corAtual($pdo);
+$corTemaPadrao  = TemaService::COR_PADRAO;
+$temaStatusGet  = $_GET['tema'] ?? '';
+
 // ---------- Lista de versões/uploads (somente Admin) ----------
 $uploads = [];
 if ($tipo === 'admin') {
@@ -77,7 +86,7 @@ $mensagensUpload = [
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
     .modal-overlay{
@@ -86,7 +95,7 @@ $mensagensUpload = [
     }
     .modal-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.16);
+        border:1px solid rgba(var(--accent-rgb),0.16);
     }
     .badge{
         display:inline-flex;
@@ -97,12 +106,12 @@ $mensagensUpload = [
         letter-spacing:0.04em;
         padding:0.28rem 0.65rem;
         border-radius:999px;
-        color:var(--gold-light);
-        background:rgba(61,126,201,0.12);
-        border:1px solid rgba(61,126,201,0.4);
+        color:var(--accent-strong);
+        background:rgba(var(--accent-rgb),0.12);
+        border:1px solid rgba(var(--accent-rgb),0.4);
     }
     table tbody tr{
-        border-top:1px solid rgba(255,255,255,0.05);
+        border-top:1px solid var(--line);
     }
 </style>
 </head>
@@ -126,7 +135,7 @@ include __DIR__ . '/../../includes/toast.php';
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Preferências</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Preferências</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Configurações</h1>
         </div>
     </header>
@@ -148,14 +157,14 @@ include __DIR__ . '/../../includes/toast.php';
                 <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <button type="button" id="opcao-tema-escuro" onclick="definirTema('dark')"
                             class="theme-option text-left">
-                        <div class="theme-swatch mb-3" style="background:linear-gradient(180deg,#101828,#0a0e1a);"></div>
+                        <div class="theme-swatch mb-3" style="background:linear-gradient(180deg,var(--surface-2),#0a0e1a);"></div>
                         <p class="settings-label">Escuro</p>
                         <p class="settings-desc">Padrão do painel</p>
                     </button>
 
                     <button type="button" id="opcao-tema-claro" onclick="definirTema('light')"
                             class="theme-option text-left">
-                        <div class="theme-swatch mb-3" style="background:linear-gradient(180deg,#ffffff,#eef2f8);"></div>
+                        <div class="theme-swatch mb-3" style="background:linear-gradient(180deg,#ffffff,var(--text-soft));"></div>
                         <p class="settings-label">Claro</p>
                         <p class="settings-desc">Fundo claro, texto escuro</p>
                     </button>
@@ -200,13 +209,13 @@ include __DIR__ . '/../../includes/toast.php';
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="field-label block mb-2 uppercase" for="senha_nova">Nova senha</label>
-                        <input id="senha_nova" name="senha_nova" type="password" required minlength="6"
+                        <input id="senha_nova" name="senha_nova" type="password" required minlength="8"
                                class="field w-full h-12 px-4 rounded-xl text-sm">
                     </div>
 
                     <div>
                         <label class="field-label block mb-2 uppercase" for="senha_confirma">Confirmar nova senha</label>
-                        <input id="senha_confirma" name="senha_confirma" type="password" required minlength="6"
+                        <input id="senha_confirma" name="senha_confirma" type="password" required minlength="8"
                                class="field w-full h-12 px-4 rounded-xl text-sm">
                     </div>
                 </div>
@@ -241,7 +250,7 @@ include __DIR__ . '/../../includes/toast.php';
                         <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500 pointer-events-none">%</span>
                     </div>
                 </div>
-                <div class="rounded-xl p-4 text-sm" style="background:rgba(61,126,201,0.08); border:1px solid rgba(61,126,201,0.22);">
+                <div class="rounded-xl p-4 text-sm" style="background:rgba(var(--accent-rgb),0.08); border:1px solid rgba(var(--accent-rgb),0.22);">
                     <p class="settings-label mb-1">Exemplo com um serviço de R$ 55,00</p>
                     <p class="settings-desc">Funcionário: <strong id="comissao-ex-func" class="text-[color:var(--cream)]">—</strong> &nbsp;·&nbsp; Barbearia: <strong id="comissao-ex-casa" class="text-[color:var(--cream)]">—</strong></p>
                     <p class="settings-desc mt-2">Atendimentos do proprietário não geram comissão.</p>
@@ -269,6 +278,131 @@ include __DIR__ . '/../../includes/toast.php';
     </script>
     <?php endif; ?>
 
+    <?php if ($podePersonalizarCor): ?>
+    <?php
+        $mensagensTema = [
+            'ok'         => ['sucesso', 'Cor da barbearia atualizada para todos os usuários.'],
+            'restaurado' => ['sucesso', 'Cor padrão restaurada.'],
+            'erro'       => ['erro', 'Cor inválida. Escolha uma cor no formato #RRGGBB.'],
+            'falha'      => ['erro', 'Não foi possível salvar a cor agora. Tente novamente.'],
+        ];
+        if (isset($mensagensTema[$temaStatusGet])):
+    ?>
+        <script>document.addEventListener('DOMContentLoaded', function () { toast(<?= json_encode($mensagensTema[$temaStatusGet][1]) ?>, <?= json_encode($mensagensTema[$temaStatusGet][0]) ?>); }); </script>
+    <?php endif; ?>
+    <section class="p-5 sm:p-8 pb-0 sm:pb-0 max-w-5xl" id="cor-barbearia">
+        <div class="panel-card rounded-2xl p-5 sm:p-6">
+            <p class="text-sm font-semibold text-[color:var(--cream)] mb-1">Cor da barbearia</p>
+            <p class="settings-desc mb-5">Escolha a cor de destaque do sistema (botões, menu, indicadores). Vale para todos os usuários desta barbearia e fica salva — o escuro/claro de cada pessoa continua separado. O contraste dos textos é ajustado automaticamente para manter a leitura.</p>
+
+            <form action="/Configuracoes/scripts/tema_salvar.php" method="POST" autocomplete="off" id="form-cor-barbearia" class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] gap-6 items-start">
+                <?= csrf_field() ?>
+                <input type="hidden" name="acao" value="salvar">
+                <div>
+                    <span class="field-label block mb-2 uppercase">Cores prontas</span>
+                    <div class="cor-presets" role="radiogroup" aria-label="Cores prontas">
+                        <?php foreach (CatalogoService::CORES_PRESET as $hex => $nomeCor): ?>
+                            <button type="button" class="cor-preset" role="radio" aria-checked="false" data-cor="<?= htmlspecialchars($hex, ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($nomeCor, ENT_QUOTES, 'UTF-8') ?>">
+                                <span class="cor-preset__bolinha" style="background:<?= htmlspecialchars($hex, ENT_QUOTES, 'UTF-8') ?>"></span>
+                                <span class="cor-preset__nome"><?= htmlspecialchars($nomeCor, ENT_QUOTES, 'UTF-8') ?></span>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <label class="field-label block mt-5 mb-2 uppercase" for="cor-hex">Outra cor</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="cor-seletor" value="<?= htmlspecialchars($corTema, ENT_QUOTES, 'UTF-8') ?>" class="cor-seletor" aria-label="Escolher cor">
+                        <input type="text" id="cor-hex" name="cor" value="<?= htmlspecialchars($corTema, ENT_QUOTES, 'UTF-8') ?>" maxlength="7" inputmode="text" spellcheck="false" autocapitalize="off"
+                               pattern="#[0-9A-Fa-f]{6}" class="field h-12 w-40 px-4 rounded-xl text-sm uppercase" aria-describedby="cor-ajuda">
+                        <span id="cor-ajuda" class="settings-desc">Formato #RRGGBB</span>
+                    </div>
+                    <p id="cor-erro" class="cor-erro hidden" role="alert">Cor inválida. Use o formato #RRGGBB (ex.: #C9A14A).</p>
+                </div>
+
+                <div class="cor-previa" aria-live="polite">
+                    <p class="settings-label mb-3">Prévia</p>
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <button type="button" class="btn-primary h-10 px-4 rounded-xl text-sm" tabindex="-1">Botão principal</button>
+                        <button type="button" class="btn-secondary h-10 px-4 rounded-xl text-sm" tabindex="-1">Secundário</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <span class="badge badge-info">Destaque</span>
+                        <a href="#cor-barbearia" class="cor-previa__link" tabindex="-1">Link de exemplo</a>
+                    </div>
+                    <div class="cor-previa__barra"><span></span></div>
+                    <p class="settings-desc mt-3" id="cor-contraste">—</p>
+                </div>
+
+                <div class="lg:col-span-2 flex flex-wrap items-center gap-3">
+                    <button type="submit" class="btn-primary h-12 px-6 rounded-xl text-sm" id="cor-salvar">Salvar cor</button>
+                    <button type="button" class="btn-secondary h-12 px-5 rounded-xl text-sm" id="cor-desfazer">Desfazer prévia</button>
+                    <button type="submit" form="form-cor-restaurar" class="btn-secondary h-12 px-5 rounded-xl text-sm" id="cor-restaurar" <?= $corTema === $corTemaPadrao ? 'disabled' : '' ?>>Restaurar cor padrão</button>
+                </div>
+            </form>
+            <form action="/Configuracoes/scripts/tema_salvar.php" method="POST" id="form-cor-restaurar" class="hidden">
+                <?= csrf_field() ?>
+                <input type="hidden" name="acao" value="restaurar">
+            </form>
+        </div>
+    </section>
+    <script src="/assets/js/tema-cor.js?v=2"></script>
+    <script>
+        (function () {
+            var salva = <?= json_encode($corTema) ?>;
+            var padrao = <?= json_encode($corTemaPadrao) ?>;
+            var hex = document.getElementById('cor-hex');
+            var seletor = document.getElementById('cor-seletor');
+            var erro = document.getElementById('cor-erro');
+            var contraste = document.getElementById('cor-contraste');
+            var salvar = document.getElementById('cor-salvar');
+            var presets = Array.prototype.slice.call(document.querySelectorAll('.cor-preset'));
+
+            function marcarPresets(cor) {
+                presets.forEach(function (b) {
+                    var on = b.getAttribute('data-cor').toLowerCase() === cor;
+                    b.classList.toggle('is-ativo', on);
+                    b.setAttribute('aria-checked', on ? 'true' : 'false');
+                });
+            }
+            function atualizar(cor, origem) {
+                var v = TemaCor.validar(cor);
+                if (v === null) {
+                    erro.classList.remove('hidden');
+                    hex.setAttribute('aria-invalid', 'true');
+                    salvar.disabled = true;
+                    return;
+                }
+                erro.classList.add('hidden');
+                hex.removeAttribute('aria-invalid');
+                salvar.disabled = false;
+                if (origem !== 'hex') hex.value = v;
+                if (origem !== 'seletor') seletor.value = v;
+                TemaCor.aplicarPrevia(v);
+                marcarPresets(v);
+                var escuro = document.documentElement.getAttribute('data-theme') !== 'light';
+                var t = TemaCor.tokens(v, escuro);
+                var c = TemaCor.contraste(t['accent-on'], t['accent']);
+                contraste.textContent = 'Texto sobre a cor: contraste ' + c.toFixed(1).replace('.', ',') + ':1' + (c >= 4.5 ? ' (ótimo)' : c >= 3 ? ' (bom para textos em negrito)' : ' (baixo)');
+            }
+            presets.forEach(function (b) { b.addEventListener('click', function () { atualizar(b.getAttribute('data-cor'), 'preset'); }); });
+            seletor.addEventListener('input', function () { atualizar(seletor.value, 'seletor'); });
+            hex.addEventListener('input', function () { atualizar(hex.value, 'hex'); });
+            document.getElementById('cor-desfazer').addEventListener('click', function () {
+                TemaCor.limparPrevia();
+                hex.value = salva; seletor.value = salva;
+                erro.classList.add('hidden'); salvar.disabled = false;
+                atualizar(salva, 'desfazer');
+                if (salva === padrao) { TemaCor.limparPrevia(); }
+            });
+            // Estado inicial: sem alterar a página (já vem com a cor salva do servidor).
+            marcarPresets(salva);
+            var t0 = TemaCor.tokens(salva, document.documentElement.getAttribute('data-theme') !== 'light');
+            var c0 = TemaCor.contraste(t0['accent-on'], t0['accent']);
+            contraste.textContent = 'Texto sobre a cor: contraste ' + c0.toFixed(1).replace('.', ',') + ':1' + (c0 >= 4.5 ? ' (ótimo)' : c0 >= 3 ? ' (bom para textos em negrito)' : ' (baixo)');
+        })();
+    </script>
+    <?php endif; ?>
+
     <?php if ($tipo === 'barbeiro'): ?>
     <section class="p-5 sm:p-8 max-w-5xl">
         <div class="panel-card rounded-2xl p-5 sm:p-6">
@@ -290,7 +424,7 @@ include __DIR__ . '/../../includes/toast.php';
                         Copiar
                     </button>
                 </div>
-                <button type="button" id="btn-gerar-novo-link" class="text-xs mt-3" style="color:#7f8fac; text-decoration:underline;">
+                <button type="button" id="btn-gerar-novo-link" class="text-xs mt-3" style="color:var(--text-muted); text-decoration:underline;">
                     Gerar um novo link (o link atual deixa de funcionar)
                 </button>
             </div>
@@ -485,9 +619,9 @@ Swal.fire({
     icon: 'error',
     title: 'Senha incorreta',
     text: <?= json_encode($_GET['senha_erro'], JSON_UNESCAPED_UNICODE) ?>,
-    background: '#101828',
-    color: '#e9eef6',
-    confirmButtonColor: '#3d7ec9',
+    background: 'var(--surface-2)',
+    color: 'var(--cream)',
+    confirmButtonColor: 'var(--accent)',
     confirmButtonText: 'Entendi',
     iconColor: '#8c1f28'
 }).then(function () {

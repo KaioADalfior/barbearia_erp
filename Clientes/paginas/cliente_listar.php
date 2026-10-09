@@ -48,7 +48,7 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
     .modal-overlay{
@@ -57,7 +57,7 @@ $mensagens = [
     }
     .modal-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.16);
+        border:1px solid rgba(var(--accent-rgb),0.16);
     }
     .badge{
         display:inline-flex;
@@ -70,12 +70,12 @@ $mensagens = [
         border-radius:999px;
     }
     .badge-ativo{
-        color:#bfe6c7;
+        color:var(--success-text);
         background:rgba(66,140,82,0.14);
         border:1px solid rgba(66,140,82,0.4);
     }
     .badge-inativo{
-        color:#c9a8ab;
+        color:var(--danger-text);
         background:rgba(140,31,40,0.12);
         border:1px solid rgba(140,31,40,0.4);
     }
@@ -86,23 +86,23 @@ $mensagens = [
         width:34px;
         height:34px;
         border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.08);
+        border:1px solid var(--line);
         background:rgba(255,255,255,0.03);
-        color:#8fa0bd;
+        color:var(--text-muted);
         transition:color .15s, border-color .15s, background-color .15s;
     }
     .icon-btn:hover{
-        color:var(--gold-light);
-        border-color:rgba(61,126,201,0.4);
-        background:rgba(61,126,201,0.08);
+        color:var(--accent-strong);
+        border-color:rgba(var(--accent-rgb),0.4);
+        background:rgba(var(--accent-rgb),0.08);
     }
     .icon-btn-danger:hover{
-        color:#f0a2a8;
+        color:var(--danger-text);
         border-color:rgba(140,31,40,0.5);
         background:rgba(140,31,40,0.1);
     }
     table tbody tr{
-        border-top:1px solid rgba(255,255,255,0.05);
+        border-top:1px solid var(--line);
     }
 
     /* Tabela exibida em ~80% de escala (mesmo efeito de zoom do navegador),
@@ -123,14 +123,14 @@ $mensagens = [
         justify-content:space-between;
         gap:1rem;
         padding:0.85rem 0;
-        border-top:1px solid rgba(255,255,255,0.06);
+        border-top:1px solid var(--line);
     }
     .view-row:first-child{ border-top:none; }
     .view-label{
         font-size:11px;
         letter-spacing:0.1em;
         text-transform:uppercase;
-        color:#7f8fac;
+        color:var(--text-muted);
     }
     .view-value{
         font-size:14px;
@@ -153,7 +153,7 @@ $mensagens = [
         display:flex;
         gap:0.25rem;
         overflow-x:auto;
-        border-bottom:1px solid rgba(255,255,255,0.08);
+        border-bottom:1px solid var(--line);
         margin:0 -1.75rem 1.25rem;
         padding:0 1.75rem;
     }
@@ -165,7 +165,7 @@ $mensagens = [
         font-size:12.5px;
         font-weight:600;
         letter-spacing:0.02em;
-        color:#7f8fac;
+        color:var(--text-muted);
         padding:0.7rem 0.15rem;
         border-bottom:2px solid transparent;
         margin-right:1.1rem;
@@ -179,14 +179,14 @@ $mensagens = [
     }
     .cli-tab:hover{ color:var(--cream); }
     .cli-tab.is-active{
-        color:var(--gold-light);
+        color:var(--accent-strong);
         border-bottom-color:var(--gold);
     }
     .cli-tab:disabled{
         opacity:0.35;
         cursor:not-allowed;
     }
-    .cli-tab:disabled:hover{ color:#7f8fac; }
+    .cli-tab:disabled:hover{ color:var(--text-muted); }
     .cli-tab-badge{
         display:inline-flex;
         align-items:center;
@@ -195,8 +195,8 @@ $mensagens = [
         height:17px;
         padding:0 5px;
         border-radius:999px;
-        background:rgba(61,126,201,0.16);
-        color:var(--gold-light);
+        background:rgba(var(--accent-rgb),0.16);
+        color:var(--accent-strong);
         font-size:10px;
         font-weight:700;
     }
@@ -210,7 +210,7 @@ $mensagens = [
     }
     .cli-item{
         background:rgba(255,255,255,0.025);
-        border:1px solid rgba(255,255,255,0.06);
+        border:1px solid var(--line);
         border-radius:0.85rem;
         padding:0.85rem 1rem;
         margin-bottom:0.6rem;
@@ -234,11 +234,11 @@ $mensagens = [
     }
     .cli-item-meta{
         font-size:11px;
-        color:#7f8fac;
+        color:var(--text-muted);
     }
     .cli-item-desc{
         font-size:13px;
-        color:#aebdd6;
+        color:var(--text-soft);
         line-height:1.5;
         overflow-wrap:anywhere;
         word-break:break-word;
@@ -256,26 +256,26 @@ $mensagens = [
         white-space:nowrap;
     }
     .cli-badge-fiado{ color:#b8b3f0; background:rgba(99,91,220,0.16); border:1px solid rgba(99,91,220,0.4); }
-    .cli-badge-pagamento{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-observacao{ color:#7fd0d9; background:rgba(15,92,102,0.28); border:1px solid rgba(15,92,102,0.6); }
-    .cli-badge-atendimento{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-outro{ color:#c3cee0; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); }
-    .cli-badge-quitado-pendente{ color:#9dc4f0; background:rgba(61,126,201,0.14); border:1px solid rgba(61,126,201,0.4); }
-    .cli-badge-quitado-pago{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-status-agendado   { color:#7fd0d9; background:rgba(15,92,102,0.28);  border:1px solid rgba(15,92,102,0.6); }
-    .cli-badge-status-confirmado { color:#7fd0d9; background:rgba(15,92,102,0.16); border:1px solid rgba(15,92,102,0.4); }
-    .cli-badge-status-concluido  { color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-status-cancelado  { color:#c9a8ab; background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
+    .cli-badge-pagamento{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-observacao{ color:var(--info-text); background:rgba(15,92,102,0.28); border:1px solid rgba(15,92,102,0.6); }
+    .cli-badge-atendimento{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-outro{ color:var(--text-soft); background:rgba(255,255,255,0.06); border:1px solid var(--line); }
+    .cli-badge-quitado-pendente{ color:var(--info-text); background:rgba(var(--accent-rgb),0.14); border:1px solid rgba(var(--accent-rgb),0.4); }
+    .cli-badge-quitado-pago{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-status-agendado   { color:var(--info-text); background:rgba(15,92,102,0.28);  border:1px solid rgba(15,92,102,0.6); }
+    .cli-badge-status-confirmado { color:var(--info-text); background:rgba(15,92,102,0.16); border:1px solid rgba(15,92,102,0.4); }
+    .cli-badge-status-concluido  { color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-status-cancelado  { color:var(--danger-text); background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
     .cli-vazio{
         text-align:center;
         padding:2rem 1rem;
-        color:#7f8fac;
+        color:var(--text-muted);
         font-size:13px;
     }
     .cli-em-breve{
         text-align:center;
         padding:3rem 1.5rem;
-        color:#7f8fac;
+        color:var(--text-muted);
         font-size:13px;
     }
 
@@ -320,7 +320,7 @@ $mensagens = [
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Clientes</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Clientes</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Gerenciar Clientes</h1>
         </div>
     </header>

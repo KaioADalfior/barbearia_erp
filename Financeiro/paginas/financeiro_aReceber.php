@@ -17,35 +17,35 @@ $paginaAtual = 'financeiro-fiados';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <link rel="stylesheet" href="/assets/css/forma-pagamento.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     .modal-overlay{ background:rgba(0,0,0,0.7); backdrop-filter:blur(3px); }
-    .modal-card{ background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3)); border:1px solid rgba(61,126,201,0.16); }
+    .modal-card{ background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3)); border:1px solid rgba(var(--accent-rgb),0.16); }
     .icon-btn{
         display:inline-flex; align-items:center; justify-content:center;
         width:34px; height:34px; border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); color:#8fa0bd;
+        border:1px solid var(--line); background:rgba(255,255,255,0.03); color:var(--text-muted);
         transition:color .15s, border-color .15s, background-color .15s;
     }
-    .icon-btn:hover{ color:var(--gold-light); border-color:rgba(61,126,201,0.4); background:rgba(61,126,201,0.08); }
-    .icon-btn-receber:hover{ color:#7fd99a; border-color:rgba(66,140,82,0.4); background:rgba(66,140,82,0.1); }
+    .icon-btn:hover{ color:var(--accent-strong); border-color:rgba(var(--accent-rgb),0.4); background:rgba(var(--accent-rgb),0.08); }
+    .icon-btn-receber:hover{ color:var(--success-text); border-color:rgba(66,140,82,0.4); background:rgba(66,140,82,0.1); }
 
-    table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
+    table tbody tr{ border-top:1px solid var(--line); }
     .badge{
         display:inline-flex; align-items:center; gap:0.35rem;
         font-size:11px; font-weight:600; letter-spacing:0.03em;
         padding:0.28rem 0.65rem; border-radius:999px; white-space:nowrap;
     }
-    .badge-pendente{ color:#9dc4f0; background:rgba(61,126,201,0.14); border:1px solid rgba(61,126,201,0.4); }
-    .badge-forma{ color:#aebdd6; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); }
-    .valor-pendente{ color:#9dc4f0; font-weight:600; }
+    .badge-pendente{ color:var(--info-text); background:rgba(var(--accent-rgb),0.14); border:1px solid rgba(var(--accent-rgb),0.4); }
+    .badge-forma{ color:var(--text-soft); background:rgba(255,255,255,0.05); border:1px solid var(--line); }
+    .valor-pendente{ color:var(--info-text); font-weight:600; }
 
-    .view-row{ display:flex; justify-content:space-between; gap:1rem; padding:0.65rem 0; border-top:1px solid rgba(255,255,255,0.06); }
+    .view-row{ display:flex; justify-content:space-between; gap:1rem; padding:0.65rem 0; border-top:1px solid var(--line); }
     .view-row:first-child{ border-top:none; }
-    .view-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:#7f8fac; }
+    .view-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); }
     .view-value{ font-size:13.5px; color:var(--cream); font-weight:500; text-align:right; }
 
     .linha-cliente{ cursor:pointer; }
@@ -58,54 +58,54 @@ $paginaAtual = 'financeiro-fiados';
         display:flex; justify-content:space-between; align-items:center; gap:1rem;
         padding:0.55rem 1.25rem 0.55rem 3rem;
         border-top:1px solid rgba(255,255,255,0.04);
-        font-size:12.5px; color:#aebdd6;
+        font-size:12.5px; color:var(--text-soft);
     }
     .item-fiado:first-child{ border-top:none; }
     .campo-valor-receber{
-        width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12);
+        width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--line);
         border-radius:0.65rem; padding:0.7rem 0.9rem; font-size:15px; font-weight:600;
         color:var(--cream); text-align:right;
     }
-    .campo-valor-receber:focus{ outline:none; border-color:rgba(61,126,201,0.5); }
-    .valor-max-hint{ font-size:11px; color:#7f8fac; margin-top:0.4rem; }
-    .valor-max-hint button{ color:var(--gold-light); text-decoration:underline; }
+    .campo-valor-receber:focus{ outline:none; border-color:rgba(var(--accent-rgb),0.5); }
+    .valor-max-hint{ font-size:11px; color:var(--text-muted); margin-top:0.4rem; }
+    .valor-max-hint button{ color:var(--accent-strong); text-decoration:underline; }
 
     /* ---------- Modal: detalhes do cliente (somente leitura) ---------- */
     .modal-card-detalhes{ height:min(640px, 90vh); }
     @media (max-width:640px){ .modal-card-detalhes{ height:min(580px, 88vh); } }
     .cli-tabs{
         display:flex; gap:0.25rem; overflow-x:auto;
-        border-bottom:1px solid rgba(255,255,255,0.08);
+        border-bottom:1px solid var(--line);
         margin:0 -1.75rem 1.25rem; padding:0 1.75rem;
     }
     .cli-tab{
         flex-shrink:0; display:inline-flex; align-items:center; gap:0.4rem;
-        font-size:12.5px; font-weight:600; letter-spacing:0.02em; color:#7f8fac;
+        font-size:12.5px; font-weight:600; letter-spacing:0.02em; color:var(--text-muted);
         padding:0.7rem 0.15rem; border-bottom:2px solid transparent; margin-right:1.1rem;
         cursor:pointer; background:none; border-top:none; border-left:none; border-right:none;
         white-space:nowrap; transition:color .15s, border-color .15s;
     }
     .cli-tab:hover{ color:var(--cream); }
-    .cli-tab.is-active{ color:var(--gold-light); border-bottom-color:var(--gold); }
+    .cli-tab.is-active{ color:var(--accent-strong); border-bottom-color:var(--gold); }
     .cli-tab-badge{
         display:inline-flex; align-items:center; justify-content:center;
         min-width:17px; height:17px; padding:0 5px; border-radius:999px;
-        background:rgba(61,126,201,0.16); color:var(--gold-light); font-size:10px; font-weight:700;
+        background:rgba(var(--accent-rgb),0.16); color:var(--accent-strong); font-size:10px; font-weight:700;
     }
     .cli-tab-panel{ display:none; }
     .cli-tab-panel.is-active{ display:block; }
     .cli-scroll{ max-height:360px; overflow-y:auto; overflow-x:hidden; padding-right:2px; }
     .cli-item{
-        background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.06);
+        background:rgba(255,255,255,0.025); border:1px solid var(--line);
         border-radius:0.85rem; padding:0.85rem 1rem; margin-bottom:0.6rem;
         max-width:100%; overflow-wrap:anywhere;
     }
     .cli-item:last-child{ margin-bottom:0; }
     .cli-item-top{ display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.3rem; }
     .cli-item-title{ font-size:13.5px; font-weight:600; color:var(--cream); min-width:0; overflow-wrap:anywhere; }
-    .cli-item-meta{ font-size:11px; color:#7f8fac; }
+    .cli-item-meta{ font-size:11px; color:var(--text-muted); }
     .cli-item-desc{
-        font-size:13px; color:#aebdd6; line-height:1.5;
+        font-size:13px; color:var(--text-soft); line-height:1.5;
         overflow-wrap:anywhere; word-break:break-word; white-space:pre-wrap;
     }
     .cli-badge-tipo{
@@ -114,19 +114,19 @@ $paginaAtual = 'financeiro-fiados';
         border-radius:999px; white-space:nowrap;
     }
     .cli-badge-fiado{ color:#b8b3f0; background:rgba(99,91,220,0.16); border:1px solid rgba(99,91,220,0.4); }
-    .cli-badge-pagamento{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-observacao{ color:#7fd0d9; background:rgba(15,92,102,0.28); border:1px solid rgba(15,92,102,0.6); }
-    .cli-badge-atendimento{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-outro{ color:#c3cee0; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); }
-    .cli-badge-quitado-pendente{ color:#9dc4f0; background:rgba(61,126,201,0.14); border:1px solid rgba(61,126,201,0.4); }
-    .cli-badge-quitado-pago{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-status-agendado   { color:#7fd0d9; background:rgba(15,92,102,0.28);  border:1px solid rgba(15,92,102,0.6); }
-    .cli-badge-status-confirmado { color:#7fd0d9; background:rgba(15,92,102,0.16); border:1px solid rgba(15,92,102,0.4); }
-    .cli-badge-status-concluido  { color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .cli-badge-status-cancelado  { color:#c9a8ab; background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
-    .cli-vazio{ text-align:center; padding:2rem 1rem; color:#7f8fac; font-size:13px; }
-    .badge-ativo{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .badge-inativo{ color:#c9a8ab; background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
+    .cli-badge-pagamento{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-observacao{ color:var(--info-text); background:rgba(15,92,102,0.28); border:1px solid rgba(15,92,102,0.6); }
+    .cli-badge-atendimento{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-outro{ color:var(--text-soft); background:rgba(255,255,255,0.06); border:1px solid var(--line); }
+    .cli-badge-quitado-pendente{ color:var(--info-text); background:rgba(var(--accent-rgb),0.14); border:1px solid rgba(var(--accent-rgb),0.4); }
+    .cli-badge-quitado-pago{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-status-agendado   { color:var(--info-text); background:rgba(15,92,102,0.28);  border:1px solid rgba(15,92,102,0.6); }
+    .cli-badge-status-confirmado { color:var(--info-text); background:rgba(15,92,102,0.16); border:1px solid rgba(15,92,102,0.4); }
+    .cli-badge-status-concluido  { color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .cli-badge-status-cancelado  { color:var(--danger-text); background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
+    .cli-vazio{ text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:13px; }
+    .badge-ativo{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .badge-inativo{ color:var(--danger-text); background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
 
     html[data-theme="light"] .icon-btn{ color:#475569; }
     html[data-theme="light"] .badge-pendente{ color:#1e4976; }
@@ -152,13 +152,13 @@ $paginaAtual = 'financeiro-fiados';
     /* ---------- Modal: novo registro de fiado ---------- */
     .resultado-cliente{
         padding:0.65rem 0.85rem; border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.07); cursor:pointer;
+        border:1px solid var(--line); cursor:pointer;
         font-size:13px; color:var(--cream);
         transition:background-color .15s, border-color .15s;
     }
-    .resultado-cliente:hover{ background:rgba(61,126,201,0.1); border-color:rgba(61,126,201,0.35); }
+    .resultado-cliente:hover{ background:rgba(var(--accent-rgb),0.1); border-color:rgba(var(--accent-rgb),0.35); }
     .cliente-selecionado{
-        background:rgba(61,126,201,0.1); border:1px solid rgba(61,126,201,0.35);
+        background:rgba(var(--accent-rgb),0.1); border:1px solid rgba(var(--accent-rgb),0.35);
         border-radius:0.75rem; padding:0.75rem 1rem;
         display:flex; align-items:center; justify-content:space-between; gap:0.75rem;
     }
@@ -167,12 +167,12 @@ $paginaAtual = 'financeiro-fiados';
     /* ---------- Campo de valor em moeda (Novo Registro de Fiado) ---------- */
     .campo-moeda-wrap{
         display:flex; align-items:center; gap:0.4rem;
-        width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12);
+        width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--line);
         border-radius:0.65rem; padding:0.7rem 0.9rem;
         transition:border-color .15s, background-color .15s;
     }
-    .campo-moeda-wrap:focus-within{ border-color:rgba(61,126,201,0.5); background:rgba(255,255,255,0.05); }
-    .campo-moeda-prefixo{ font-size:15px; font-weight:600; color:#7f8fac; user-select:none; }
+    .campo-moeda-wrap:focus-within{ border-color:rgba(var(--accent-rgb),0.5); background:rgba(255,255,255,0.05); }
+    .campo-moeda-prefixo{ font-size:15px; font-weight:600; color:var(--text-muted); user-select:none; }
     .campo-moeda-input{
         flex:1; min-width:0; background:transparent; border:none; outline:none;
         padding:0; font-size:17px; font-weight:600; color:var(--cream); text-align:right;
@@ -198,7 +198,7 @@ $paginaAtual = 'financeiro-fiados';
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Financeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Financeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Contas a Receber</h1>
         </div>
     </header>

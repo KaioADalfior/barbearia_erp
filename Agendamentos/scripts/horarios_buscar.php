@@ -26,7 +26,7 @@ require_once __DIR__ . '/../../includes/HorarioService.php';
 $idBarbeiro = (int) $_SESSION['id'];
 $data       = $_GET['data'] ?? '';
 
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
+if (!HorarioService::dataValida($data)) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'erro' => 'Data inválida.']);
     exit;

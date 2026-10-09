@@ -36,20 +36,20 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
-    table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
+    table tbody tr{ border-top:1px solid var(--line); }
     .avatar{
         width:36px; height:36px; border-radius:9999px; object-fit:cover;
-        border:1px solid rgba(255,255,255,0.1);
+        border:1px solid var(--line);
     }
     .avatar-fallback{
         width:36px; height:36px; border-radius:9999px;
         display:flex; align-items:center; justify-content:center;
-        background:rgba(61,126,201,0.14); color:var(--gold-light);
+        background:rgba(var(--accent-rgb),0.14); color:var(--accent-strong);
         font-weight:600; font-size:13px;
-        border:1px solid rgba(255,255,255,0.08);
+        border:1px solid var(--line);
     }
     .badge{
         display:inline-flex; align-items:center; gap:0.35rem;
@@ -57,17 +57,17 @@ $mensagens = [
         padding:0.28rem 0.65rem; border-radius:999px;
     }
     .badge-hash{
-        color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4);
+        color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4);
     }
-    .badge-prop{ color:#f0d18a; background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45); }
-    .badge-func{ color:#9dc4f0; background:rgba(61,126,201,0.14); border:1px solid rgba(61,126,201,0.4); }
+    .badge-prop{ color:var(--warning-text); background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45); }
+    .badge-func{ color:var(--info-text); background:rgba(var(--accent-rgb),0.14); border:1px solid rgba(var(--accent-rgb),0.4); }
     .tipo-opcoes{ display:grid; grid-template-columns:1fr; gap:.6rem; }
     @media (min-width:480px){ .tipo-opcoes{ grid-template-columns:1fr 1fr; } }
     .tipo-opcao{ position:relative; display:block; cursor:pointer; }
     .tipo-opcao input{ position:absolute; opacity:0; inset:0; width:100%; height:100%; cursor:pointer; margin:0; }
     .tipo-opcao__card{
         display:flex; gap:.6rem; align-items:flex-start; padding:.75rem .85rem; border-radius:.8rem;
-        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.10);
+        background:rgba(255,255,255,0.03); border:1px solid var(--line);
         transition:border-color .15s, background .15s;
     }
     .tipo-opcao__dot{
@@ -75,14 +75,14 @@ $mensagens = [
         border:2px solid rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center;
     }
     .tipo-opcao__dot::after{ content:''; width:8px; height:8px; border-radius:9999px; background:transparent; transition:background .15s; }
-    .tipo-opcao input:checked + .tipo-opcao__card{ border-color:rgba(61,126,201,0.75); background:rgba(61,126,201,0.12); }
-    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot{ border-color:#6fa8ea; }
-    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot::after{ background:#6fa8ea; }
-    .tipo-opcao input:focus-visible + .tipo-opcao__card{ outline:2px solid #6fa8ea; outline-offset:2px; }
+    .tipo-opcao input:checked + .tipo-opcao__card{ border-color:rgba(var(--accent-rgb),0.75); background:rgba(var(--accent-rgb),0.12); }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot{ border-color:var(--accent-strong); }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot::after{ background:var(--accent-strong); }
+    .tipo-opcao input:focus-visible + .tipo-opcao__card{ outline:2px solid var(--accent-strong); outline-offset:2px; }
     .tipo-opcao__titulo{ font-size:13px; font-weight:600; color:var(--cream); }
-    .tipo-opcao__desc{ font-size:11.5px; line-height:1.4; color:#8b97ac; margin-top:1px; }
+    .tipo-opcao__desc{ font-size:11.5px; line-height:1.4; color:var(--text-muted); margin-top:1px; }
     .badge-pendente{
-        color:#f0d18a; background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45);
+        color:var(--warning-text); background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45);
     }
 </style>
 </head>
@@ -100,7 +100,7 @@ $mensagens = [
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Barbeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Barbeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Barbeiros Cadastrados</h1>
         </div>
         <a href="/barbeiros/cadastrar" class="btn-primary h-11 px-5 rounded-xl text-sm flex items-center justify-center gap-2 shrink-0">
@@ -293,7 +293,7 @@ $mensagens = [
 
                 <div class="mb-7">
                     <label class="field-label block mb-2 uppercase" for="edit-senha">Nova senha</label>
-                    <input id="edit-senha" name="senha" type="password" minlength="6"
+                    <input id="edit-senha" name="senha" type="password" minlength="8"
                            placeholder="Deixe em branco para não alterar"
                            class="field w-full h-12 px-4 rounded-xl text-sm">
                     <p class="text-xs text-zinc-500 mt-2">Só preencha se quiser trocar a senha dele agora. Em branco, a senha atual continua valendo.</p>

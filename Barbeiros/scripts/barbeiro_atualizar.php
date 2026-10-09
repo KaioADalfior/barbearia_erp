@@ -31,7 +31,7 @@ $paramsVolta = http_build_query([
     'tipo_usuario' => $tipoUsuario,
 ]);
 
-if ($id <= 0 || !in_array($tipoUsuario, ['proprietario', 'funcionario'], true) || $nome === '' || $login === '' || $telefone === '' || ($novaSenha !== '' && strlen($novaSenha) < 6)) {
+if ($id <= 0 || !in_array($tipoUsuario, ['proprietario', 'funcionario'], true) || $nome === '' || $login === '' || $telefone === '' || ($novaSenha !== '' && strlen($novaSenha) < 8)) {
     header('Location: /barbeiros?status=edicao-erro&' . $paramsVolta);
     exit;
 }

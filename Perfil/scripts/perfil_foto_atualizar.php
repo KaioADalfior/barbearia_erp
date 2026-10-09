@@ -11,6 +11,7 @@ exigirSessao(['barbeiro'], json: true);
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/ImagemPersistente.php';
+require_once __DIR__ . '/../../includes/ImagemSegura.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -82,7 +83,7 @@ $extensoesPermitidas = [
 
 $mimeReal = mime_content_type($arquivo['tmp_name']);
 
-if (!isset($extensoesPermitidas[$mimeReal])) {
+if (!isset($extensoesPermitidas[$mimeReal]) || @getimagesize($arquivo['tmp_name']) === false) {
     echo json_encode(['ok' => false, 'erro' => 'Formato inválido. Envie uma imagem JPG, PNG ou WEBP.']);
     exit;
 }
@@ -103,7 +104,7 @@ $extensao   = $extensoesPermitidas[$mimeReal];
 $nomeNovo   = 'barbeiro_' . $idBarbeiro . '_' . bin2hex(random_bytes(6)) . '.' . $extensao;
 $destino    = $pastaUploads . $nomeNovo;
 
-if (!move_uploaded_file($arquivo['tmp_name'], $destino)) {
+if (!ImagemSegura::mover($arquivo['tmp_name'], $mimeReal, $destino)) {
     echo json_encode(['ok' => false, 'erro' => 'Não foi possível salvar a imagem no servidor.']);
     exit;
 }

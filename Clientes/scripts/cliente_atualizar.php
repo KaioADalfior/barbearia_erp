@@ -23,6 +23,7 @@ exigirSessao(['barbeiro']);
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/ClienteService.php';
 require_once __DIR__ . '/../../includes/csrf.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /clientes');
@@ -92,6 +93,12 @@ if (!$clienteAntigo) {
 $estavaAtivo   = (int) $clienteAntigo['ativo'] === 1;
 $vaiInativar   = $estavaAtivo && $ativo === 0;
 $totalRemovido = 0;
+
+// Inativar apaga os agendamentos ativos do cliente (de todos os barbeiros):
+// só o proprietário pode.
+if ($vaiInativar && !AcessoService::ehProprietario($pdo)) {
+    AcessoService::negar(false, 'Inativar cliente é exclusivo do proprietário');
+}
 
 try {
     $pdo->beginTransaction();

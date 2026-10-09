@@ -17,7 +17,7 @@ $paginaAtual = 'financeiro-baixa';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <link rel="stylesheet" href="/assets/css/forma-pagamento.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -37,9 +37,9 @@ $paginaAtual = 'financeiro-baixa';
         letter-spacing:0.04em;
         padding:0.3rem 0.7rem;
         border-radius:999px;
-        color:#6fa8ea;
-        background:rgba(61,126,201,0.10);
-        border:1px solid rgba(61,126,201,0.35);
+        color:var(--accent-strong);
+        background:rgba(var(--accent-rgb),0.10);
+        border:1px solid rgba(var(--accent-rgb),0.35);
     }
     .modal-overlay{
         background:rgba(0,0,0,0.7);
@@ -47,7 +47,7 @@ $paginaAtual = 'financeiro-baixa';
     }
     .modal-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.16);
+        border:1px solid rgba(var(--accent-rgb),0.16);
     }
     .icon-btn{
         display:inline-flex;
@@ -56,15 +56,15 @@ $paginaAtual = 'financeiro-baixa';
         width:34px;
         height:34px;
         border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.08);
+        border:1px solid var(--line);
         background:rgba(255,255,255,0.03);
-        color:#8fa0bd;
+        color:var(--text-muted);
         transition:color .15s, border-color .15s, background-color .15s;
     }
-    .icon-btn:hover{ color:var(--gold-light); border-color:rgba(61,126,201,0.4); background:rgba(61,126,201,0.08); }
-    .icon-btn-danger:hover{ color:#f0a2a8; border-color:rgba(140,31,40,0.5); background:rgba(140,31,40,0.1); }
+    .icon-btn:hover{ color:var(--accent-strong); border-color:rgba(var(--accent-rgb),0.4); background:rgba(var(--accent-rgb),0.08); }
+    .icon-btn-danger:hover{ color:var(--danger-text); border-color:rgba(140,31,40,0.5); background:rgba(140,31,40,0.1); }
 
-    table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
+    table tbody tr{ border-top:1px solid var(--line); }
 
     .badge{
         display:inline-flex;
@@ -77,12 +77,12 @@ $paginaAtual = 'financeiro-baixa';
         border-radius:999px;
         white-space:nowrap;
     }
-    .badge-entrada{ color:#bfe6c7; background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
-    .badge-saida{ color:#f0a2a8; background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
-    .badge-forma{ color:#aebdd6; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); }
+    .badge-entrada{ color:var(--success-text); background:rgba(66,140,82,0.14); border:1px solid rgba(66,140,82,0.4); }
+    .badge-saida{ color:var(--danger-text); background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
+    .badge-forma{ color:var(--text-soft); background:rgba(255,255,255,0.05); border:1px solid var(--line); }
 
-    .valor-entrada{ color:#7fd696; font-weight:600; }
-    .valor-saida{ color:#f0a2a8; font-weight:600; }
+    .valor-entrada{ color:var(--success-text); font-weight:600; }
+    .valor-saida{ color:var(--danger-text); font-weight:600; }
 
     /* ---- Toggle Entrada/Saída dentro do modal ---- */
     .tipo-toggle{ display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
@@ -90,29 +90,29 @@ $paginaAtual = 'financeiro-baixa';
     .tipo-toggle label{
         display:flex; align-items:center; justify-content:center; gap:0.5rem;
         padding:0.75rem; border-radius:0.85rem; cursor:pointer;
-        border:1px solid rgba(255,255,255,0.1);
+        border:1px solid var(--line);
         background:rgba(255,255,255,0.03);
-        color:#8fa0bd; font-size:13.5px; font-weight:600;
+        color:var(--text-muted); font-size:13.5px; font-weight:600;
         transition:border-color .15s, background-color .15s, color .15s;
     }
     .tipo-toggle input:checked + label.tipo-entrada{
-        border-color:rgba(66,140,82,0.5); background:rgba(66,140,82,0.14); color:#bfe6c7;
+        border-color:rgba(66,140,82,0.5); background:rgba(66,140,82,0.14); color:var(--success-text);
     }
     .tipo-toggle input:checked + label.tipo-saida{
-        border-color:rgba(140,31,40,0.55); background:rgba(140,31,40,0.14); color:#f0c9cc;
+        border-color:rgba(140,31,40,0.55); background:rgba(140,31,40,0.14); color:var(--danger-text);
     }
 
     /* Grid de "Forma de pagamento": estilos compartilhados em
        assets/css/forma-pagamento.css (componente reutilizável). */
 
     .summary-strip{ display:flex; flex-wrap:wrap; gap:1.5rem; }
-    .summary-item .label{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#7f8fac; }
+    .summary-item .label{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); }
     .summary-item .value{ font-size:1.15rem; font-weight:600; color:var(--cream); }
 
     /* ---- Modal "Ver detalhes" (somente leitura) ---- */
-    .view-row{ display:flex; justify-content:space-between; gap:1rem; padding:0.65rem 0; border-top:1px solid rgba(255,255,255,0.06); }
+    .view-row{ display:flex; justify-content:space-between; gap:1rem; padding:0.65rem 0; border-top:1px solid var(--line); }
     .view-row:first-child{ border-top:none; }
-    .view-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:#7f8fac; }
+    .view-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); }
     .view-value{ font-size:13.5px; color:var(--cream); font-weight:500; text-align:right; }
 
     /* ---------- Tema claro: reforço de contraste ---------- */
@@ -143,7 +143,7 @@ $paginaAtual = 'financeiro-baixa';
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Financeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Financeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Cadastrar Baixa</h1>
         </div>
     </header>

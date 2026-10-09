@@ -62,6 +62,15 @@ final class AcessoService
         } catch (Throwable $e) {
             // Coluna ainda não existe (migração não rodou): comportamento
             // antigo do sistema — todo barbeiro tem acesso completo.
+            // QUALQUER OUTRO erro (timeout, deadlock, queda do banco) NÃO
+            // pode virar poder de proprietário: falha FECHADA, e sem guardar
+            // no cache para tentar de novo na próxima chamada.
+            $colunaAusente = $e instanceof PDOException
+                && (($e->errorInfo[1] ?? null) === 1054 || $e->getCode() === '42S22');
+            if (!$colunaAusente) {
+                error_log('AcessoService: falha ao ler tipo_usuario: ' . $e->getMessage());
+                return self::FUNCIONARIO;
+            }
             $tipo = self::PROPRIETARIO;
         }
 

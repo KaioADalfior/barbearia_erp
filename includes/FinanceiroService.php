@@ -11,6 +11,15 @@
 require_once __DIR__ . '/forma_pagamento.php'; // FORMAS_PAGAMENTO_LABELS
 require_once __DIR__ . '/ComissaoService.php';
 
+/**
+ * O agendamento já não está mais "agendado/confirmado" (outra aba/clique
+ * concluiu, cancelou ou marcou ausente primeiro). Evita concluir em duplicidade
+ * ou "ressuscitar" um agendamento cancelado.
+ */
+class AgendamentoJaProcessadoException extends RuntimeException
+{
+}
+
 class FinanceiroService
 {
     /**
@@ -77,8 +86,16 @@ class FinanceiroService
         bool $fiado,
         int $idBarbeiro
     ): int {
-        $stmtConclui = $pdo->prepare("UPDATE Agendamentos SET Status = 'concluido' WHERE idAgendamento = :id");
+        // Só conclui quem ainda está aberto: se outra requisição (duplo clique,
+        // outra aba) chegou antes, a conclusão não repete nem sobrescreve um cancelamento.
+        $stmtConclui = $pdo->prepare(
+            "UPDATE Agendamentos SET Status = 'concluido'
+             WHERE idAgendamento = :id AND Status IN ('agendado', 'confirmado')"
+        );
         $stmtConclui->execute(['id' => $agendamento['idAgendamento']]);
+        if ($stmtConclui->rowCount() === 0) {
+            throw new AgendamentoJaProcessadoException('Agendamento #' . $agendamento['idAgendamento'] . ' já foi processado.');
+        }
 
         $stmtLibera = $pdo->prepare('UPDATE Horario SET disponivel = 1 WHERE idHorario = :h');
         $stmtLibera->execute(['h' => $agendamento['idHorario']]);
@@ -163,8 +180,14 @@ class FinanceiroService
      */
     public static function marcarAgendamentoAusente(PDO $pdo, array $agendamento): void
     {
-        $stmtMarca = $pdo->prepare("UPDATE Agendamentos SET Status = 'ausente' WHERE idAgendamento = :id");
+        $stmtMarca = $pdo->prepare(
+            "UPDATE Agendamentos SET Status = 'ausente'
+             WHERE idAgendamento = :id AND Status IN ('agendado', 'confirmado')"
+        );
         $stmtMarca->execute(['id' => $agendamento['idAgendamento']]);
+        if ($stmtMarca->rowCount() === 0) {
+            throw new AgendamentoJaProcessadoException('Agendamento #' . $agendamento['idAgendamento'] . ' já foi processado.');
+        }
 
         // Propositalmente NÃO libera o Horario aqui (ver docblock acima) —
         // ele já está com disponivel=0 desde que o agendamento foi criado
@@ -787,10 +810,17 @@ class FinanceiroService
         // a sobra dos atendimentos dos funcionários, mas esses lançamentos
         // não são dele). E funcionário não apaga a receita de um atendimento
         // dele: ela é a base da comissão (quem controla é o proprietário).
-        $stmtOrigem = $pdo->prepare('SELECT origem FROM FinanceiroLancamentos WHERE idLancamento = :id AND id_barbeiro = :b');
+        $stmtOrigem = $pdo->prepare('SELECT origem, status FROM FinanceiroLancamentos WHERE idLancamento = :id AND id_barbeiro = :b');
         $stmtOrigem->execute(['id' => $idLancamento, 'b' => $idBarbeiro]);
-        $origem = $stmtOrigem->fetchColumn();
-        if ($origem === false) {
+        $linhaLanc = $stmtOrigem->fetch();
+        if (!$linhaLanc) {
+            return false;
+        }
+        $origem = $linhaLanc['origem'];
+        // Só se exclui lançamento PAGO. Antes, para um fiado pendente, o
+        // histórico do cliente e os recebimentos parciais eram apagados e o
+        // lançamento continuava existindo.
+        if ($linhaLanc['status'] !== 'pago') {
             return false;
         }
         if ($origem === 'agendamento' && AcessoService::tipoDoBarbeiro($pdo, $idBarbeiro) === AcessoService::FUNCIONARIO) {

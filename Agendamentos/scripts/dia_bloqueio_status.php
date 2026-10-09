@@ -17,7 +17,14 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token é enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../includes/HorarioService.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -29,7 +36,7 @@ $idBarbeiro = (int) $_SESSION['id'];
 $data       = trim($_POST['data'] ?? '');
 $acao       = $_POST['acao'] ?? '';
 
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data) || !in_array($acao, ['bloquear', 'desbloquear'], true)) {
+if (!HorarioService::dataValida($data) || !in_array($acao, ['bloquear', 'desbloquear'], true)) {
     echo json_encode(['ok' => false, 'erro' => 'Requisição inválida.']);
     exit;
 }

@@ -3,54 +3,54 @@
 // Endpoint AJAX (POST) chamado pelo modal "Concluir Agendamento" em
 // Agendamentos/paginas/agendar.php.
 //
-// Recebe, alÈm do agendamento, a(s) forma(s) de pagamento (mesmo
+// Recebe, al√©m do agendamento, a(s) forma(s) de pagamento (mesmo
 // componente usado em Financeiro > Cadastrar Baixa) e a flag "fiado".
-// Marca o agendamento como concluÌdo (o registro nunca È apagado ó fica
-// no banco com Status = 'concluido' para histÛrico) e cria automaticamente
-// o lanÁamento financeiro correspondente:
-//   - fiado = 0 -> lanÁamento PAGO, entra normalmente nas receitas.
-//   - fiado = 1 -> lanÁamento PENDENTE, fica fora do c·lculo de receitas
-//                  atÈ ser recebido em Financeiro > Fiados.
-// O hor·rio volta a ficar disponÌvel na grade, igual ao cancelamento.
+// Marca o agendamento como conclu√≠do (o registro nunca √© apagado ‚Äî fica
+// no banco com Status = 'concluido' para hist√≥rico) e cria automaticamente
+// o lan√ßamento financeiro correspondente:
+//   - fiado = 0 -> lan√ßamento PAGO, entra normalmente nas receitas.
+//   - fiado = 1 -> lan√ßamento PENDENTE, fica fora do c√°lculo de receitas
+//                  at√© ser recebido em Financeiro > Fiados.
+// O hor√°rio volta a ficar dispon√≠vel na grade, igual ao cancelamento.
 //
-// Agendamento duplicado (dois hor·rios vinculados por grupo_agendamento):
-// concluir QUALQUER UMA das duas linhas (a principal ou a secund·ria)
-// conclui as DUAS automaticamente, de forma simÈtrica. O lanÁamento
-// financeiro È criado UMA ⁄NICA VEZ, sempre a partir da linha PRINCIPAL
-// (que carrega o valor cobrado ó 1x ou 2x o serviÁo); a linha secund·ria
-// sÛ È marcada como concluÌda e tem seu hor·rio liberado, sem gerar
-// nenhum lanÁamento prÛprio (evita duplicidade no financeiro). Pra
-// concluir S” UM dos dois hor·rios (deixando o outro em aberto), ver
+// Agendamento duplicado (dois hor√°rios vinculados por grupo_agendamento):
+// concluir QUALQUER UMA das duas linhas (a principal ou a secund√°ria)
+// conclui as DUAS automaticamente, de forma sim√©trica. O lan√ßamento
+// financeiro √© criado UMA √öNICA VEZ, sempre a partir da linha PRINCIPAL
+// (que carrega o valor cobrado ‚Äî 1x ou 2x o servi√ßo); a linha secund√°ria
+// s√≥ √© marcada como conclu√≠da e tem seu hor√°rio liberado, sem gerar
+// nenhum lan√ßamento pr√≥prio (evita duplicidade no financeiro). Pra
+// concluir S√ì UM dos dois hor√°rios (deixando o outro em aberto), ver
 // agendamento_concluir_individual.php.
 //
-// ServiÁo realmente realizado: o modal "Concluir Agendamento" deixa o
-// barbeiro escolher, num SELECT alimentado pelos serviÁos cadastrados no
-// banco, qual serviÁo foi de fato prestado ó pode ser diferente do que foi
-// originalmente agendado (ex.: agendou "Corte + Barba" mas sÛ fez
+// Servi√ßo realmente realizado: o modal "Concluir Agendamento" deixa o
+// barbeiro escolher, num SELECT alimentado pelos servi√ßos cadastrados no
+// banco, qual servi√ßo foi de fato prestado ‚Äî pode ser diferente do que foi
+// originalmente agendado (ex.: agendou "Corte + Barba" mas s√≥ fez
 // "Corte"). Isso vale TANTO pra agendamento avulso quanto pra duplicado:
-//   - avulso: um ˙nico campo, idServicoRealizado.
-//   - duplicado: DOIS campos independentes ó idServicoRealizado (Hor·rio
-//     1/principal) e idServicoRealizadoSecundario (Hor·rio 2/secund·rio)
-//     ó cobre o caso de "o pai vai com o filho e corta outro corte do j·
+//   - avulso: um √∫nico campo, idServicoRealizado.
+//   - duplicado: DOIS campos independentes ‚Äî idServicoRealizado (Hor√°rio
+//     1/principal) e idServicoRealizadoSecundario (Hor√°rio 2/secund√°rio)
+//     ‚Äî cobre o caso de "o pai vai com o filho e corta outro corte do j√°
 //     agendado", em que cada pessoa pode ter feito um corte diferente do
 //     que constava no agendamento original. O valor final cobrado (no
-//     lanÁamento ˙nico, sempre pela linha principal) È recalculado a
-//     partir dos serviÁos efetivamente escolhidos: sÛ o do Hor·rio 1
+//     lan√ßamento √∫nico, sempre pela linha principal) √© recalculado a
+//     partir dos servi√ßos efetivamente escolhidos: s√≥ o do Hor√°rio 1
 //     (cobranca_duplicado = 'um') ou a soma dos dois (cobranca_duplicado
-//     = 'dois') ó mesma regra de cobranÁa j· definida na criaÁ„o do
-//     agendamento, sÛ que agora aplicada aos serviÁos REALMENTE feitos.
-// Quando informado, o Agendamento È atualizado (idServico + Valor) ANTES
-// de gerar o lanÁamento financeiro, ent„o tudo que lÍ a partir daÌ
-// (financeiro, histÛrico do cliente, relatÛrios) j· reflete sÛ o que foi
+//     = 'dois') ‚Äî mesma regra de cobran√ßa j√° definida na cria√ß√£o do
+//     agendamento, s√≥ que agora aplicada aos servi√ßos REALMENTE feitos.
+// Quando informado, o Agendamento √© atualizado (idServico + Valor) ANTES
+// de gerar o lan√ßamento financeiro, ent√£o tudo que l√™ a partir da√≠
+// (financeiro, hist√≥rico do cliente, relat√≥rios) j√° reflete s√≥ o que foi
 // realmente cobrado.
 //
-// "Cliente Ausente" (ausente = 1): o cliente n„o veio. O hor·rio È
-// liberado exatamente como numa conclus„o normal (grade mostra "Ausente -
-// Nome do Cliente" em vez de "ConcluÌdo - Nome"), mas N√O È gerado nenhum
-// lanÁamento financeiro (n„o houve cobranÁa) ó nem pago, nem fiado. Forma
-// de pagamento e "fiado" s„o ignorados nesse caso. Agendamento duplicado
-// segue a mesma regra simÈtrica: marcar qualquer uma das duas linhas como
-// ausente marca as duas, sem gerar lanÁamento nenhum.
+// "Cliente Ausente" (ausente = 1): o cliente n√£o veio. O hor√°rio √©
+// liberado exatamente como numa conclus√£o normal (grade mostra "Ausente -
+// Nome do Cliente" em vez de "Conclu√≠do - Nome"), mas N√ÉO √© gerado nenhum
+// lan√ßamento financeiro (n√£o houve cobran√ßa) ‚Äî nem pago, nem fiado. Forma
+// de pagamento e "fiado" s√£o ignorados nesse caso. Agendamento duplicado
+// segue a mesma regra sim√©trica: marcar qualquer uma das duas linhas como
+// ausente marca as duas, sem gerar lan√ßamento nenhum.
 
 require_once __DIR__ . '/../../includes/session.php';
 header('Content-Type: application/json; charset=utf-8');
@@ -58,12 +58,18 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token √© enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/FinanceiroService.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['ok' => false, 'erro' => 'MÈtodo n„o permitido.']);
+    echo json_encode(['ok' => false, 'erro' => 'M√©todo n√£o permitido.']);
     exit;
 }
 
@@ -77,16 +83,16 @@ $idServicoRealizado            = (int) ($_POST['idServicoRealizado'] ?? 0);
 $idServicoRealizadoSecundario  = (int) ($_POST['idServicoRealizadoSecundario'] ?? 0);
 
 if ($idAgendamento <= 0) {
-    echo json_encode(['ok' => false, 'erro' => 'Agendamento inv·lido.']);
+    echo json_encode(['ok' => false, 'erro' => 'Agendamento inv√°lido.']);
     exit;
 }
 
 $formas = FinanceiroService::normalizarFormasPagamento($formasBrutas);
 
-// Forma de pagamento sÛ È obrigatÛria quando N√O È fiado e N√O È "Cliente
-// Ausente" ó no fiado ela fica bloqueada no formul·rio e sÛ È definida no
-// recebimento (Financeiro > Fiados); no ausente n„o existe cobranÁa
-// nenhuma, ent„o n„o faz sentido pedir forma de pagamento.
+// Forma de pagamento s√≥ √© obrigat√≥ria quando N√ÉO √© fiado e N√ÉO √© "Cliente
+// Ausente" ‚Äî no fiado ela fica bloqueada no formul√°rio e s√≥ √© definida no
+// recebimento (Financeiro > Fiados); no ausente n√£o existe cobran√ßa
+// nenhuma, ent√£o n√£o faz sentido pedir forma de pagamento.
 if (!$ausente && !$fiado && empty($formas)) {
     echo json_encode(['ok' => false, 'erro' => 'Selecione ao menos uma forma de pagamento.']);
     exit;
@@ -106,23 +112,23 @@ $stmt->execute(['id' => $idAgendamento, 'b' => $idBarbeiro]);
 $agendamento = $stmt->fetch();
 
 if (!$agendamento) {
-    echo json_encode(['ok' => false, 'erro' => 'Agendamento n„o encontrado.']);
+    echo json_encode(['ok' => false, 'erro' => 'Agendamento n√£o encontrado.']);
     exit;
 }
 
 if ($agendamento['Status'] === 'concluido') {
-    echo json_encode(['ok' => false, 'erro' => 'Esse agendamento j· est· concluÌdo.']);
+    echo json_encode(['ok' => false, 'erro' => 'Esse agendamento j√° est√° conclu√≠do.']);
     exit;
 }
 
 if ($agendamento['Status'] === 'ausente') {
-    echo json_encode(['ok' => false, 'erro' => 'Esse agendamento j· foi marcado como Cliente Ausente.']);
+    echo json_encode(['ok' => false, 'erro' => 'Esse agendamento j√° foi marcado como Cliente Ausente.']);
     exit;
 }
 
 /**
- * Busca um serviÁo ATIVO pelo id. Usada tanto pro serviÁo do Hor·rio 1
- * quanto do Hor·rio 2 ó mesma validaÁ„o nos dois casos.
+ * Busca um servi√ßo ATIVO pelo id. Usada tanto pro servi√ßo do Hor√°rio 1
+ * quanto do Hor√°rio 2 ‚Äî mesma valida√ß√£o nos dois casos.
  */
 function buscarServicoAtivo(PDO $pdo, int $idServico): ?array
 {
@@ -138,8 +144,8 @@ function buscarServicoAtivo(PDO $pdo, int $idServico): ?array
 try {
     $pdo->beginTransaction();
 
-    // ---------- Agendamento duplicado: descobre a linha irm„ (se houver) ----------
-    // Sempre roteia o lanÁamento financeiro pela linha PRINCIPAL, n„o
+    // ---------- Agendamento duplicado: descobre a linha irm√£ (se houver) ----------
+    // Sempre roteia o lan√ßamento financeiro pela linha PRINCIPAL, n√£o
     // importa qual das duas o barbeiro clicou.
     $agendamentoPrincipal  = $agendamento;
     $agendamentoSecundario = null;
@@ -169,16 +175,16 @@ try {
         }
     }
 
-    // ---------- ServiÁo realmente realizado (SELECT do modal Concluir) ----------
+    // ---------- Servi√ßo realmente realizado (SELECT do modal Concluir) ----------
     // Vale tanto pra agendamento avulso quanto pra duplicado (ver
-    // cabeÁalho do arquivo) ó a ˙nica diferenÁa È que o duplicado tem DOIS
-    // campos independentes, um por hor·rio.
+    // cabe√ßalho do arquivo) ‚Äî a √∫nica diferen√ßa √© que o duplicado tem DOIS
+    // campos independentes, um por hor√°rio.
     if (!$ausente) {
         if ($idServicoRealizado > 0) {
             $servicoRealizadoPrincipal = buscarServicoAtivo($pdo, $idServicoRealizado);
             if (!$servicoRealizadoPrincipal) {
                 $pdo->rollBack();
-                echo json_encode(['ok' => false, 'erro' => 'ServiÁo selecionado para o Hor·rio 1 È inv·lido ou est· inativo.']);
+                echo json_encode(['ok' => false, 'erro' => 'Servi√ßo selecionado para o Hor√°rio 1 √© inv√°lido ou est√° inativo.']);
                 exit;
             }
 
@@ -198,7 +204,7 @@ try {
             $servicoRealizadoSecundario = buscarServicoAtivo($pdo, $idServicoRealizadoSecundario);
             if (!$servicoRealizadoSecundario) {
                 $pdo->rollBack();
-                echo json_encode(['ok' => false, 'erro' => 'ServiÁo selecionado para o Hor·rio 2 È inv·lido ou est· inativo.']);
+                echo json_encode(['ok' => false, 'erro' => 'Servi√ßo selecionado para o Hor√°rio 2 √© inv√°lido ou est√° inativo.']);
                 exit;
             }
 
@@ -214,9 +220,9 @@ try {
         }
 
         // Recalcula o valor cobrado (sempre pela linha principal) a partir
-        // dos serviÁos REALMENTE selecionados acima ó nunca do que foi sÛ
-        // agendado. Mesma regra de cobranca_duplicado j· definida na
-        // criaÁ„o: 'um' cobra sÛ o Hor·rio 1; 'dois' soma os dois.
+        // dos servi√ßos REALMENTE selecionados acima ‚Äî nunca do que foi s√≥
+        // agendado. Mesma regra de cobranca_duplicado j√° definida na
+        // cria√ß√£o: 'um' cobra s√≥ o Hor√°rio 1; 'dois' soma os dois.
         if ($agendamentoSecundario) {
             $novoValorPrincipal = $agendamentoPrincipal['Valor'];
             if (($agendamentoPrincipal['cobranca_duplicado'] ?? null) === 'dois') {
@@ -232,7 +238,7 @@ try {
     }
 
     if ($ausente) {
-        // ---------- Cliente Ausente: libera o hor·rio, N√O gera lanÁamento ----------
+        // ---------- Cliente Ausente: libera o hor√°rio, N√ÉO gera lan√ßamento ----------
         FinanceiroService::marcarAgendamentoAusente($pdo, $agendamentoPrincipal);
 
         if ($agendamentoSecundario) {
@@ -241,19 +247,19 @@ try {
 
         $idLancamento = null;
     } else {
-        // Nome do serviÁo do hor·rio secund·rio (se houver) ó usado para o
-        // lanÁamento/fiado exibir os DOIS cortes quando os dois foram cobrados
-        // (cobranca_duplicado = 'dois'), e sÛ o principal quando foi cobrado
+        // Nome do servi√ßo do hor√°rio secund√°rio (se houver) ‚Äî usado para o
+        // lan√ßamento/fiado exibir os DOIS cortes quando os dois foram cobrados
+        // (cobranca_duplicado = 'dois'), e s√≥ o principal quando foi cobrado
         // apenas um (ver FinanceiroService::concluirAgendamentoComPagamento).
         $agendamentoPrincipal['servicoSecundarioNome'] = $agendamentoSecundario['servicoNome'] ?? null;
 
-        // ⁄nico lanÁamento financeiro do atendimento, sempre com o valor da
-        // linha principal (1x ou 2x o serviÁo, j· recalculado acima a
+        // √önico lan√ßamento financeiro do atendimento, sempre com o valor da
+        // linha principal (1x ou 2x o servi√ßo, j√° recalculado acima a
         // partir do que foi realmente escolhido).
         $idLancamento = FinanceiroService::concluirAgendamentoComPagamento($pdo, $agendamentoPrincipal, $formas, $fiado, $idBarbeiro);
 
-        // Conclui tambÈm a linha secund·ria (sem gerar nenhum lanÁamento
-        // prÛprio) e libera o hor·rio dela ó mesmo comportamento simÈtrico
+        // Conclui tamb√©m a linha secund√°ria (sem gerar nenhum lan√ßamento
+        // pr√≥prio) e libera o hor√°rio dela ‚Äî mesmo comportamento sim√©trico
         // visto pelo barbeiro em qualquer uma das duas linhas.
         if ($agendamentoSecundario) {
             $stmtConcluiSecundario = $pdo->prepare("UPDATE Agendamentos SET Status = 'concluido' WHERE idAgendamento = :id");
@@ -267,18 +273,18 @@ try {
     $pdo->commit();
 
     $camposLog = [
-        ['name' => '?? Agendamento', 'value' => '#' . $agendamentoPrincipal['idAgendamento'], 'inline' => true],
-        ['name' => '?? Cliente', 'value' => $agendamentoPrincipal['clienteNome'], 'inline' => true],
-        ['name' => '?? ServiÁo', 'value' => $agendamentoPrincipal['servicoNome'], 'inline' => true],
-        ['name' => '?? Status financeiro', 'value' => $ausente ? 'Cliente ausente (sem cobranÁa)' : ($fiado ? 'Fiado (pendente)' : 'Pago'), 'inline' => true],
+        ['name' => 'üìÖ Agendamento', 'value' => '#' . $agendamentoPrincipal['idAgendamento'], 'inline' => true],
+        ['name' => 'üë§ Cliente', 'value' => $agendamentoPrincipal['clienteNome'], 'inline' => true],
+        ['name' => '‚úÇÔ∏è Servi√ßo', 'value' => $agendamentoPrincipal['servicoNome'], 'inline' => true],
+        ['name' => 'üí∞ Status financeiro', 'value' => $ausente ? 'Cliente ausente (sem cobran√ßa)' : ($fiado ? 'Fiado (pendente)' : 'Pago'), 'inline' => true],
     ];
 
     if ($agendamentoSecundario) {
-        $camposLog[] = ['name' => '?? Duplicado', 'value' => ($ausente ? 'Marcado como ausente junto com #' : 'ConcluÌdo junto com #') . $agendamentoSecundario['idAgendamento'] . ' (' . $agendamentoSecundario['servicoNome'] . ')', 'inline' => true];
+        $camposLog[] = ['name' => 'üë• Duplicado', 'value' => ($ausente ? 'Marcado como ausente junto com #' : 'Conclu√≠do junto com #') . $agendamentoSecundario['idAgendamento'] . ' (' . $agendamentoSecundario['servicoNome'] . ')', 'inline' => true];
     }
 
     DiscordLogger::agendamentos(
-        $ausente ? '?? Cliente ausente' : '? Agendamento concluÌdo',
+        $ausente ? 'üôà Cliente ausente' : '‚úÖ Agendamento conclu√≠do',
         $camposLog,
         $ausente ? DiscordLogger::COR_ALERTA : DiscordLogger::COR_SUCESSO
     );
@@ -290,11 +296,17 @@ try {
         'ausente'                 => $ausente,
         'idAgendamentoSecundario' => $agendamentoSecundario['idAgendamento'] ?? null,
     ]);
+} catch (AgendamentoJaProcessadoException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    http_response_code(409);
+    echo json_encode(['ok' => false, 'erro' => 'Esse agendamento j√° foi conclu√≠do, cancelado ou marcado como ausente. Atualize a p√°gina.']);
 } catch (Exception $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    DiscordLogger::erro('?? Falha ao concluir agendamento', $e);
+    DiscordLogger::erro('üí• Falha ao concluir agendamento', $e);
     http_response_code(500);
     echo json_encode(['ok' => false, 'erro' => 'Erro ao concluir o agendamento.']);
 }

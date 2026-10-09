@@ -6,7 +6,10 @@ require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro']);
 
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
 require_once __DIR__ . '/../../includes/csrf.php';
+// Preço/serviço/foto: só o proprietário altera (funcionário só consulta).
+AcessoService::exigirProprietario($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /servicos');

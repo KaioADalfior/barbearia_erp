@@ -16,7 +16,7 @@ $paginaAtual = 'barbeiro-cadastrar';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <style>
     .tipo-opcoes{ display:grid; grid-template-columns:1fr; gap:.75rem; }
     @media (min-width:520px){ .tipo-opcoes{ grid-template-columns:1fr 1fr; } }
@@ -24,7 +24,7 @@ $paginaAtual = 'barbeiro-cadastrar';
     .tipo-opcao input{ position:absolute; opacity:0; inset:0; width:100%; height:100%; cursor:pointer; margin:0; }
     .tipo-opcao__card{
         display:flex; gap:.75rem; align-items:flex-start; padding:.9rem 1rem; border-radius:.9rem;
-        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.10);
+        background:rgba(255,255,255,0.03); border:1px solid var(--line);
         transition:border-color .15s, background .15s;
     }
     .tipo-opcao__dot{
@@ -32,12 +32,12 @@ $paginaAtual = 'barbeiro-cadastrar';
         border:2px solid rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center;
     }
     .tipo-opcao__dot::after{ content:''; width:8px; height:8px; border-radius:9999px; background:transparent; transition:background .15s; }
-    .tipo-opcao input:checked + .tipo-opcao__card{ border-color:rgba(61,126,201,0.75); background:rgba(61,126,201,0.12); }
-    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot{ border-color:#6fa8ea; }
-    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot::after{ background:#6fa8ea; }
-    .tipo-opcao input:focus-visible + .tipo-opcao__card{ outline:2px solid #6fa8ea; outline-offset:2px; }
+    .tipo-opcao input:checked + .tipo-opcao__card{ border-color:rgba(var(--accent-rgb),0.75); background:rgba(var(--accent-rgb),0.12); }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot{ border-color:var(--accent-strong); }
+    .tipo-opcao input:checked + .tipo-opcao__card .tipo-opcao__dot::after{ background:var(--accent-strong); }
+    .tipo-opcao input:focus-visible + .tipo-opcao__card{ outline:2px solid var(--accent-strong); outline-offset:2px; }
     .tipo-opcao__titulo{ font-size:14px; font-weight:600; color:var(--cream); }
-    .tipo-opcao__desc{ font-size:12px; line-height:1.45; color:#8b97ac; margin-top:2px; }
+    .tipo-opcao__desc{ font-size:12px; line-height:1.45; color:var(--text-muted); margin-top:2px; }
 </style>
 </head>
 <body class="flex">
@@ -53,7 +53,7 @@ $paginaAtual = 'barbeiro-cadastrar';
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Barbeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Barbeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Cadastrar Barbeiro</h1>
         </div>
     </header>
@@ -133,7 +133,7 @@ $paginaAtual = 'barbeiro-cadastrar';
 
                     <div class="mb-7">
                         <label class="field-label block mb-2 uppercase" for="senha">Senha</label>
-                        <input id="senha" name="senha" type="password" placeholder="Senha de acesso" required minlength="6"
+                        <input id="senha" name="senha" type="password" placeholder="Senha de acesso" required minlength="8"
                                class="field w-full h-12 px-4 rounded-xl text-sm">
                     </div>
 

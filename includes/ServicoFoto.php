@@ -5,6 +5,7 @@
 // nome do arquivo (coluna Servico.foto).
 
 require_once __DIR__ . '/ImagemPersistente.php';
+require_once __DIR__ . '/ImagemSegura.php';
 
 final class ServicoFoto
 {
@@ -97,7 +98,7 @@ final class ServicoFoto
         }
 
         $nome = 'servico_' . bin2hex(random_bytes(8)) . '.' . self::TIPOS[$mime];
-        if (!move_uploaded_file($arquivo['tmp_name'], $pasta . $nome)) {
+        if (!ImagemSegura::mover($arquivo['tmp_name'], $mime, $pasta . $nome)) {
             return ['ok' => false, 'erro' => 'salvar'];
         }
 

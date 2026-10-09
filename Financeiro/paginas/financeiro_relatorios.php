@@ -16,60 +16,60 @@ $paginaAtual = 'financeiro-relatorios';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     .modal-overlay{ background:rgba(0,0,0,0.7); backdrop-filter:blur(3px); }
-    .modal-card{ background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3)); border:1px solid rgba(61,126,201,0.16); }
+    .modal-card{ background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3)); border:1px solid rgba(var(--accent-rgb),0.16); }
 
     .icon-btn{
         display:inline-flex; align-items:center; justify-content:center;
         width:34px; height:34px; border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); color:#8fa0bd;
+        border:1px solid var(--line); background:rgba(255,255,255,0.03); color:var(--text-muted);
         transition:color .15s, border-color .15s, background-color .15s;
     }
-    .icon-btn:hover{ color:var(--gold-light); border-color:rgba(61,126,201,0.4); background:rgba(61,126,201,0.08); }
-    .icon-btn-danger:hover{ color:#f0a2a8; border-color:rgba(140,31,40,0.5); background:rgba(140,31,40,0.1); }
+    .icon-btn:hover{ color:var(--accent-strong); border-color:rgba(var(--accent-rgb),0.4); background:rgba(var(--accent-rgb),0.08); }
+    .icon-btn-danger:hover{ color:var(--danger-text); border-color:rgba(140,31,40,0.5); background:rgba(140,31,40,0.1); }
 
-    table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
+    table tbody tr{ border-top:1px solid var(--line); }
 
     .badge{
         display:inline-flex; align-items:center; gap:0.35rem;
         font-size:11px; font-weight:600; letter-spacing:0.03em;
         padding:0.28rem 0.65rem; border-radius:999px; white-space:nowrap;
     }
-    .badge-diario  { color:#7fd0d9; background:rgba(15,92,102,0.20);  border:1px solid rgba(15,92,102,0.5); }
-    .badge-semanal { color:#bfe6c7; background:rgba(66,140,82,0.16); border:1px solid rgba(66,140,82,0.45); }
-    .badge-mensal  { color:#9dc4f0; background:rgba(61,126,201,0.16); border:1px solid rgba(61,126,201,0.45); }
-    .badge-anual   { color:#f0a2a8; background:rgba(140,31,40,0.16); border:1px solid rgba(140,31,40,0.45); }
-    .badge-periodo { color:#e6cf9d; background:rgba(158,120,25,0.16); border:1px solid rgba(158,120,25,0.45); }
+    .badge-diario  { color:var(--info-text); background:rgba(15,92,102,0.20);  border:1px solid rgba(15,92,102,0.5); }
+    .badge-semanal { color:var(--success-text); background:rgba(66,140,82,0.16); border:1px solid rgba(66,140,82,0.45); }
+    .badge-mensal  { color:var(--info-text); background:rgba(var(--accent-rgb),0.16); border:1px solid rgba(var(--accent-rgb),0.45); }
+    .badge-anual   { color:var(--danger-text); background:rgba(140,31,40,0.16); border:1px solid rgba(140,31,40,0.45); }
+    .badge-periodo { color:var(--warning-text); background:rgba(158,120,25,0.16); border:1px solid rgba(158,120,25,0.45); }
 
-    .valor-entrada{ color:#7fd696; font-weight:600; }
-    .valor-saida{ color:#f0a2a8; font-weight:600; }
+    .valor-entrada{ color:var(--success-text); font-weight:600; }
+    .valor-saida{ color:var(--danger-text); font-weight:600; }
 
     .gerar-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.14);
+        border:1px solid rgba(var(--accent-rgb),0.14);
     }
 
     .tipo-radio{ display:none; }
     .tipo-label{
         display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.35rem;
-        border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02);
+        border:1px solid var(--line); background:rgba(255,255,255,0.02);
         border-radius:0.85rem; padding:0.7rem 0.5rem; cursor:pointer; text-align:center;
         transition:border-color .15s, background-color .15s, color .15s;
-        color:#8fa0bd; font-size:12px; font-weight:600; letter-spacing:0.02em;
+        color:var(--text-muted); font-size:12px; font-weight:600; letter-spacing:0.02em;
     }
-    .tipo-label:hover{ border-color:rgba(61,126,201,0.35); }
+    .tipo-label:hover{ border-color:rgba(var(--accent-rgb),0.35); }
     .tipo-radio:checked + .tipo-label{
-        border-color:rgba(61,126,201,0.55);
-        background:rgba(61,126,201,0.1);
-        color:var(--gold-light);
+        border-color:rgba(var(--accent-rgb),0.55);
+        background:rgba(var(--accent-rgb),0.1);
+        color:var(--accent-strong);
     }
     .tipo-label svg{ opacity:0.85; }
 
-    .empty-state{ border:1px dashed rgba(255,255,255,0.12); border-radius:1rem; }
+    .empty-state{ border:1px dashed var(--line); border-radius:1rem; }
 
     /* Linha de data(s) + botão: sempre na mesma linha. Em telas estreitas
        os campos de data encolhem e o botão vira ícone-only para nunca
@@ -111,7 +111,7 @@ $paginaAtual = 'financeiro-relatorios';
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Financeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Financeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Relatórios</h1>
         </div>
     </header>
@@ -122,11 +122,11 @@ $paginaAtual = 'financeiro-relatorios';
         <!-- ==================== GERAR RELATÓRIO (MANUAL) ==================== -->
         <div class="gerar-card rounded-2xl p-5 sm:p-6 mb-6">
             <div class="flex items-start gap-3 mb-5">
-                <div class="w-10 h-10 rounded-xl bg-[rgba(61,126,201,0.14)] flex items-center justify-center shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-[rgba(var(--accent-rgb),0.14)] flex items-center justify-center shrink-0">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5Z" stroke="var(--gold-light)" stroke-width="1.4" stroke-linejoin="round"/>
-                        <path d="M14 3.5V8h4.5" stroke="var(--gold-light)" stroke-width="1.4" stroke-linejoin="round"/>
-                        <path d="M9 13h6M9 16h6" stroke="var(--gold-light)" stroke-width="1.3" stroke-linecap="round"/>
+                        <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5Z" stroke="var(--accent-strong)" stroke-width="1.4" stroke-linejoin="round"/>
+                        <path d="M14 3.5V8h4.5" stroke="var(--accent-strong)" stroke-width="1.4" stroke-linejoin="round"/>
+                        <path d="M9 13h6M9 16h6" stroke="var(--accent-strong)" stroke-width="1.3" stroke-linecap="round"/>
                     </svg>
                 </div>
                 <div>
@@ -435,7 +435,7 @@ function excluirRelatorio(idRelatorio) {
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#8c1f28',
         background: '#182338',
-        color: '#e9eef6'
+        color: 'var(--cream)'
     }).then(function (resultado) {
         if (!resultado.isConfirmed) return;
 

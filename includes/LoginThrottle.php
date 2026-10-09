@@ -19,15 +19,38 @@
  */
 
 require_once __DIR__ . '/../config/security.php';
+require_once __DIR__ . '/IpCliente.php';
 
 class LoginThrottle
 {
     private static function chave(string $login): string
     {
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'desconhecido';
-        // normaliza o login (case-insensitive) pra não driblar o limite só
-        // variando maiúsculas/minúsculas
-        return $ip . ':' . mb_strtolower(trim($login));
+        $ip = IpCliente::obter();
+        // Normaliza o login como o banco compara (sem diferença de
+        // maiúsculas/minúsculas nem de acentos): "Admin", "admin" e "admín"
+        // contam como a MESMA conta — senão bastava variar acento para
+        // ganhar tentativas novas.
+        $norm = mb_strtolower(trim($login));
+        if (function_exists('iconv')) {
+            $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $norm);
+            if ($ascii !== false && $ascii !== '') {
+                $norm = preg_replace('/[^a-z0-9._@-]/', '', strtolower($ascii)) ?: $norm;
+            }
+        }
+        return $ip . ':' . substr($norm, 0, 80);
+    }
+
+    /** Apaga tentativas antigas (a tabela só cresceria) — chamado de vez em quando. */
+    private static function limparAntigas(PDO $pdo): void
+    {
+        if (random_int(1, 50) !== 1) {
+            return;
+        }
+        try {
+            $pdo->exec('DELETE FROM LoginTentativas WHERE criado_em < DATE_SUB(NOW(), INTERVAL 7 DAY)');
+        } catch (Throwable $e) {
+            // sem importância: tenta de novo na próxima
+        }
     }
 
     /**
@@ -68,6 +91,7 @@ class LoginThrottle
 
     public static function registrarFalha(PDO $pdo, string $login): void
     {
+        self::limparAntigas($pdo);
         $stmt = $pdo->prepare(
             'INSERT INTO LoginTentativas (chave, sucesso, criado_em) VALUES (:chave, 0, NOW())'
         );

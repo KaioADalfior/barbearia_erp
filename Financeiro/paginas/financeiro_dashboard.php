@@ -17,7 +17,7 @@ $paginaAtual = 'financeiro-dashboard';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <style>
@@ -30,13 +30,13 @@ $paginaAtual = 'financeiro-dashboard';
         letter-spacing:0.04em;
         padding:0.3rem 0.7rem;
         border-radius:999px;
-        color:#6fa8ea;
-        background:rgba(61,126,201,0.10);
-        border:1px solid rgba(61,126,201,0.35);
+        color:var(--accent-strong);
+        background:rgba(var(--accent-rgb),0.10);
+        border:1px solid rgba(var(--accent-rgb),0.35);
     }
     .kpi-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.12);
+        border:1px solid rgba(var(--accent-rgb),0.12);
         position:relative;
         overflow:hidden;
     }
@@ -49,23 +49,23 @@ $paginaAtual = 'financeiro-dashboard';
         justify-content:center;
         flex-shrink:0;
     }
-    .kpi-entrada .kpi-card__icon{ background:rgba(66,140,82,0.14); color:#7fd696; }
-    .kpi-saida   .kpi-card__icon{ background:rgba(140,31,40,0.14); color:#f0a2a8; }
-    .kpi-saldo   .kpi-card__icon{ background:rgba(61,126,201,0.14); color:var(--gold-light); }
-    .kpi-qtd     .kpi-card__icon{ background:rgba(15,92,102,0.30); color:#7fd0d9; }
+    .kpi-entrada .kpi-card__icon{ background:rgba(66,140,82,0.14); color:var(--success-text); }
+    .kpi-saida   .kpi-card__icon{ background:rgba(140,31,40,0.14); color:var(--danger-text); }
+    .kpi-saldo   .kpi-card__icon{ background:rgba(var(--accent-rgb),0.14); color:var(--accent-strong); }
+    .kpi-qtd     .kpi-card__icon{ background:rgba(15,92,102,0.30); color:var(--info-text); }
 
     .period-tabs{
         display:inline-flex;
         gap:0.25rem;
         padding:0.3rem;
         border-radius:0.85rem;
-        background:rgba(0,0,0,0.35);
-        border:1px solid rgba(255,255,255,0.08);
+        background:var(--field-bg);
+        border:1px solid var(--line);
     }
     .period-tab{
         border:none;
         background:transparent;
-        color:#7f8fac;
+        color:var(--text-muted);
         font-size:12.5px;
         font-weight:600;
         letter-spacing:0.03em;
@@ -78,7 +78,7 @@ $paginaAtual = 'financeiro-dashboard';
     .period-tab:hover{ color:var(--cream); }
     .period-tab.is-active{
         background:linear-gradient(180deg, var(--gold-light), var(--gold));
-        color:#ffffff;
+        color:var(--accent-on);
     }
 
     .chart-wrap{ position:relative; height:320px; }
@@ -90,7 +90,7 @@ $paginaAtual = 'financeiro-dashboard';
         justify-content:space-between;
         gap:0.75rem;
         padding:0.6rem 0;
-        border-top:1px solid rgba(255,255,255,0.06);
+        border-top:1px solid var(--line);
         font-size:13px;
     }
     .legend-item:first-child{ border-top:none; }
@@ -121,7 +121,7 @@ $paginaAtual = 'financeiro-dashboard';
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Financeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Financeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Dashboard</h1>
         </div>
     </header>
@@ -253,15 +253,17 @@ $paginaAtual = 'financeiro-dashboard';
    ===================================================================== */
 
 const ehTemaClaro = document.documentElement.getAttribute('data-theme') === 'light';
-const corEixo   = ehTemaClaro ? '#1e293b' : '#7f8fac';
-const corLegenda = ehTemaClaro ? '#334155' : '#aebdd6';
+// Chart.js desenha em <canvas> e não entende var(--x): lê os tokens já resolvidos.
+const abToken = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+const corEixo   = abToken('--text-muted');
+const corLegenda = abToken('--text-soft');
 const corGradeGraf = ehTemaClaro ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
 
 const CORES_FORMAS = {
-    pix:       '#6fa8ea',
-    credito:   '#3d7ec9',
+    pix:       abToken('--accent-strong'),
+    credito:   abToken('--accent-lo'),
     debito:    '#428c52',
-    dinheiro:  '#3d7ec9',
+    dinheiro:  abToken('--accent'),
     boleto:    '#8c1f28'
 };
 const LABEL_FORMAS = <?= json_encode(FORMAS_PAGAMENTO_LABELS, JSON_UNESCAPED_UNICODE) ?>;
@@ -357,7 +359,7 @@ async function atualizarDashboard() {
     document.getElementById('kpi-entradas').textContent = formatarMoeda(totalEntradas);
     document.getElementById('kpi-saidas').textContent = formatarMoeda(totalSaidas);
     document.getElementById('kpi-saldo').textContent = formatarMoeda(saldo);
-    document.getElementById('kpi-saldo').style.color = saldo >= 0 ? '#bfe6c7' : '#f0a2a8';
+    document.getElementById('kpi-saldo').style.color = saldo >= 0 ? 'var(--success-text)' : 'var(--danger-text)';
     document.getElementById('kpi-qtd').textContent = dados.qtd;
     document.getElementById('chart-subtitulo').textContent = subtitulo;
     document.getElementById('chart-saldo-subtitulo').textContent = subtitulo.replace('Visão', 'Evolução do saldo —').replace(/^Evolução do saldo — —?/, 'Evolução do saldo —');
@@ -405,12 +407,12 @@ async function atualizarDashboard() {
             datasets: [{
                 label: 'Saldo acumulado',
                 data: saldoAcumulado,
-                borderColor: '#6fa8ea',
-                backgroundColor: 'rgba(61,126,201,0.15)',
+                borderColor: abToken('--accent-strong'),
+                backgroundColor: 'rgba(' + abToken('--accent-rgb') + ',0.15)',
                 fill: true,
                 tension: 0.35,
                 pointRadius: 3,
-                pointBackgroundColor: '#6fa8ea'
+                pointBackgroundColor: abToken('--accent-strong')
             }]
         },
         options: {
@@ -440,7 +442,7 @@ async function atualizarDashboard() {
             datasets: [{
                 data: distribuicao.map(function (d) { return d.valor; }),
                 backgroundColor: distribuicao.map(function (d) { return CORES_FORMAS[d.chave]; }),
-                borderColor: '#131c2e',
+                borderColor: abToken('--surface-2'),
                 borderWidth: 2
             }]
         },

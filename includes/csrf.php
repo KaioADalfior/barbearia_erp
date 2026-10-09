@@ -56,7 +56,10 @@ function csrf_field(): string
  */
 function csrf_verificar(bool $json = false, ?string $redirecionarPara = null): void
 {
-    $tokenEnviado = $_POST['_csrf'] ?? '';
+    // Token vem no campo _csrf (formulários) ou no header X-CSRF-Token
+    // (fetch/AJAX — o script de includes/sidebar-script.php põe esse header
+    // automaticamente em todo fetch POST para o mesmo site).
+    $tokenEnviado = $_POST['_csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     $tokenSessao  = $_SESSION['_csrf_token'] ?? '';
 
     if ($tokenSessao !== '' && is_string($tokenEnviado) && hash_equals($tokenSessao, $tokenEnviado)) {

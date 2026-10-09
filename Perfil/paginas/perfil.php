@@ -37,7 +37,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
     .perfil-avatar-wrap{
@@ -46,6 +46,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         height:96px;
         flex-shrink:0;
     }
+    .perfil-avatar.hidden{ display:none; }
     .perfil-avatar{
         width:96px;
         height:96px;
@@ -53,7 +54,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         object-fit:cover;
         display:block;
         background:rgba(255,255,255,0.05);
-        border:2px solid rgba(61,126,201,0.35);
+        border:2px solid rgba(var(--accent-rgb),0.35);
     }
     .perfil-avatar-letra{
         width:96px;
@@ -62,9 +63,9 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         display:flex;
         align-items:center;
         justify-content:center;
-        background:linear-gradient(180deg, rgba(61,126,201,0.22), rgba(61,126,201,0.08));
-        border:2px solid rgba(61,126,201,0.35);
-        color:var(--gold-light);
+        background:linear-gradient(180deg, rgba(var(--accent-rgb),0.22), rgba(var(--accent-rgb),0.08));
+        border:2px solid rgba(var(--accent-rgb),0.35);
+        color:var(--accent-strong);
         font-family:'Bebas Neue', sans-serif;
         font-size:36px;
         letter-spacing:0.03em;
@@ -81,7 +82,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         justify-content:center;
         background:linear-gradient(180deg, var(--gold-light), var(--gold));
         border:2px solid var(--charcoal-2);
-        color:#ffffff;
+        color:var(--accent-on);
         cursor:pointer;
         transition:filter .15s;
     }
@@ -94,13 +95,13 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
     }
     .perfil-remover-foto{
         font-size:12px;
-        color:#8fa0bd;
+        color:var(--text-muted);
         text-decoration:underline;
         text-underline-offset:2px;
         cursor:pointer;
         transition:color .15s;
     }
-    .perfil-remover-foto:hover{ color:#e0a2a8; }
+    .perfil-remover-foto:hover{ color:var(--danger-text); }
     .recorte-overlay{
         position:fixed; inset:0; z-index:200;
         display:none; align-items:center; justify-content:center;
@@ -110,7 +111,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
     .recorte-modal{
         width:100%; max-width:440px;
         background:linear-gradient(180deg, var(--charcoal), var(--charcoal-2));
-        border:1px solid rgba(61,126,201,0.25);
+        border:1px solid rgba(var(--accent-rgb),0.25);
         border-radius:20px; padding:20px;
         box-shadow:0 24px 60px -12px rgba(0,0,0,0.8);
     }
@@ -127,8 +128,8 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         font-size:14px; font-weight:600; cursor:pointer; transition:filter .15s;
     }
     .recorte-btn:hover{ filter:brightness(1.1); }
-    .recorte-btn-sec{ background:rgba(255,255,255,0.06); color:#c9d3e6; border:1px solid rgba(255,255,255,0.1); }
-    .recorte-btn-pri{ background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:#fff; border:none; }
+    .recorte-btn-sec{ background:rgba(255,255,255,0.06); color:var(--text-soft); border:1px solid var(--line); }
+    .recorte-btn-pri{ background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:var(--accent-on); border:none; }
     .recorte-btn[disabled]{ opacity:.6; cursor:wait; }
     .badge-usuario{
         display:inline-flex;
@@ -139,9 +140,9 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         letter-spacing:0.03em;
         padding:0.28rem 0.65rem;
         border-radius:999px;
-        color:var(--gold-light);
-        background:rgba(61,126,201,0.12);
-        border:1px solid rgba(61,126,201,0.4);
+        color:var(--accent-strong);
+        background:rgba(var(--accent-rgb),0.12);
+        border:1px solid rgba(var(--accent-rgb),0.4);
     }
 </style>
 </head>
@@ -159,7 +160,7 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Minha conta</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Minha conta</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Perfil</h1>
         </div>
     </header>
@@ -251,13 +252,13 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="field-label block mb-2 uppercase" for="senha_nova">Nova senha</label>
-                        <input id="senha_nova" name="senha_nova" type="password" required minlength="6"
+                        <input id="senha_nova" name="senha_nova" type="password" required minlength="8"
                                class="field w-full h-12 px-4 rounded-xl text-sm">
                     </div>
 
                     <div>
                         <label class="field-label block mb-2 uppercase" for="senha_confirma">Confirmar nova senha</label>
-                        <input id="senha_confirma" name="senha_confirma" type="password" required minlength="6"
+                        <input id="senha_confirma" name="senha_confirma" type="password" required minlength="8"
                                class="field w-full h-12 px-4 rounded-xl text-sm">
                     </div>
                 </div>
@@ -275,12 +276,12 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
 <div id="recorte-overlay" class="recorte-overlay" role="dialog" aria-modal="true" aria-labelledby="recorte-titulo">
     <div class="recorte-modal">
         <p id="recorte-titulo" class="text-sm font-semibold text-[color:var(--cream)] mb-1">Ajustar foto</p>
-        <p class="text-xs mb-3" style="color:#8fa0bd">Arraste para posicionar e use o controle para aproximar ou afastar.</p>
+        <p class="text-xs mb-3" style="color:var(--text-muted)">Arraste para posicionar e use o controle para aproximar ou afastar.</p>
         <div class="recorte-area"><img id="recorte-img" alt="Pré-visualização"></div>
         <div class="flex items-center gap-3 mt-4">
-            <span class="text-xs" style="color:#8fa0bd">&minus;</span>
+            <span class="text-xs" style="color:var(--text-muted)">&minus;</span>
             <input type="range" id="recorte-zoom" class="recorte-zoom" min="0" max="1" step="0.01" value="0" aria-label="Zoom">
-            <span class="text-xs" style="color:#8fa0bd">+</span>
+            <span class="text-xs" style="color:var(--text-muted)">+</span>
         </div>
         <div class="flex justify-end gap-3 mt-5">
             <button type="button" id="recorte-cancelar" class="recorte-btn recorte-btn-sec">Cancelar</button>
@@ -465,9 +466,9 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         icon: 'error',
         title: 'Não foi possível salvar',
         text: <?= json_encode($_GET['perfil_erro'], JSON_UNESCAPED_UNICODE) ?>,
-        background: '#101828',
-        color: '#e9eef6',
-        confirmButtonColor: '#3d7ec9',
+        background: 'var(--surface-2)',
+        color: 'var(--cream)',
+        confirmButtonColor: 'var(--accent)',
         confirmButtonText: 'Entendi',
         iconColor: '#8c1f28'
     }).then(function () {
@@ -486,9 +487,9 @@ $inicial     = strtoupper(substr($barbeiro['nome'] ?? 'B', 0, 1));
         icon: 'error',
         title: 'Senha incorreta',
         text: <?= json_encode($_GET['senha_erro'], JSON_UNESCAPED_UNICODE) ?>,
-        background: '#101828',
-        color: '#e9eef6',
-        confirmButtonColor: '#3d7ec9',
+        background: 'var(--surface-2)',
+        color: 'var(--cream)',
+        confirmButtonColor: 'var(--accent)',
         confirmButtonText: 'Entendi',
         iconColor: '#8c1f28'
     }).then(function () {

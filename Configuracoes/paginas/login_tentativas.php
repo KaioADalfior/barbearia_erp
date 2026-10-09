@@ -56,15 +56,15 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
-    table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
+    table tbody tr{ border-top:1px solid var(--line); }
     .badge{
         display:inline-flex; align-items:center; gap:0.35rem;
         font-size:11px; font-weight:600; letter-spacing:0.04em;
         padding:0.28rem 0.65rem; border-radius:999px;
-        color:#c9a8ab; background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4);
+        color:var(--danger-text); background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4);
     }
 </style>
 </head>
@@ -82,7 +82,7 @@ $mensagens = [
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Configurações</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Configurações</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Logins Bloqueados</h1>
         </div>
         <?php if (!empty($bloqueios)): ?>

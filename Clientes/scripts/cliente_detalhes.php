@@ -13,6 +13,7 @@ exigirSessao(['barbeiro'], json: true);
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/FinanceiroService.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
 
 $idCliente = (int) ($_GET['id'] ?? 0);
 
@@ -38,16 +39,21 @@ if (!$cliente) {
 }
 
 // ---------- Agendamentos do cliente ----------
+// Funcionário vê só os atendimentos e o histórico DELE com este cliente;
+// o proprietário vê tudo (visão da barbearia).
+$somenteMeus = AcessoService::ehFuncionario($pdo);
+$idMeu       = (int) ($_SESSION['id'] ?? 0);
+
 $stmtAgendamentos = $pdo->prepare(
     'SELECT a.idAgendamento, a.Data, a.Valor, a.IncluirBarba, a.Observacao, a.Status,
             s.nome AS servico_nome, h.hora
      FROM Agendamentos a
      JOIN Servico s ON s.idServico = a.idServico
      JOIN Horario h ON h.idHorario = a.idHorario
-     WHERE a.idCliente = :id
+     WHERE a.idCliente = :id' . ($somenteMeus ? ' AND h.id_barbeiro = :meu' : '') . '
      ORDER BY a.Data DESC, h.hora DESC'
 );
-$stmtAgendamentos->execute(['id' => $idCliente]);
+$stmtAgendamentos->execute($somenteMeus ? ['id' => $idCliente, 'meu' => $idMeu] : ['id' => $idCliente]);
 $agendamentos = $stmtAgendamentos->fetchAll();
 
 // ---------- Histórico livre (fiado / observação / atendimento / outro) ----------
@@ -56,10 +62,10 @@ $stmtHistorico = $pdo->prepare(
             b.nome AS barbeiro_nome
      FROM ClienteHistorico ch
      LEFT JOIN Barbeiro b ON b.id_barbeiro = ch.id_barbeiro
-     WHERE ch.idCliente = :id
+     WHERE ch.idCliente = :id' . ($somenteMeus ? ' AND ch.id_barbeiro = :meu' : '') . '
      ORDER BY ch.criado_em DESC'
 );
-$stmtHistorico->execute(['id' => $idCliente]);
+$stmtHistorico->execute($somenteMeus ? ['id' => $idCliente, 'meu' => $idMeu] : ['id' => $idCliente]);
 $historico = $stmtHistorico->fetchAll();
 
 echo json_encode([

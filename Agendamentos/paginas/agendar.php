@@ -22,7 +22,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <link rel="stylesheet" href="/assets/css/forma-pagamento.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -31,14 +31,14 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         width:38px; height:38px;
         display:flex; align-items:center; justify-content:center;
         border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.08);
-        color:#aebdd6;
+        border:1px solid var(--line);
+        color:var(--text-soft);
         transition:background-color .15s, border-color .15s, color .15s;
     }
     .cal-nav-btn:hover{
-        background:rgba(61,126,201,0.10);
-        border-color:rgba(61,126,201,0.35);
-        color:var(--gold-light);
+        background:rgba(var(--accent-rgb),0.10);
+        border-color:rgba(var(--accent-rgb),0.35);
+        color:var(--accent-strong);
     }
 
     /* ---------- Lista de horários ---------- */
@@ -115,13 +115,13 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     .btn-inativar-horario{
         background:rgba(140,31,40,0.12);
         border:1px solid rgba(140,31,40,0.35);
-        color:#e0a2a8;
+        color:var(--danger-text);
     }
     .btn-inativar-horario:hover{ background:rgba(140,31,40,0.2); }
     .btn-reativar-horario{
         background:rgba(66,140,82,0.12);
         border:1px solid rgba(66,140,82,0.35);
-        color:#9fd4ab;
+        color:var(--success-text);
     }
     .btn-reativar-horario:hover{ background:rgba(66,140,82,0.2); }
 
@@ -134,7 +134,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     }
     .horario-info{
         font-size:12.5px;
-        color:#8fa0bd;
+        color:var(--text-muted);
         text-align:right;
     }
     .status-dot{
@@ -159,7 +159,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     }
     .modal-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.16);
+        border:1px solid rgba(var(--accent-rgb),0.16);
     }
     .icon-btn{
         display:inline-flex;
@@ -168,15 +168,15 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         width:34px;
         height:34px;
         border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.08);
+        border:1px solid var(--line);
         background:rgba(255,255,255,0.03);
-        color:#8fa0bd;
+        color:var(--text-muted);
         transition:color .15s, border-color .15s, background-color .15s;
     }
     .icon-btn:hover{
-        color:var(--gold-light);
-        border-color:rgba(61,126,201,0.4);
-        background:rgba(61,126,201,0.08);
+        color:var(--accent-strong);
+        border-color:rgba(var(--accent-rgb),0.4);
+        background:rgba(var(--accent-rgb),0.08);
     }
     .tab-btn{
         flex:1;
@@ -184,33 +184,33 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         border-radius:0.65rem;
         font-size:13px;
         text-align:center;
-        color:#7288a6;
-        border:1px solid rgba(255,255,255,0.08);
+        color:var(--text-muted);
+        border:1px solid var(--line);
         cursor:pointer;
         transition:background-color .15s, border-color .15s, color .15s;
     }
     .tab-btn.tab-ativa{
         background:linear-gradient(180deg, var(--gold-light), var(--gold));
-        color:#ffffff;
+        color:var(--accent-on);
         font-weight:600;
         border-color:transparent;
     }
     .resultado-cliente{
         padding:0.65rem 0.85rem;
         border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.07);
+        border:1px solid var(--line);
         cursor:pointer;
         font-size:13px;
         color:var(--cream);
         transition:background-color .15s, border-color .15s;
     }
     .resultado-cliente:hover{
-        background:rgba(61,126,201,0.1);
-        border-color:rgba(61,126,201,0.35);
+        background:rgba(var(--accent-rgb),0.1);
+        border-color:rgba(var(--accent-rgb),0.35);
     }
     .cliente-selecionado{
-        background:rgba(61,126,201,0.1);
-        border:1px solid rgba(61,126,201,0.35);
+        background:rgba(var(--accent-rgb),0.1);
+        border:1px solid rgba(var(--accent-rgb),0.35);
         border-radius:0.75rem;
         padding:0.75rem 1rem;
         display:flex;
@@ -223,14 +223,14 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         justify-content:space-between;
         gap:1rem;
         padding:0.85rem 0;
-        border-top:1px solid rgba(255,255,255,0.06);
+        border-top:1px solid var(--line);
     }
     .view-row:first-child{ border-top:none; }
     .view-label{
         font-size:11px;
         letter-spacing:0.1em;
         text-transform:uppercase;
-        color:#7f8fac;
+        color:var(--text-muted);
     }
     .view-value{
         font-size:14px;
@@ -243,19 +243,19 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         width:32px; height:32px;
         display:flex; align-items:center; justify-content:center;
         border-radius:0.55rem;
-        border:1px solid rgba(255,255,255,0.08);
-        color:#aebdd6;
+        border:1px solid var(--line);
+        color:var(--text-soft);
         transition:background-color .15s, border-color .15s, color .15s;
     }
     .cal-modal-nav-btn:hover{
-        background:rgba(61,126,201,0.10);
-        border-color:rgba(61,126,201,0.35);
-        color:var(--gold-light);
+        background:rgba(var(--accent-rgb),0.10);
+        border-color:rgba(var(--accent-rgb),0.35);
+        color:var(--accent-strong);
     }
     .cal-weekday{
         font-size:11px;
         text-align:center;
-        color:#7f8fac;
+        color:var(--text-muted);
         letter-spacing:0.03em;
         padding-bottom:0.5rem;
     }
@@ -277,19 +277,19 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         transition:background-color .15s, border-color .15s, color .15s;
     }
     .cal-day:hover{
-        background:rgba(61,126,201,0.10);
-        border-color:rgba(61,126,201,0.3);
+        background:rgba(var(--accent-rgb),0.10);
+        border-color:rgba(var(--accent-rgb),0.3);
     }
     .cal-day-outro-mes{ color:#3c5170; }
     .cal-day-passado{ color:#57667f; }
     .cal-day-hoje{
-        border-color:rgba(61,126,201,0.5);
-        color:var(--gold-light);
+        border-color:rgba(var(--accent-rgb),0.5);
+        color:var(--accent-strong);
         font-weight:600;
     }
     .cal-day-selecionado{
         background:linear-gradient(180deg, var(--gold-light), var(--gold));
-        color:#ffffff;
+        color:var(--accent-on);
         font-weight:700;
         border-color:transparent;
     }
@@ -301,7 +301,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         font-size:11px;
         letter-spacing:0.08em;
         text-transform:uppercase;
-        color:#aebdd6;
+        color:var(--text-soft);
         font-weight:500;
         margin-bottom:8px;
     }
@@ -311,8 +311,8 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         font-weight:400;
         font-size:12px;
     }
-    .corte-modal-label .obrigatorio{ color:#e0a2a8; }
-    .corte-modal-label .opcional{ color:#7f8fac; }
+    .corte-modal-label .obrigatorio{ color:var(--danger-text); }
+    .corte-modal-label .opcional{ color:var(--text-muted); }
     .corte-modal-select-wrap{ position:relative; }
     .corte-modal-select-wrap + .corte-modal-label{ margin-top:18px; }
     .corte-modal-select{
@@ -320,9 +320,9 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         height:46px;
         padding:0 40px 0 14px;
         border-radius:0.75rem;
-        background:rgba(0,0,0,0.35);
-        border:1px solid rgba(255,255,255,0.08);
-        color:#e9eef6;
+        background:var(--field-bg);
+        border:1px solid var(--line);
+        color:var(--cream);
         font-size:14px;
         font-family:inherit;
         appearance:none;
@@ -331,21 +331,21 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         cursor:pointer;
         transition:border-color .2s, box-shadow .2s, background-color .2s;
     }
-    .corte-modal-select:hover{ border-color:rgba(61,126,201,0.35); }
+    .corte-modal-select:hover{ border-color:rgba(var(--accent-rgb),0.35); }
     .corte-modal-select:focus{
         outline:none;
         border-color:var(--gold);
-        background:rgba(0,0,0,0.5);
-        box-shadow:0 0 0 4px rgba(61,126,201,0.12);
+        background:var(--field-bg);
+        box-shadow:0 0 0 4px rgba(var(--accent-rgb),0.12);
     }
-    .corte-modal-select option{ background:#101828; color:#e9eef6; }
+    .corte-modal-select option{ background:var(--surface-2); color:var(--cream); }
     .corte-modal-chevron{
         position:absolute;
         right:14px;
         top:50%;
         transform:translateY(-50%);
         pointer-events:none;
-        color:#7f8fac;
+        color:var(--text-muted);
     }
     /* Ícone do calendário nativo do <input type="date"> é escuro por
        padrão — inverte pra ficar visível no tema escuro (usado no modal
@@ -375,17 +375,17 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     .cal-nav-btn.is-bloqueado{
         background:rgba(230,179,60,0.14);
         border-color:rgba(230,179,60,0.45);
-        color:#e6c27a;
+        color:var(--warning-text);
     }
     .cal-nav-btn.is-bloqueado:hover{
         background:rgba(230,179,60,0.22);
         border-color:rgba(230,179,60,0.6);
-        color:#e6c27a;
+        color:var(--warning-text);
     }
     .cal-day-bloqueado{
         background:rgba(230,179,60,0.16);
         border-color:rgba(230,179,60,0.45);
-        color:#e6c27a;
+        color:var(--warning-text);
     }
     .cal-day-bloqueado:hover{
         background:rgba(230,179,60,0.24);
@@ -393,15 +393,15 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     }
     .cal-day-bloqueado.cal-day-selecionado{
         background:linear-gradient(180deg, var(--gold-light), var(--gold));
-        color:#ffffff;
+        color:var(--accent-on);
     }
     .cal-day-lock{
-        width:10px; height:10px; flex-shrink:0; color:#e6c27a;
+        width:10px; height:10px; flex-shrink:0; color:var(--warning-text);
     }
     .aviso-dia-bloqueado{
         background:rgba(230,179,60,0.12);
         border:1px solid rgba(230,179,60,0.35);
-        color:#e6c27a;
+        color:var(--warning-text);
     }
 
     /* ---------- Modal de detalhes/atendimento (mais largo, ações no topo) ---------- */
@@ -413,7 +413,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     }
     .det-acoes__fechar{
         margin-left:auto;
-        color:#7f8fac;
+        color:var(--text-muted);
         transition:color .15s;
     }
     .det-acoes__fechar:hover{ color:var(--cream); }
@@ -429,7 +429,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         padding:0.65rem 0.85rem;
         border-radius:0.75rem;
         background:rgba(255,255,255,0.02);
-        border:1px solid rgba(255,255,255,0.06);
+        border:1px solid var(--line);
         min-width:0;
     }
     .det-field--full{ grid-column:1 / -1; }
@@ -437,7 +437,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         font-size:10.5px;
         letter-spacing:0.08em;
         text-transform:uppercase;
-        color:#7f8fac;
+        color:var(--text-muted);
         margin-bottom:3px;
     }
     .det-field__value{
@@ -450,13 +450,15 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     .lista-espera-fab{
         position:fixed;
         right:1.5rem;
-        bottom:1.5rem;
+        /* Fica ACIMA do rodapé fixo (.ab-rodape-fixo, z-index 60), cuja altura
+           real vem de --ab-rodape-h (definida em sidebar_barbeiro.php). */
+        bottom:calc(1.5rem + var(--ab-rodape-h, 34px));
         z-index:40;
         width:54px; height:54px;
         border-radius:999px;
         display:flex; align-items:center; justify-content:center;
         background:linear-gradient(180deg, var(--gold-light), var(--gold));
-        color:#ffffff;
+        color:var(--accent-on);
         box-shadow:0 8px 24px rgba(0,0,0,0.35);
         border:none;
         cursor:pointer;
@@ -477,10 +479,10 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
     .lista-espera-painel{
         position:fixed;
         right:1.5rem;
-        bottom:5.5rem;
+        bottom:calc(5.5rem + var(--ab-rodape-h, 34px));
         z-index:40;
         width:min(360px, calc(100vw - 2rem));
-        max-height:min(520px, calc(100vh - 8rem));
+        max-height:min(520px, calc(100vh - 8rem - var(--ab-rodape-h, 34px)));
         display:flex;
         flex-direction:column;
         overflow:hidden;
@@ -489,12 +491,12 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
         display:flex; align-items:center; justify-content:space-between; gap:0.5rem;
         padding:0.65rem 0.75rem;
         border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.07);
+        border:1px solid var(--line);
         background:rgba(255,255,255,0.02);
     }
     @media (max-width: 480px){
-        .lista-espera-fab{ right:1rem; bottom:1rem; }
-        .lista-espera-painel{ right:0.5rem; left:0.5rem; width:auto; bottom:4.75rem; }
+        .lista-espera-fab{ right:1rem; bottom:calc(1rem + var(--ab-rodape-h, 34px)); }
+        .lista-espera-painel{ right:0.5rem; left:0.5rem; width:auto; bottom:calc(4.75rem + var(--ab-rodape-h, 34px)); }
     }
 </style>
 </head>
@@ -512,7 +514,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Agendamento</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Agendamento</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Agendar</h1>
         </div>
     </header>
@@ -667,7 +669,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
                         <?php endforeach; ?>
                     </select>
                     <?php if (empty($servicos)): ?>
-                        <p class="text-xs text-[#e0a2a8] mt-1.5">Nenhum serviço cadastrado. Rode scriptBD/atualizacao_servicos.sql.</p>
+                        <p class="text-xs text-[var(--danger-text)] mt-1.5">Nenhum serviço cadastrado. Rode scriptBD/atualizacao_servicos.sql.</p>
                     <?php endif; ?>
                 </div>
 
@@ -686,7 +688,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
                 </div>
 
                 <div id="duplicar-detalhes" class="hidden mb-4">
-                    <p id="duplicar-info" class="text-xs mt-1 mb-2" style="color:var(--gold-light);">—</p>
+                    <p id="duplicar-info" class="text-xs mt-1 mb-2" style="color:var(--accent-strong);">—</p>
                     <button type="button" id="btn-alterar-cortes" onclick="abrirModalSelecionarCortes()" class="btn-secondary h-9 px-3.5 rounded-lg text-xs">
                         Selecione os Cortes
                     </button>
@@ -725,7 +727,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
                             30 em 30 dias
                         </label>
                     </div>
-                    <p id="fidelidade-aviso" class="hidden text-xs mt-2" style="color:var(--gold-light);">—</p>
+                    <p id="fidelidade-aviso" class="hidden text-xs mt-2" style="color:var(--accent-strong);">—</p>
                 </div>
                 </div>
                 </div>
@@ -736,7 +738,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
                               class="field w-full px-4 py-2.5 rounded-xl text-sm resize-none"></textarea>
                 </div>
 
-                <p id="agendar-erro" class="hidden text-xs text-[#e0a2a8] mt-2"></p>
+                <p id="agendar-erro" class="hidden text-xs text-[var(--danger-text)] mt-2"></p>
 
                 <div class="flex gap-3 mt-6">
                     <button type="submit" id="btn-salvar-agendamento" class="btn-primary h-12 px-6 rounded-xl text-sm flex-1">
@@ -818,7 +820,7 @@ $servicos = $pdo->query("SELECT idServico, nome, valor FROM Servico WHERE ativo 
                 <button type="button" id="btn-alterar-agendamento" onclick="abrirMenuAlterarAgendamento()" class="btn-secondary h-10 px-4 rounded-xl text-sm">
                     🔁 Alterar agendamento
                 </button>
-                <button type="button" id="btn-cancelar-agendamento" onclick="confirmarCancelamento()" class="btn-secondary h-10 px-4 rounded-xl text-sm" style="color:#e0a2a8;">
+                <button type="button" id="btn-cancelar-agendamento" onclick="confirmarCancelamento()" class="btn-secondary h-10 px-4 rounded-xl text-sm" style="color:var(--danger-text);">
                     Cancelar
                 </button>
                 <button type="button" onclick="closeModal('modal-detalhes')" class="det-acoes__fechar h-10 px-3 rounded-xl text-sm">
@@ -1401,12 +1403,12 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                 ? 'Nenhum novo agendamento poderá ser criado neste dia. Agendamentos já existentes não são apagados.'
                 : 'Este dia volta a aceitar novos agendamentos normalmente.',
             icon: 'question',
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             showCancelButton: true,
             confirmButtonText: acao === 'bloquear' ? 'Sim, bloquear' : 'Sim, desbloquear',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: acao === 'bloquear' ? '#8c1f28' : '#3d7ec9',
+            confirmButtonColor: acao === 'bloquear' ? '#8c1f28' : 'var(--accent)',
             reverseButtons: true
         });
 
@@ -1604,9 +1606,9 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     </div>
                 </div>
             `,
-            background: '#101828',
-            color: '#e9eef6',
-            confirmButtonColor: '#3d7ec9',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
+            confirmButtonColor: 'var(--accent)',
             confirmButtonText: 'Confirmar',
             showCancelButton: true,
             cancelButtonText: 'Cancelar',
@@ -1856,7 +1858,7 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     closeModal('modal-agendar');
                     Swal.fire({
                         title: 'Agendamento não permitido',
-                        text: 'Este cliente já possui um agendamento hoje.',
+                        text: 'Este cliente já possui um agendamento nesse dia.',
                         icon: 'error'
                     });
                     btn.disabled = false;
@@ -1881,16 +1883,16 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     const datasPuladas = f.puladas.map(function (p) {
                         return p.data.split('-').reverse().join('/');
                     }).join(', ');
-                    html += `<br><br><span style="color:#e0a2a8;">${f.puladas.length} ocorrência(s) não pôde(puderam) ser criada(s) por conflito de horário:</span><br>${escapeHtml(datasPuladas)}`;
+                    html += `<br><br><span style="color:var(--danger-text);">${f.puladas.length} ocorrência(s) não pôde(puderam) ser criada(s) por conflito de horário:</span><br>${escapeHtml(datasPuladas)}`;
                 }
 
                 Swal.fire({
                     title: 'Agendamento confirmado!',
                     html: html,
                     icon: 'success',
-                    background: '#101828',
-                    color: '#e9eef6',
-                    confirmButtonColor: '#3d7ec9',
+                    background: 'var(--surface-2)',
+                    color: 'var(--cream)',
+                    confirmButtonColor: 'var(--accent)',
                     confirmButtonText: 'Entendi'
                 });
             } else if (dados.duplicado) {
@@ -1905,9 +1907,9 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     title: 'Agendamento duplicado confirmado!',
                     html: `🟣 ${resumoCortes}<br><br>Total cobrado: <strong>${totalFormatado}</strong>`,
                     icon: 'success',
-                    background: '#101828',
-                    color: '#e9eef6',
-                    confirmButtonColor: '#3d7ec9',
+                    background: 'var(--surface-2)',
+                    color: 'var(--cream)',
+                    confirmButtonColor: 'var(--accent)',
                     confirmButtonText: 'Entendi'
                 });
             } else {
@@ -2018,10 +2020,10 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             title: 'Cancelar agendamento duplicado',
             html: `Este cliente tem dois horários vinculados: <strong>${escapeHtml(horarioSelecionado.hora)}</strong> e <strong>${escapeHtml(irmao.hora)}</strong>. O que deseja fazer?`,
             icon: 'question',
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             confirmButtonText: `Cancelar só ${escapeHtml(horarioSelecionado.hora)}`,
-            confirmButtonColor: '#3d7ec9',
+            confirmButtonColor: 'var(--accent)',
             showDenyButton: true,
             denyButtonText: 'Cancelar os dois horários',
             denyButtonColor: '#b3413d',
@@ -2109,12 +2111,12 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             title: 'Cancelar agendamento',
             html: 'Como deseja cancelar este agendamento?',
             icon: 'question',
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: 'Cancelar este corte',
-            confirmButtonColor: '#3d7ec9',
+            confirmButtonColor: 'var(--accent)',
             denyButtonText: 'Cancelar todos os cortes',
             denyButtonColor: '#b3413d',
             cancelButtonText: 'Voltar',
@@ -2140,8 +2142,8 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             title: 'Cancelar todos os cortes futuros?',
             html: `Tem certeza que deseja cancelar <strong>todos os cortes futuros</strong> de <strong>${escapeHtml(horarioSelecionado.cliente.nome)}</strong>? Esta ação não pode ser desfeita.`,
             icon: 'warning',
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             showCancelButton: true,
             confirmButtonText: 'Sim, cancelar todos',
             confirmButtonColor: '#b3413d',
@@ -2498,14 +2500,14 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             title: 'Reagendar',
             text: 'Como deseja reagendar?',
             icon: 'question',
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: 'Reagendar somente esta semana',
             denyButtonText: 'Reagendar fidelidade',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#3d7ec9',
+            confirmButtonColor: 'var(--accent)',
             denyButtonColor: '#8b5cf6',
             reverseButtons: true
         }).then(function (resultado) {
@@ -2577,9 +2579,9 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     </div>
                 </div>
             `,
-            background: '#101828',
-            color: '#e9eef6',
-            confirmButtonColor: '#3d7ec9',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
+            confirmButtonColor: 'var(--accent)',
             confirmButtonText: 'Confirmar reagendamento',
             showCancelButton: true,
             cancelButtonText: 'Cancelar',
@@ -2662,8 +2664,8 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     <p class="text-xs text-zinc-500" style="margin-top:14px;">Período: próximos 12 meses a partir da nova data inicial.</p>
                 </div>
             `,
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             confirmButtonColor: '#8b5cf6',
             confirmButtonText: 'Confirmar reagendamento da fidelidade',
             showCancelButton: true,
@@ -2704,16 +2706,16 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
 
                     if (dados.puladas && dados.puladas.length > 0) {
                         const datasPuladas = dados.puladas.map(function (p) { return p.data.split('-').reverse().join('/'); }).join(', ');
-                        html += `<br><br><span style="color:#e0a2a8;">${dados.puladas.length} ocorrência(s) não pôde(puderam) ser criada(s) por conflito:</span><br>${escapeHtml(datasPuladas)}`;
+                        html += `<br><br><span style="color:var(--danger-text);">${dados.puladas.length} ocorrência(s) não pôde(puderam) ser criada(s) por conflito:</span><br>${escapeHtml(datasPuladas)}`;
                     }
 
                     Swal.fire({
                         title: 'Fidelidade reagendada!',
                         html: html,
                         icon: 'success',
-                        background: '#101828',
-                        color: '#e9eef6',
-                        confirmButtonColor: '#3d7ec9',
+                        background: 'var(--surface-2)',
+                        color: 'var(--cream)',
+                        confirmButtonColor: 'var(--accent)',
                         confirmButtonText: 'Entendi'
                     });
 
@@ -2738,14 +2740,14 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
             title: 'Alterar agendamento',
             text: 'O que você deseja fazer?',
             icon: 'question',
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: 'Alterar cliente',
             denyButtonText: 'Trocar cliente',
             cancelButtonText: 'Trocar horário',
-            confirmButtonColor: '#3d7ec9',
+            confirmButtonColor: 'var(--accent)',
             denyButtonColor: '#8b5cf6',
             cancelButtonColor: '#3a4a63',
             reverseButtons: true
@@ -2778,12 +2780,12 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     <p class="text-xs text-zinc-500 mb-2">O horário continua o mesmo (${escapeHtml(horarioSelecionado.hora)} — ${escapeHtml(dataAgendamentoSelecionado.split('-').reverse().join('/'))}) — só o cliente muda. Busque o novo cliente:</p>
                     <input type="text" id="swal-alterar-busca" class="field w-full h-11 px-4 rounded-xl text-sm mb-2" placeholder="Nome ou telefone...">
                     <div id="swal-alterar-resultados" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
-                    <div id="swal-alterar-selecionado" class="hidden" style="margin-top:10px; padding:10px 12px; border-radius:10px; background:rgba(61,126,201,0.1); border:1px solid rgba(61,126,201,0.35); font-size:13px;"></div>
+                    <div id="swal-alterar-selecionado" class="hidden" style="margin-top:10px; padding:10px 12px; border-radius:10px; background:rgba(var(--accent-rgb),0.1); border:1px solid rgba(var(--accent-rgb),0.35); font-size:13px;"></div>
                 </div>
             `,
-            background: '#101828',
-            color: '#e9eef6',
-            confirmButtonColor: '#3d7ec9',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
+            confirmButtonColor: 'var(--accent)',
             confirmButtonText: 'Alterar cliente',
             showCancelButton: true,
             cancelButtonText: 'Cancelar',
@@ -2863,12 +2865,12 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                         title: 'Reagendar cliente anterior?',
                         html: `O cliente <strong>${escapeHtml(dados.clienteAntigo.nome)}</strong> estava agendado para este horário.<br>Deseja reagendar ${escapeHtml(dados.clienteAntigo.nome)} para outro horário?`,
                         icon: 'question',
-                        background: '#101828',
-                        color: '#e9eef6',
+                        background: 'var(--surface-2)',
+                        color: 'var(--cream)',
                         showDenyButton: true,
                         confirmButtonText: 'Sim, reagendar',
                         denyButtonText: 'Não, apenas substituir',
-                        confirmButtonColor: '#3d7ec9',
+                        confirmButtonColor: 'var(--accent)',
                         denyButtonColor: '#3a4a63',
                         reverseButtons: true
                     }).then(function (r2) {
@@ -2906,9 +2908,9 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     </div>
                 </div>
             `,
-            background: '#101828',
-            color: '#e9eef6',
-            confirmButtonColor: '#3d7ec9',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
+            confirmButtonColor: 'var(--accent)',
             confirmButtonText: 'Reagendar',
             showCancelButton: true,
             cancelButtonText: 'Cancelar',
@@ -2977,8 +2979,8 @@ const SERVICOS_DISPONIVEIS = <?= json_encode(array_map(function ($s) {
                     <div id="swal-trocar-selecionado" class="hidden" style="margin-top:10px; padding:10px 12px; border-radius:10px; background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.4); font-size:13px;"></div>
                 </div>
             `,
-            background: '#101828',
-            color: '#e9eef6',
+            background: 'var(--surface-2)',
+            color: 'var(--cream)',
             confirmButtonColor: '#8b5cf6',
             confirmButtonText: 'Trocar',
             showCancelButton: true,

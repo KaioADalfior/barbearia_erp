@@ -22,7 +22,7 @@ $stmt = $pdo->prepare(
             c.idCliente, c.nome, c.telefone
      FROM ListaEspera le
      INNER JOIN Cliente c ON c.idCliente = le.idCliente
-     WHERE le.id_barbeiro = :b
+     WHERE le.id_barbeiro = :b AND c.ativo = 1
      ORDER BY le.criado_em ASC'
 );
 $stmt->execute(['b' => $idBarbeiro]);

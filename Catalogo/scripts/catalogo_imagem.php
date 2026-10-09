@@ -8,7 +8,10 @@ require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
 require_once __DIR__ . '/../../includes/csrf.php';
+// Vitrine pública: só o proprietário configura.
+AcessoService::exigirProprietario($pdo, true);
 require_once __DIR__ . '/../../includes/CatalogoService.php';
 
 header('Content-Type: application/json; charset=utf-8');

@@ -23,162 +23,101 @@ if (!empty($_SESSION['tipo'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BarbERP — Acesso</title>
 
+    <?php require_once __DIR__ . '/../../includes/theme-init.php'; ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
     <style>
-        :root {
-            --onyx: #0b0f17;
-            --charcoal: #111827;
-            --charcoal-2: #141b2b;
-            --gold: #2f6fed;
-            --gold-light: #5b93f7;
-            --cream: #e7ebf3;
-            --pole-red: #64748b;
-            --pole-blue: #94a3b8;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--onyx);
+        /* Tokens, tipografia (.display, .eyebrow), campos (.field, .field-label)
+           e tema claro/escuro vêm de assets/css/admin-theme.css. Aqui ficam
+           só as peças exclusivas da tela de acesso. */
+        body.lg-body {
             background-image:
-                radial-gradient(ellipse at 50% 18%, rgba(47, 111, 237, 0.10), transparent 55%),
-                radial-gradient(ellipse at 50% 100%, rgba(0, 0, 0, 0.65), transparent 60%),
-                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 6px);
-            min-height: 100vh;
+                radial-gradient(ellipse at 50% 16%, rgba(var(--accent-rgb), 0.11), transparent 55%),
+                radial-gradient(ellipse at 50% 100%, rgba(0, 0, 0, 0.35), transparent 60%),
+                repeating-linear-gradient(45deg, rgba(255, 236, 205, 0.014) 0, rgba(255, 236, 205, 0.014) 1px, transparent 1px, transparent 7px);
+        }
+        html[data-theme="light"] body.lg-body {
+            background-image:
+                radial-gradient(ellipse at 50% 14%, rgba(var(--accent-rgb), 0.16), transparent 55%);
         }
 
-        .display {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-        }
-
-        .eyebrow {
-            font-family: 'Poppins', sans-serif;
-            letter-spacing: 0.35em;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        /* Emblema em relevo */
-        .emblem {
+        .lg-emblem {
             background:
                 radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.10), transparent 45%),
-                linear-gradient(145deg, #17233a, #0b0f17);
-            border: 1px solid rgba(47, 111, 237, 0.55);
+                linear-gradient(145deg, var(--surface-3), var(--bg));
+            border: 1px solid rgba(var(--accent-rgb), 0.55);
             box-shadow:
-                0 0 0 4px rgba(47, 111, 237, 0.08),
-                0 12px 30px -8px rgba(0, 0, 0, 0.7),
+                0 0 0 4px rgba(var(--accent-rgb), 0.08),
+                var(--shadow-1),
                 inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
 
-        /* Faixa de destaque neutra — barra sólida na cor de destaque do sistema,
-       sem referência temática a barbearia, para servir de base genérica a
-       qualquer cliente (ver mesmo tratamento em assets/css/admin-theme.css). */
-        .barber-stripe {
+        .lg-stripe {
             height: 5px;
             width: 100%;
-            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            background: linear-gradient(90deg, var(--accent-lo), var(--accent), var(--accent-hi), var(--accent), var(--accent-lo));
         }
 
-        .card {
-            background: linear-gradient(180deg, var(--charcoal), var(--charcoal-2));
-            border: 1px solid rgba(47, 111, 237, 0.14);
+        .lg-card {
+            background: linear-gradient(180deg, var(--surface-2), var(--surface));
+            border: 1px solid var(--line-strong);
+            box-shadow: var(--shadow-2);
         }
 
-        .field-label {
-            font-size: 12px;
-            letter-spacing: 0.12em;
-            font-weight: 500;
-            color: #aebdd6;
-        }
-
-        .field {
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: var(--cream);
-            transition: border-color .2s, box-shadow .2s, background-color .2s;
-        }
-
-        .field::placeholder {
-            color: #5b6f8c;
-        }
-
-        .field:focus {
-            outline: none;
-            border-color: var(--gold);
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.12);
-        }
-
-        .btn-entrar {
-            background: linear-gradient(180deg, var(--gold-light), var(--gold));
-            color: #ffffff;
+        .lg-btn {
+            background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+            color: var(--accent-on);
             font-weight: 600;
             letter-spacing: 0.03em;
             transition: filter .2s, transform .15s, box-shadow .2s;
-            box-shadow: 0 8px 20px -8px rgba(47, 111, 237, 0.55);
+            box-shadow: 0 8px 20px -8px rgba(var(--accent-rgb), 0.55);
         }
+        .lg-btn:hover { filter: brightness(1.06); box-shadow: 0 10px 26px -6px rgba(var(--accent-rgb), 0.65); }
+        .lg-btn:active { transform: scale(0.98); }
+        .lg-btn:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; }
 
-        .btn-entrar:hover {
-            filter: brightness(1.08);
-            box-shadow: 0 10px 26px -6px rgba(47, 111, 237, 0.65);
-        }
-
-        .btn-entrar:active {
-            transform: scale(0.98);
-        }
-
-        .divider-tick {
+        .lg-tick {
             width: 1px;
             height: 14px;
-            background: rgba(47, 111, 237, 0.4);
-        }
-
-        .error-box {
-            border: 1px solid rgba(239, 68, 68, 0.55);
-            background: rgba(239, 68, 68, 0.12);
-            color: #f0c9cc;
+            background: rgba(var(--accent-rgb), 0.5);
         }
     </style>
 </head>
 
-<body class="flex items-center justify-center px-6 py-10">
+<body class="lg-body flex items-center justify-center px-6 py-10">
 
     <div class="w-full max-w-md">
 
         <!-- Emblema -->
         <div class="flex flex-col items-center mb-7">
-            <div class="emblem w-20 h-20 rounded-full flex items-center justify-center mb-4">
+            <div class="lg-emblem w-20 h-20 rounded-full flex items-center justify-center mb-4">
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="11" width="14" height="9" rx="2" stroke="var(--gold-light)" stroke-width="1.4" />
-                    <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="var(--gold-light)" stroke-width="1.4" stroke-linecap="round" />
-                    <circle cx="12" cy="15.4" r="1.3" fill="var(--gold-light)" />
+                    <rect x="5" y="11" width="14" height="9" rx="2" stroke="var(--accent-strong)" stroke-width="1.4" />
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="var(--accent-strong)" stroke-width="1.4" stroke-linecap="round" />
+                    <circle cx="12" cy="15.4" r="1.3" fill="var(--accent-strong)" />
                 </svg>
             </div>
 
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Plataforma de Gestão</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Plataforma de Gestão</p>
             <h1 class="display text-5xl text-[color:var(--cream)] leading-none">
-                BARB<span style="color:var(--gold-light)">ERP</span>
+                BARB<span style="color:var(--accent-strong)">ERP</span>
             </h1>
-            <div class="flex items-center gap-3 mt-3 text-[11px] text-zinc-500 tracking-wider">
+            <div class="flex items-center gap-3 mt-3 text-[11px] tracking-wider" style="color:var(--text-muted)">
                 <span>PAINEL INTERNO</span>
-                <span class="divider-tick"></span>
+                <span class="lg-tick"></span>
                 <span>ACESSO RESTRITO</span>
             </div>
         </div>
 
         <!-- Card -->
-        <div class="card rounded-3xl shadow-2xl overflow-hidden">
+        <div class="lg-card rounded-3xl shadow-2xl overflow-hidden">
 
-            <div class="barber-stripe"></div>
+            <div class="lg-stripe"></div>
 
             <div class="p-8">
 
@@ -209,7 +148,7 @@ if (!empty($_SESSION['tipo'])) {
                             class="field w-full h-12 px-4 rounded-xl text-sm">
                     </div>
 
-                    <button type="submit" class="btn-entrar w-full h-12 rounded-xl text-sm">
+                    <button type="submit" class="lg-btn w-full h-12 rounded-xl text-sm">
                         Entrar no sistema
                     </button>
 
@@ -217,10 +156,10 @@ if (!empty($_SESSION['tipo'])) {
 
             </div>
 
-            <div class="barber-stripe"></div>
+            <div class="lg-stripe"></div>
         </div>
 
-        <p class="text-center text-xs text-zinc-600 mt-8 font-light">
+        <p class="text-center text-xs mt-8 font-light" style="color:var(--text-muted)">
             © 2026 DAK Soluções Digitais — Todos os direitos reservados.
         </p>
 
@@ -234,11 +173,11 @@ if (!empty($_SESSION['tipo'])) {
                 text: '<?= $_GET['erro'] === 'bloqueado'
                             ? 'Muitas tentativas de acesso. Tente novamente mais tarde.'
                             : 'Usuário ou senha inválidos. Confira os dados e tente novamente.' ?>',
-                background: '#141b2b',
-                color: '#e7ebf3',
-                confirmButtonColor: '#2f6fed',
+                background: 'var(--surface-2)',
+                color: 'var(--cream)',
+                confirmButtonColor: 'var(--accent)',
                 confirmButtonText: 'Tentar novamente',
-                iconColor: '#ef4444'
+                iconColor: 'var(--danger)'
             }).then(function() {
                 // Remove ?erro=1 da URL para não reabrir o modal num refresh
                 var url = new URL(window.location.href);

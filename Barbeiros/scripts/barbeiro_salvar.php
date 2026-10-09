@@ -27,7 +27,7 @@ if (!in_array($tipoUsuario, ['proprietario', 'funcionario'], true)) {
     exit;
 }
 
-if ($nome === '' || $login === '' || $telefone === '' || $senha === '' || strlen($senha) < 6) {
+if ($nome === '' || $login === '' || $telefone === '' || $senha === '' || strlen($senha) < 8) {
     header('Location: /barbeiros/cadastrar?status=erro');
     exit;
 }

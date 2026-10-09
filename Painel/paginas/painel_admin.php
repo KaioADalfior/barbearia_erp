@@ -15,7 +15,7 @@ $paginaAtual = 'dashboard';
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 </head>
 <body class="flex">
 
@@ -25,7 +25,7 @@ $paginaAtual = 'dashboard';
 <main class="flex-1 min-w-0">
 
     <header class="topbar px-8 py-6">
-        <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Painel Administrativo</p>
+        <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Painel Administrativo</p>
         <h1 class="display text-4xl text-[color:var(--cream)]">Bem-vindo, <?= htmlspecialchars($_SESSION['nome'] ?? 'Admin') ?></h1>
     </header>
 

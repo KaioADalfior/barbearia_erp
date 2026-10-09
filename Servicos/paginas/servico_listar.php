@@ -6,6 +6,11 @@ exigirSessao(['barbeiro']);
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/ServicoFoto.php';
+require_once __DIR__ . '/../../includes/AcessoService.php';
+
+// Funcionário consulta os serviços; cadastrar/editar/inativar é do proprietário
+// (os endpoints também recusam — ver Servicos/scripts/*).
+$podeEditarServicos = AcessoService::ehProprietario($pdo);
 
 $paginaAtual = 'servico-listar';
 
@@ -56,7 +61,7 @@ $mensagens = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
@@ -67,7 +72,7 @@ $mensagens = [
     }
     .modal-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.16);
+        border:1px solid rgba(var(--accent-rgb),0.16);
     }
     .badge{
         display:inline-flex;
@@ -80,12 +85,12 @@ $mensagens = [
         border-radius:999px;
     }
     .badge-ativo{
-        color:#bfe6c7;
+        color:var(--success-text);
         background:rgba(66,140,82,0.14);
         border:1px solid rgba(66,140,82,0.4);
     }
     .badge-inativo{
-        color:#c9a8ab;
+        color:var(--danger-text);
         background:rgba(140,31,40,0.12);
         border:1px solid rgba(140,31,40,0.4);
     }
@@ -96,37 +101,37 @@ $mensagens = [
         width:34px;
         height:34px;
         border-radius:0.65rem;
-        border:1px solid rgba(255,255,255,0.08);
+        border:1px solid var(--line);
         background:rgba(255,255,255,0.03);
-        color:#8fa0bd;
+        color:var(--text-muted);
         transition:color .15s, border-color .15s, background-color .15s;
     }
     .icon-btn:hover{
-        color:var(--gold-light);
-        border-color:rgba(61,126,201,0.4);
-        background:rgba(61,126,201,0.08);
+        color:var(--accent-strong);
+        border-color:rgba(var(--accent-rgb),0.4);
+        background:rgba(var(--accent-rgb),0.08);
     }
     .icon-btn-danger:hover{
-        color:#f0a2a8;
+        color:var(--danger-text);
         border-color:rgba(140,31,40,0.5);
         background:rgba(140,31,40,0.1);
     }
     table tbody tr{
-        border-top:1px solid rgba(255,255,255,0.05);
+        border-top:1px solid var(--line);
     }
     .view-row{
         display:flex;
         justify-content:space-between;
         gap:1rem;
         padding:0.85rem 0;
-        border-top:1px solid rgba(255,255,255,0.06);
+        border-top:1px solid var(--line);
     }
     .view-row:first-child{ border-top:none; }
     .view-label{
         font-size:11px;
         letter-spacing:0.1em;
         text-transform:uppercase;
-        color:#7f8fac;
+        color:var(--text-muted);
     }
     .view-value{
         font-size:14px;
@@ -138,7 +143,7 @@ $mensagens = [
     .servico-thumb{
         width:56px; height:42px; border-radius:0.6rem; overflow:hidden; flex-shrink:0;
         display:flex; align-items:center; justify-content:center;
-        background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+        background:rgba(255,255,255,0.04); border:1px solid var(--line);
         color:#5b6f8c;
     }
     .servico-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -146,19 +151,19 @@ $mensagens = [
     .foto-campo__preview{
         width:96px; height:72px; border-radius:0.75rem; overflow:hidden; flex-shrink:0;
         display:flex; align-items:center; justify-content:center;
-        background:rgba(0,0,0,0.3); border:1px dashed rgba(255,255,255,0.18); color:#5b6f8c;
+        background:var(--field-bg); border:1px dashed var(--line); color:#5b6f8c;
     }
     .foto-campo__preview img{ width:100%; height:100%; object-fit:cover; display:block; }
     .foto-campo__preview img.hidden{ display:none; }
     .foto-campo__acoes{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; min-width:0; }
     .foto-campo__link{
-        font-size:12px; font-weight:600; color:var(--gold-light); cursor:pointer;
+        font-size:12px; font-weight:600; color:var(--accent-strong); cursor:pointer;
         background:none; border:none; padding:0;
     }
     .foto-campo__link:hover{ text-decoration:underline; }
-    .foto-campo__link--perigo{ color:#e0a2a8; }
-    .foto-campo__dica{ font-size:11px; color:#7f8fac; }
-    .view-foto{ width:100%; aspect-ratio:4/3; border-radius:0.9rem; overflow:hidden; margin-bottom:1rem; background:rgba(0,0,0,0.3); }
+    .foto-campo__link--perigo{ color:var(--danger-text); }
+    .foto-campo__dica{ font-size:11px; color:var(--text-muted); }
+    .view-foto{ width:100%; aspect-ratio:4/3; border-radius:0.9rem; overflow:hidden; margin-bottom:1rem; background:var(--field-bg); }
     .view-foto img{ width:100%; height:100%; object-fit:cover; display:block; }
 
     /* ---------- Modal de recorte da foto ---------- */
@@ -171,7 +176,7 @@ $mensagens = [
     .recorte-modal{
         width:100%; max-width:480px;
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.25);
+        border:1px solid rgba(var(--accent-rgb),0.25);
         border-radius:20px; padding:20px;
         box-shadow:0 24px 60px -12px rgba(0,0,0,0.8);
     }
@@ -187,8 +192,8 @@ $mensagens = [
         font-size:14px; font-weight:600; cursor:pointer; transition:filter .15s;
     }
     .recorte-btn:hover{ filter:brightness(1.1); }
-    .recorte-btn-sec{ background:rgba(255,255,255,0.06); color:#c9d3e6; border:1px solid rgba(255,255,255,0.1); }
-    .recorte-btn-pri{ background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:#fff; border:none; }
+    .recorte-btn-sec{ background:rgba(255,255,255,0.06); color:var(--text-soft); border:1px solid var(--line); }
+    .recorte-btn-pri{ background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:var(--accent-on); border:none; }
 
     /* ---------- Tema claro: reforço de contraste ---------- */
     html[data-theme="light"] .badge-ativo{ color:#1f6b30; }
@@ -212,7 +217,7 @@ $mensagens = [
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Serviços</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Serviços</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Gerenciar Serviço</h1>
         </div>
     </header>
@@ -241,21 +246,25 @@ $mensagens = [
                 >
             </div>
 
+            <?php if ($podeEditarServicos): ?>
             <button type="button" onclick="openModal('modal-cadastrar')" class="btn-primary h-11 px-5 rounded-xl text-sm flex items-center justify-center gap-2 shrink-0">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 5v14M5 12h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
                 </svg>
                 Cadastrar Serviço
             </button>
+            <?php endif; ?>
         </div>
 
         <?php if (empty($servicos)): ?>
 
             <div class="panel-card rounded-2xl p-10 text-center">
                 <p class="text-sm text-zinc-400">Nenhum serviço cadastrado ainda.</p>
+                <?php if ($podeEditarServicos): ?>
                 <button type="button" onclick="openModal('modal-cadastrar')" class="btn-secondary h-10 px-5 rounded-xl text-sm mt-4 inline-flex items-center">
                     Cadastrar o primeiro serviço
                 </button>
+                <?php endif; ?>
             </div>
 
         <?php else: ?>
@@ -332,6 +341,7 @@ $mensagens = [
                                             </svg>
                                         </button>
 
+                                        <?php if ($podeEditarServicos): ?>
                                         <button type="button" title="Editar" class="icon-btn"
                                             data-id="<?= (int) $s['idServico'] ?>"
                                             data-nome="<?= htmlspecialchars($nome) ?>"
@@ -368,6 +378,7 @@ $mensagens = [
                                                     <path d="M4 17v-4h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
                                                 </svg>
                                             </button>
+                                        <?php endif; ?>
                                         <?php endif; ?>
 
                                     </div>
@@ -432,7 +443,7 @@ $mensagens = [
                 </div>
 
                 <div class="mb-7">
-                    <label class="field-label block mb-2 uppercase">Foto do serviço <span class="normal-case" style="letter-spacing:0;color:#7f8fac">(opcional)</span></label>
+                    <label class="field-label block mb-2 uppercase">Foto do serviço <span class="normal-case" style="letter-spacing:0;color:var(--text-muted)">(opcional)</span></label>
                     <div class="foto-campo">
                         <div class="foto-campo__preview">
                             <img id="cad-foto-preview" class="hidden" alt="Pré-visualização da foto">
@@ -525,7 +536,7 @@ $mensagens = [
                 </div>
 
                 <div class="mb-7">
-                    <label class="field-label block mb-2 uppercase">Foto do serviço <span class="normal-case" style="letter-spacing:0;color:#7f8fac">(opcional)</span></label>
+                    <label class="field-label block mb-2 uppercase">Foto do serviço <span class="normal-case" style="letter-spacing:0;color:var(--text-muted)">(opcional)</span></label>
                     <div class="foto-campo">
                         <div class="foto-campo__preview">
                             <img id="edit-foto-preview" class="hidden" alt="Pré-visualização da foto">
@@ -646,12 +657,12 @@ $mensagens = [
 <div id="recorte-overlay" class="recorte-overlay" role="dialog" aria-modal="true" aria-labelledby="recorte-titulo">
     <div class="recorte-modal">
         <p id="recorte-titulo" class="text-sm font-semibold text-[color:var(--cream)] mb-1">Ajustar foto do serviço</p>
-        <p class="text-xs mb-3" style="color:#8fa0bd">Arraste para posicionar e use o controle para aproximar ou afastar.</p>
+        <p class="text-xs mb-3" style="color:var(--text-muted)">Arraste para posicionar e use o controle para aproximar ou afastar.</p>
         <div class="recorte-area"><img id="recorte-img" alt="Pré-visualização"></div>
         <div class="flex items-center gap-3 mt-4">
-            <span class="text-xs" style="color:#8fa0bd">&minus;</span>
+            <span class="text-xs" style="color:var(--text-muted)">&minus;</span>
             <input type="range" id="recorte-zoom" class="recorte-zoom" min="0" max="1" step="0.01" value="0" aria-label="Zoom">
-            <span class="text-xs" style="color:#8fa0bd">+</span>
+            <span class="text-xs" style="color:var(--text-muted)">+</span>
         </div>
         <div class="flex justify-end gap-3 mt-5">
             <button type="button" id="recorte-cancelar" class="recorte-btn recorte-btn-sec">Cancelar</button>

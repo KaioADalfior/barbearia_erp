@@ -11,7 +11,7 @@
 Options -Indexes
 
 # Bloqueia download direto de dumps de banco, backups, configs, etc.
-<FilesMatch "\.(sql|zip|tar|tar\.gz|gz|rar|7z|bak|old|log|md|env|txt|ini|conf|yml|yaml)$">
+<FilesMatch "(\.(sql|zip|tar|tar\.gz|gz|rar|7z|bak|old|log|md|env|txt|ini|conf|yml|yaml|toml|patch|diff|nix|sh)|^env)$">
     Require all denied
 </FilesMatch>
 
@@ -24,6 +24,9 @@ Options -Indexes
 RedirectMatch 404 ^/scriptBD/
 RedirectMatch 404 ^/\.nixpacks/
 RedirectMatch 404 ^/includes/.*\.php$
+RedirectMatch 404 ^/config/
+RedirectMatch 404 ^/Claude(%20|\s)outputs/
+RedirectMatch 404 ^/teste_sessao\.php$
 
 # Agendamento público por link (sem login) — ver Publico/paginas/agendar.php
 # e includes/PublicoTokenService.php. URL bonita e "inquebrável" (o token

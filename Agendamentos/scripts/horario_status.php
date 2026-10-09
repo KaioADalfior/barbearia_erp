@@ -18,6 +18,12 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../includes/guard.php';
 exigirSessao(['barbeiro'], json: true);
 
+// CSRF: o header X-CSRF-Token é enviado sozinho por includes/sidebar-script.php.
+require_once __DIR__ . '/../../includes/csrf.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar(json: true);
+}
+
 require_once __DIR__ . '/../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -59,8 +65,21 @@ if ($acao === 'inativar') {
         exit;
     }
 
-    $stmtUpdate = $pdo->prepare('UPDATE Horario SET disponivel = 0 WHERE idHorario = :h');
-    $stmtUpdate->execute(['h' => $idHorario]);
+    // UPDATE condicional (atômico): só inativa se NÃO existir agendamento
+    // ativo no horário no momento da escrita — fecha a janela entre o
+    // SELECT acima e este UPDATE (agendamento criado em paralelo).
+    $stmtUpdate = $pdo->prepare(
+        "UPDATE Horario SET disponivel = 0
+         WHERE idHorario = :h AND id_barbeiro = :b
+           AND NOT EXISTS (SELECT 1 FROM Agendamentos a
+                           WHERE a.idHorario = Horario.idHorario AND a.Status IN ('agendado', 'confirmado'))"
+    );
+    $stmtUpdate->execute(['h' => $idHorario, 'b' => $idBarbeiro]);
+
+    if ($stmtUpdate->rowCount() === 0 && (int) $horario['disponivel'] === 1) {
+        echo json_encode(['ok' => false, 'erro' => 'Este horário já tem cliente agendado. Cancele o agendamento antes de inativar.']);
+        exit;
+    }
 
     DiscordLogger::agendamentos('⛔ Horário inativado (somente neste dia)', [
         ['name' => '🆔 Horário',   'value' => '#' . $idHorario, 'inline' => true],
@@ -73,8 +92,15 @@ if ($acao === 'inativar') {
 }
 
 // acao === 'reativar'
-$stmtUpdate = $pdo->prepare('UPDATE Horario SET disponivel = 1 WHERE idHorario = :h');
-$stmtUpdate->execute(['h' => $idHorario]);
+// Um horário com agendamento ativo continua "indisponível" por estar
+// ocupado — reativar só vale para horário inativado manualmente.
+if ($ocupado) {
+    echo json_encode(['ok' => false, 'erro' => 'Este horário está ocupado por um agendamento.']);
+    exit;
+}
+
+$stmtUpdate = $pdo->prepare('UPDATE Horario SET disponivel = 1 WHERE idHorario = :h AND id_barbeiro = :b');
+$stmtUpdate->execute(['h' => $idHorario, 'b' => $idBarbeiro]);
 
 DiscordLogger::agendamentos('🟢 Horário reativado', [
     ['name' => '🆔 Horário',   'value' => '#' . $idHorario, 'inline' => true],

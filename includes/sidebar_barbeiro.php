@@ -111,6 +111,7 @@ $sidebarEhProprietario = AcessoService::ehProprietario($pdo);
             </div>
         </div>
 
+        <?php if ($sidebarEhProprietario): // vitrine pública: só o proprietário configura ?>
         <!-- Grupo: Catálogo (vitrine pública /c/agendar) -->
         <div>
             <button type="button"
@@ -140,6 +141,8 @@ $sidebarEhProprietario = AcessoService::ehProprietario($pdo);
                 </a>
             </div>
         </div>
+
+        <?php endif; ?>
 
         <!-- Grupo: Agendamento -->
         <div>
@@ -339,10 +342,10 @@ $ab_agoraRodape = new DateTime();
         font-size: 11.5px;
         font-weight: 500;
         letter-spacing: 0.02em;
-        color: #aebdd6;
+        color: var(--text-soft);
         background: rgba(10,14,24,0.85);
         backdrop-filter: blur(6px);
-        border-top: 1px solid rgba(255,255,255,0.08);
+        border-top: 1px solid var(--line);
         pointer-events: none;
     }
     .ab-rodape-fixo strong{ color: var(--cream, #f4ede0); font-weight: 600; }
@@ -376,6 +379,9 @@ $ab_agoraRodape = new DateTime();
     if (sidebar && rodape) {
         var ajustar = function () {
             var altura = rodape.offsetHeight;
+            // Altura real do rodapé fixo, disponível para qualquer elemento
+            // flutuante (ex.: bolinha da lista de espera) ficar ACIMA dele.
+            document.documentElement.style.setProperty('--ab-rodape-h', altura + 'px');
             sidebar.style.height = 'calc(100vh - ' + altura + 'px)';
             sidebar.style.boxSizing = 'border-box';
         };
@@ -425,7 +431,7 @@ $ab_agoraRodape = new DateTime();
     <div class="modal-card rounded-3xl shadow-2xl overflow-hidden w-full max-w-sm">
         <div class="barber-stripe-thin"></div>
         <div class="p-7 text-center">
-            <div style="width:48px; height:48px; border-radius:999px; background:rgba(47,111,237,0.14); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+            <div style="width:48px; height:48px; border-radius:999px; background:rgba(var(--accent-rgb),0.14); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="8.5" stroke="#6fa8ea" stroke-width="1.5"/>
                     <path d="M9.2 9.3a2.8 2.8 0 1 1 3.9 2.6c-.7.35-1.1.75-1.1 1.6v.4" stroke="#6fa8ea" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

@@ -1,48 +1,178 @@
-/* assets/css/admin-theme.css */
-/* Sistema de design compartilhado das telas internas (pós-login) */
+/* assets/css/admin-theme.css
+ * Sistema de design compartilhado das telas internas (pós-login) do BarbERP.
+ *
+ * Identidade: barbearia clássica com acabamento digital premium — fundo
+ * "couro e ébano" (preto quente), superfícies em tons de madeira escura,
+ * metal escovado (latão) como cor de destaque, tipografia de letreiro
+ * (Bebas Neue) nos títulos e Poppins no texto. A faixa diagonal do poste de
+ * barbeiro aparece como assinatura discreta (.barber-stripe-thin).
+ *
+ * Como este arquivo está organizado:
+ *   1. Tokens (variáveis) — TODA cor/medida do sistema nasce aqui.
+ *      A cor de destaque (--accent*) pode ser trocada por barbearia em
+ *      Configurações > Cor da barbearia (includes/TemaService.php emite as
+ *      variáveis personalizadas; sem personalização valem as daqui).
+ *   2. Base (tipografia, foco, seleção, rolagem)
+ *   3. Estrutura (sidebar, topbar, modais)
+ *   4. Componentes (cartões, formulários, botões, avisos, badges, tabelas, KPIs)
+ *   5. Configurações (switch, opções de tema, cor da barbearia)
+ *   6. Camada de compatibilidade com utilitários Tailwind fixos (tema claro)
+ */
+
+/* ======================================================================
+   1. TOKENS
+   ====================================================================== */
 
 :root{
-    --onyx:#0b0f17;
-    --charcoal:#111827;
-    --charcoal-2:#141b2b;
-    --charcoal-3:#1a2236;
-    --gold:#2f6fed;
-    --gold-light:#5b93f7;
-    --cream:#e7ebf3;
-    --pole-red:#64748b;
-    --pole-blue:#94a3b8;
+    color-scheme:dark;
 
-    /* Cores semanticas (sucesso / erro / alerta), compartilhadas por toda
-       badge, alerta e estado visual do sistema. Mantidas como variaveis
-       para os dois temas poderem ajustar o contraste sem duplicar valores
-       espalhados pelas paginas. */
-    --success:#22c55e;
-    --success-soft:rgba(34,197,94,0.14);
-    --danger:#ef4444;
-    --danger-soft:rgba(239,68,68,0.14);
-    --warning:#f59e0b;
-    --warning-soft:rgba(245,158,11,0.14);
+    /* Tipografia */
+    --font-body:'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-display:'Bebas Neue', 'Oswald', 'Arial Narrow', Impact, sans-serif;
+
+    /* Superfícies (do fundo da página até os elementos mais "altos") */
+    --bg:#0e0c0a;
+    --surface:#16120f;
+    --surface-2:#1d1814;
+    --surface-3:#272019;
+    --field-bg:rgba(0,0,0,0.38);
+
+    /* Linhas e divisórias */
+    --line:rgba(255,236,205,0.09);
+    --line-strong:rgba(255,236,205,0.18);
+
+    /* Texto */
+    --cream:#f3ebdc;          /* texto principal */
+    --text-soft:#d3c8b4;      /* texto secundário forte */
+    --text-muted:#a4987f;     /* legendas, rótulos */
+    --text-faint:#7a705f;     /* apenas decorativo / placeholder */
+
+    /* Cor de destaque (padrão: latão). Estas 6 variáveis são as que
+       TemaService substitui quando a barbearia escolhe outra cor. */
+    --accent:#c9a14a;
+    --accent-rgb:201,161,74;
+    --accent-hi:#d4b46e;
+    --accent-lo:#9d7e3a;
+    --accent-on:#1b1408;      /* texto sobre preenchimento --accent */
+    --accent-strong:#c9a14a;  /* texto/ícone/borda/foco sobre as superfícies */
+    --accent-soft:rgba(var(--accent-rgb),0.13);
+    --accent-line:rgba(var(--accent-rgb),0.34);
+
+    /* Assinatura do poste de barbeiro */
+    --pole-red:#b8382c;
+    --pole-blue:#2f5f94;
+    --pole-cream:#efe6d2;
+
+    /* Semânticas (texto = legível sobre as superfícies do tema) */
+    --success:#38c481;
+    --success-text:#74dfa8;
+    --success-soft:rgba(56,196,129,0.14);
+    --danger:#ee5b4f;
+    --danger-text:#ff958b;
+    --danger-soft:rgba(238,91,79,0.15);
+    --warning:#e9a63a;
+    --warning-text:#f4c673;
+    --warning-soft:rgba(233,166,58,0.15);
+    --info:#3fa7b8;
+    --info-text:#7fd0d9;
+    --info-soft:rgba(63,167,184,0.15);
+
+    /* Forma e profundidade */
+    --radius-sm:0.6rem;
+    --radius:0.85rem;
+    --radius-lg:1.15rem;
+    --shadow-1:0 1px 0 rgba(255,236,205,0.04) inset, 0 8px 22px -14px rgba(0,0,0,0.75);
+    --shadow-2:0 18px 40px -18px rgba(0,0,0,0.85);
+    --focus-ring:0 0 0 3px rgba(var(--accent-rgb),0.28);
+    --overlay:rgba(8,6,4,0.72);
+
+    /* Nomes antigos (as páginas internas ainda os usam): apelidos dos tokens acima */
+    --onyx:var(--bg);
+    --charcoal:var(--surface);
+    --charcoal-2:var(--surface-2);
+    --charcoal-3:var(--surface-3);
+    --gold:var(--accent);
+    --gold-light:var(--accent-hi);
 }
+
+/* Tema claro ("papel e cera"): marfim quente, texto café, mesmo latão */
+html[data-theme="light"]{
+    color-scheme:light;
+
+    --bg:#f3eee4;
+    --surface:#fbf8f2;
+    --surface-2:#ffffff;
+    --surface-3:#f0e9db;
+    --field-bg:#ffffff;
+
+    --line:rgba(70,48,12,0.13);
+    --line-strong:rgba(70,48,12,0.26);
+
+    --cream:#231a12;
+    --text-soft:#4a3d2e;
+    --text-muted:#6c5d49;
+    --text-faint:#8d7f69;
+
+    --accent-strong:#886d32;
+    --accent-soft:rgba(var(--accent-rgb),0.16);
+    --accent-line:rgba(var(--accent-rgb),0.45);
+
+    --success:#1f9d63;
+    --success-text:#14673f;
+    --success-soft:rgba(31,157,99,0.12);
+    --danger:#d63a2e;
+    --danger-text:#a8261b;
+    --danger-soft:rgba(214,58,46,0.10);
+    --warning:#c9861a;
+    --warning-text:#8a5a08;
+    --warning-soft:rgba(201,134,26,0.13);
+    --info:#1d8795;
+    --info-text:#0d6b74;
+    --info-soft:rgba(29,135,149,0.12);
+
+    --shadow-1:0 1px 0 rgba(255,255,255,0.8) inset, 0 6px 18px -12px rgba(70,48,12,0.35);
+    --shadow-2:0 18px 40px -20px rgba(70,48,12,0.45);
+    --overlay:rgba(35,26,18,0.5);
+}
+
+/* ======================================================================
+   2. BASE
+   ====================================================================== */
 
 *{ box-sizing:border-box; }
 
 body{
-    font-family:'Poppins', sans-serif;
-    background-color:var(--onyx);
+    font-family:var(--font-body);
+    background-color:var(--bg);
     color:var(--cream);
     min-height:100vh;
+    -webkit-font-smoothing:antialiased;
 }
 
+::selection{ background:rgba(var(--accent-rgb),0.35); color:var(--cream); }
+
+/* Títulos de letreiro */
 .display{
-    font-family:'Poppins', sans-serif;
-    font-weight:700;
-    letter-spacing:-0.01em;
+    font-family:var(--font-display);
+    font-weight:400;
+    letter-spacing:0.035em;
+    text-transform:uppercase;
+    line-height:1.05;
 }
 
 .eyebrow{
     letter-spacing:0.3em;
     font-size:11px;
     font-weight:500;
+    color:var(--accent-strong);
+}
+
+/* Foco visível e consistente para quem navega por teclado. Campos de
+   formulário usam o anel próprio (.field:focus); o resto usa o contorno. */
+:where(a, button, [role="button"], summary, [tabindex]):focus-visible{
+    outline:2px solid var(--accent-strong);
+    outline-offset:2px;
+    border-radius:var(--radius-sm);
 }
 
 /* Rede de segurança: se algum conteúdo da área principal um dia ficar mais
@@ -50,6 +180,28 @@ body{
 main{
     overflow-x:auto;
 }
+
+/* Barras de rolagem acompanhando o tema (Chromium/Edge/Safari + Firefox) */
+*{ scrollbar-width:thin; scrollbar-color:rgba(var(--accent-rgb),0.35) transparent; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:rgba(var(--accent-rgb),0.28); border-radius:999px; }
+::-webkit-scrollbar-thumb:hover{ background:rgba(var(--accent-rgb),0.5); }
+
+@media (prefers-reduced-motion: reduce){
+    *,
+    *::before,
+    *::after{
+        animation-duration:0.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:0.01ms !important;
+        scroll-behavior:auto !important;
+    }
+}
+
+/* ======================================================================
+   3. ESTRUTURA
+   ====================================================================== */
 
 /* ---------- Sidebar ---------- */
 /* Componente autocontido: não depende de utilitários Tailwind para layout
@@ -66,8 +218,8 @@ main{
     flex-shrink:0;
     display:flex;
     flex-direction:column;
-    background:linear-gradient(180deg, var(--charcoal), var(--onyx));
-    border-right:1px solid rgba(47,111,237,0.12);
+    background:linear-gradient(180deg, var(--surface), var(--bg));
+    border-right:1px solid var(--line);
     transition:width .2s ease, transform .25s ease;
     z-index:60;
 }
@@ -87,8 +239,18 @@ main{
     display:flex;
     align-items:center;
     padding:1.5rem 3.1rem 1.35rem 1.25rem;
-    border-bottom:1px solid rgba(255,255,255,0.05);
+    border-bottom:1px solid var(--line);
     transition:padding .2s ease, justify-content .2s ease;
+}
+/* Fio de latão sob a marca (assinatura discreta) */
+.ab-sidebar__brand::after{
+    content:"";
+    position:absolute;
+    left:1.25rem;
+    bottom:-1px;
+    width:2.4rem;
+    height:2px;
+    background:linear-gradient(90deg, var(--accent), transparent);
 }
 @media (min-width: 1024px){
     html[data-sidebar="collapsed"] .ab-sidebar__brand{
@@ -96,6 +258,7 @@ main{
         padding-left:0.75rem;
         padding-right:0.75rem;
     }
+    html[data-sidebar="collapsed"] .ab-sidebar__brand::after{ left:50%; transform:translateX(-50%); }
 }
 
 .ab-sidebar__logo{
@@ -127,26 +290,26 @@ html[data-theme="light"] .ab-sidebar__logo-img{ filter:none; }
 /* Texto de marca (usado como alternativa à logo em imagem). */
 .ab-sidebar__brand-text{
     min-width:0;
-    line-height:1.25;
+    line-height:1.2;
 }
 .ab-sidebar__brand-name{
     margin:0;
-    font-family:'Poppins', sans-serif;
-    font-weight:700;
-    font-size:18px;
-    letter-spacing:-0.01em;
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:26px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
     color:var(--cream);
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
 }
-.ab-sidebar__brand-name span{ color:var(--gold-light); }
-html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
+.ab-sidebar__brand-name span{ color:var(--accent-strong); }
 .ab-sidebar__brand-tag{
     margin:2px 0 0;
     font-size:11px;
     letter-spacing:0.08em;
-    color:#7f8fac;
+    color:var(--text-muted);
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -192,13 +355,14 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
 }
 
 .ab-nav-item{
+    position:relative;
     display:flex;
     align-items:center;
     gap:0.75rem;
     width:100%;
     padding:0.6rem 0.75rem;
-    border-radius:0.7rem;
-    color:#8b97ac;
+    border-radius:var(--radius);
+    color:var(--text-muted);
     background:transparent;
     border:none;
     font:inherit;
@@ -207,8 +371,19 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
     cursor:pointer;
     transition:background-color .15s, color .15s;
 }
-.ab-nav-item:hover{ background:rgba(255,255,255,0.04); color:var(--cream); }
-.ab-nav-item.is-active{ background:rgba(47,111,237,0.12); color:var(--gold-light); }
+.ab-nav-item:hover{ background:rgba(var(--accent-rgb),0.07); color:var(--cream); }
+.ab-nav-item.is-active{ background:var(--accent-soft); color:var(--accent-strong); font-weight:500; }
+/* Marcador de página ativa: filete de latão na borda esquerda */
+.ab-nav-item.is-active::before{
+    content:"";
+    position:absolute;
+    left:-0.75rem;
+    top:20%;
+    bottom:20%;
+    width:3px;
+    border-radius:0 3px 3px 0;
+    background:var(--accent);
+}
 
 @media (min-width: 1024px){
     html[data-sidebar="collapsed"] .ab-nav-item{ justify-content:center; }
@@ -232,22 +407,22 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
 .ab-subnav__item{
     display:block;
     padding:0.5rem 0.75rem;
-    border-radius:0.6rem;
+    border-radius:var(--radius-sm);
     font-size:13px;
-    color:#7f8fac;
-    border-left:1px solid rgba(255,255,255,0.08);
+    color:var(--text-muted);
+    border-left:1px solid var(--line);
     text-decoration:none;
     transition:color .15s, border-color .15s, background-color .15s;
 }
 .ab-subnav__item:hover{
     color:var(--cream);
-    border-color:rgba(47,111,237,0.4);
-    background:rgba(255,255,255,0.03);
+    border-color:var(--accent-line);
+    background:rgba(var(--accent-rgb),0.06);
 }
 .ab-subnav__item.is-active{
-    color:var(--gold-light);
-    border-color:var(--gold);
-    background:rgba(47,111,237,0.10);
+    color:var(--accent-strong);
+    border-color:var(--accent);
+    background:var(--accent-soft);
 }
 
 /* ---- Rodapé ---- */
@@ -255,7 +430,7 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
 .ab-sidebar__footer{
     flex-shrink:0;
     padding:1rem;
-    border-top:1px solid rgba(255,255,255,0.05);
+    border-top:1px solid var(--line);
     display:flex;
     flex-direction:column;
     gap:0.25rem;
@@ -265,7 +440,7 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
     align-items:center;
     gap:0.75rem;
     padding:0.5rem;
-    border-radius:0.75rem;
+    border-radius:var(--radius);
     min-width:0;
 }
 @media (min-width: 1024px){
@@ -279,11 +454,11 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
     display:flex;
     align-items:center;
     justify-content:center;
-    background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.1);
+    background:var(--accent-soft);
+    border:1px solid var(--accent-line);
     font-size:11px;
     font-weight:600;
-    color:var(--gold-light);
+    color:var(--accent-strong);
 }
 
 .ab-sidebar__avatar--foto{
@@ -299,7 +474,7 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
     overflow:hidden;
     text-overflow:ellipsis;
 }
-.ab-sidebar__user-role{ font-size:11px; color:#64748b; }
+.ab-sidebar__user-role{ font-size:11px; color:var(--text-muted); }
 
 /* ---- Estado recolhido: esconde rótulos/textos ---- */
 
@@ -324,7 +499,7 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
 .ab-sidebar-backdrop{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.6);
+    background:var(--overlay);
     backdrop-filter:blur(2px);
     z-index:59;
 }
@@ -349,31 +524,18 @@ html[data-theme="light"] .ab-sidebar__brand-name span{ color:var(--gold); }
 
 /* ---- Modais sempre acima do menu, em qualquer tela/estado ----
    Toda tela interna usa a mesma classe .modal-overlay (position:fixed
-   inset:0) junto da utility "z-50" do Tailwind (z-index:50) — ver
-   Agendamentos/paginas/agendar.php, Clientes/paginas/cliente_listar.php,
-   Servicos/paginas/servico_listar.php, Configuracoes/paginas/configuracoes.php
-   e Financeiro/paginas/*.php.
-
-   No mobile/tablet (<1024px) a sidebar vira off-canvas e, quando aberta,
-   usa z-index:70 (.ab-sidebar acima) — maior que o z-50 do modal. Resultado:
-   com o menu aberto, um modal renderizado por cima dele (ex.: modal de
-   agendamento) ficava ATRÁS do menu, escondido, sem o barbeiro conseguir
-   interagir com ele sem antes fechar o menu manualmente.
-
-   Correção estrutural, num único lugar (compartilhado por todas as
-   páginas, não só Agendamentos): o maior z-index já usado pela sidebar em
-   qualquer estado é 70 (mobile aberta); aqui garantimos que o overlay do
-   modal fica sempre acima disso, com um valor coerente com essa escala
-   (não um número aleatório). O !important é necessário porque o Tailwind
-   CDN injeta seu <style> de utilities (.z-50) em um ponto do <head> cuja
-   ordem, na prática, pode variar; sem ele, o resultado dependeria de uma
-   corrida de cascata em vez de uma regra garantida. */
+   inset:0) junto da utility "z-50" do Tailwind (z-index:50). No
+   mobile/tablet (<1024px) a sidebar vira off-canvas e, quando aberta,
+   usa z-index:70 — maior que o z-50 do modal; sem uma regra central, o
+   modal ficava ATRÁS do menu. O overlay fica sempre em 80 (acima de 70).
+   O !important é necessário porque o Tailwind CDN injeta seu <style> de
+   utilities (.z-50, .bg-black/..) em um ponto do <head> cuja ordem pode
+   variar; sem ele o resultado dependeria de uma corrida de cascata. */
 .modal-overlay{
     z-index:80 !important;
-    background:rgba(8,11,18,0.7) !important;
+    background:var(--overlay) !important;
     backdrop-filter:blur(3px);
 }
-html[data-theme="light"] .modal-overlay{ background:rgba(15,23,42,0.45) !important; }
 
 /* ---- Botões de alternância (usados também fora do sidebar, no topbar) ---- */
 
@@ -383,18 +545,18 @@ html[data-theme="light"] .modal-overlay{ background:rgba(15,23,42,0.45) !importa
     display:flex;
     align-items:center;
     justify-content:center;
-    border-radius:0.65rem;
-    border:1px solid rgba(255,255,255,0.08);
-    background:rgba(255,255,255,0.03);
-    color:#aebdd6;
+    border-radius:var(--radius-sm);
+    border:1px solid var(--line);
+    background:rgba(var(--accent-rgb),0.04);
+    color:var(--text-soft);
     flex-shrink:0;
     cursor:pointer;
     transition:background-color .15s, border-color .15s, color .15s;
 }
 .menu-toggle-btn:hover{
-    background:rgba(47,111,237,0.12);
-    border-color:rgba(47,111,237,0.35);
-    color:var(--gold-light);
+    background:var(--accent-soft);
+    border-color:var(--accent-line);
+    color:var(--accent-strong);
 }
 .menu-toggle-btn svg{ transition:transform .2s ease; }
 @media (min-width: 1024px){
@@ -404,36 +566,70 @@ html[data-theme="light"] .modal-overlay{ background:rgba(15,23,42,0.45) !importa
 /* ---------- Área de conteúdo ---------- */
 
 .topbar{
-    background:linear-gradient(180deg, rgba(17,24,39,0.6), transparent);
-    border-bottom:1px solid rgba(255,255,255,0.05);
+    background:linear-gradient(180deg, rgba(var(--accent-rgb),0.05), transparent);
+    border-bottom:1px solid var(--line);
 }
 
-.panel-card{
-    background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-    border:1px solid rgba(47,111,237,0.14);
-    border-radius:1.1rem;
-}
-
-/* Faixa de destaque neutra usada no topo/rodapé de modais e alguns cards.
-   Antes era uma "listra de barbeiro" (vermelho/creme/azul) — trocada por
-   uma barra sólida na cor de destaque do sistema, sem referência temática
-   a barbearia, para servir de base genérica a qualquer cliente. */
+/* Faixa assinatura do topo de cartões e modais: poste de barbeiro em
+   diagonal, com as cores de destaque da barbearia (acompanha a cor
+   personalizada) + creme + tom escuro. */
 .barber-stripe-thin{
-    height:3px;
+    height:4px;
     width:100%;
-    background:linear-gradient(90deg, var(--gold), var(--gold-light));
+    background:repeating-linear-gradient(
+        -45deg,
+        var(--accent) 0 8px,
+        var(--pole-cream) 8px 16px,
+        var(--accent-lo) 16px 24px
+    );
+    opacity:0.95;
 }
 
 /* ---------- Ícones ----------
    Os SVGs inline de todas as páginas usam duas cores fixas em atributos
    (stroke/fill): o antigo azul de destaque (#6fa8ea) e um cinza neutro
    (#7f8fac). Em vez de editar centenas de <svg> um a um, remapeamos essas
-   cores fixas para as variáveis atuais aqui — assim os ícones acompanham a
-   nova paleta nos dois temas automaticamente. */
-svg [stroke="#6fa8ea"]{ stroke:var(--gold-light) !important; }
-svg [fill="#6fa8ea"]{ fill:var(--gold-light) !important; }
-html[data-theme="light"] svg [stroke="#6fa8ea"]{ stroke:var(--gold) !important; }
-html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
+   cores fixas para as variáveis atuais — assim os ícones acompanham a
+   paleta e a cor da barbearia nos dois temas. (!important: atributos de
+   apresentação SVG têm especificidade zero, mas o remapeamento precisa
+   vencer estilos inline de algumas páginas.) */
+svg [stroke="#6fa8ea"]{ stroke:var(--accent-strong) !important; }
+svg [fill="#6fa8ea"]{ fill:var(--accent-strong) !important; }
+svg [stroke="#7f8fac"]{ stroke:var(--text-muted) !important; }
+
+/* ---------- SweetAlert2 ----------
+   Cores de fundo/texto do popup vêm dos próprios tokens (as páginas passam
+   background/color via var(--...)); aqui ficam a tipografia, o contorno e o
+   texto legível sobre o botão de confirmação na cor de destaque. */
+.swal2-popup{
+    font-family:var(--font-body);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-2);
+}
+.swal2-popup .swal2-title{ font-family:var(--font-display); font-weight:400; letter-spacing:0.04em; text-transform:uppercase; }
+.swal2-popup .swal2-confirm[style*="var(--accent)"]{ color:var(--accent-on); }
+.swal2-popup .swal2-styled:focus-visible{ box-shadow:var(--focus-ring); }
+
+/* ======================================================================
+   4. COMPONENTES
+   ====================================================================== */
+
+/* ---------- Cartões ---------- */
+
+.panel-card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface-3));
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-1);
+}
+
+.kpi-card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface-3));
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-1);
+}
 
 /* ---------- Formulários ---------- */
 
@@ -441,66 +637,114 @@ html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
     font-size:12px;
     letter-spacing:0.1em;
     font-weight:500;
-    color:#aebdd6;
+    color:var(--text-soft);
 }
 
 .field{
-    background:rgba(0,0,0,0.35);
-    border:1px solid rgba(255,255,255,0.08);
+    background:var(--field-bg);
+    border:1px solid var(--line-strong);
     color:var(--cream);
+    border-radius:var(--radius);
     transition:border-color .2s, box-shadow .2s, background-color .2s;
 }
-.field::placeholder{ color:#5b6f8c; }
+.field::placeholder{ color:var(--text-faint); }
+.field:hover:not(:disabled){ border-color:var(--accent-line); }
 .field:focus{
     outline:none;
-    border-color:var(--gold);
-    background:rgba(0,0,0,0.5);
-    box-shadow:0 0 0 4px rgba(47,111,237,0.14);
+    border-color:var(--accent-strong);
+    box-shadow:var(--focus-ring);
 }
+.field:disabled,
+.field[readonly]{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+.field[aria-invalid="true"],
+.field.is-invalid{
+    border-color:var(--danger);
+    box-shadow:0 0 0 3px var(--danger-soft);
+}
+
+/* ---------- Botões ---------- */
 
 .btn-primary{
-    background:var(--gold);
-    color:#ffffff;
+    background:linear-gradient(180deg, var(--accent-hi), var(--accent));
+    color:var(--accent-on);
     font-weight:600;
-    letter-spacing:0.01em;
-    transition:background-color .2s, transform .15s, box-shadow .2s;
-    box-shadow:0 6px 16px -6px rgba(47,111,237,0.55);
+    letter-spacing:0.02em;
+    border:1px solid rgba(var(--accent-rgb),0.9);
+    cursor:pointer;
+    transition:filter .2s, transform .15s, box-shadow .2s;
+    box-shadow:0 8px 18px -10px rgba(var(--accent-rgb),0.85), 0 1px 0 rgba(255,255,255,0.28) inset;
 }
-.btn-primary:hover{ background:var(--gold-light); }
-.btn-primary:active{ transform:scale(0.98); }
+.btn-primary:hover:not(:disabled){ filter:brightness(1.07); box-shadow:0 10px 22px -10px rgba(var(--accent-rgb),0.95), 0 1px 0 rgba(255,255,255,0.28) inset; }
+.btn-primary:active:not(:disabled){ transform:translateY(1px) scale(0.99); filter:brightness(0.97); }
+.btn-primary:focus-visible{ outline:2px solid var(--accent-strong); outline-offset:3px; }
+.btn-primary:disabled,
+.btn-secondary:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+    box-shadow:none;
+    filter:grayscale(0.25);
+}
 
 .btn-secondary{
-    background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.1);
+    background:rgba(var(--accent-rgb),0.05);
+    border:1px solid var(--line-strong);
     color:var(--cream);
-    transition:background-color .2s, border-color .2s;
+    cursor:pointer;
+    transition:background-color .2s, border-color .2s, transform .15s;
 }
-.btn-secondary:hover{
-    background:rgba(255,255,255,0.07);
-    border-color:rgba(47,111,237,0.35);
+.btn-secondary:hover:not(:disabled){
+    background:rgba(var(--accent-rgb),0.11);
+    border-color:var(--accent-line);
 }
+.btn-secondary:active:not(:disabled){ transform:translateY(1px); }
 
-.alert-success{
-    border:1px solid rgba(34,197,94,0.35);
-    background:var(--success-soft);
-    color:#bbf0cb;
+/* Estado "carregando": qualquer botão com .is-loading (ou aria-busy="true")
+   mostra um anel girando no lugar do texto, sem mudar o tamanho do botão. */
+.btn-primary.is-loading,
+.btn-secondary.is-loading,
+.btn-primary[aria-busy="true"],
+.btn-secondary[aria-busy="true"]{
+    position:relative;
+    color:transparent !important;
+    pointer-events:none;
 }
-.alert-error{
-    border:1px solid rgba(239,68,68,0.35);
-    background:var(--danger-soft);
-    color:#fecdd3;
+.btn-primary.is-loading::after,
+.btn-secondary.is-loading::after,
+.btn-primary[aria-busy="true"]::after,
+.btn-secondary[aria-busy="true"]::after{
+    content:"";
+    position:absolute;
+    inset:50% auto auto 50%;
+    width:18px;
+    height:18px;
+    margin:-9px 0 0 -9px;
+    border:2px solid currentColor;
+    border-color:var(--accent-on) transparent var(--accent-on) transparent;
+    border-radius:50%;
+    animation:ab-spin .7s linear infinite;
 }
+.btn-secondary.is-loading::after,
+.btn-secondary[aria-busy="true"]::after{ border-color:var(--accent-strong) transparent var(--accent-strong) transparent; }
+@keyframes ab-spin{ to{ transform:rotate(360deg); } }
+
+/* ---------- Avisos ---------- */
+
+.alert-success,
+.alert-error,
 .alert-warning{
-    border:1px solid rgba(245,158,11,0.35);
-    background:var(--warning-soft);
-    color:#fde3b8;
+    border:1px solid transparent;
+    border-radius:var(--radius);
 }
+.alert-success{ border-color:rgba(56,196,129,0.38); background:var(--success-soft); color:var(--success-text); }
+.alert-error{ border-color:rgba(238,91,79,0.4); background:var(--danger-soft); color:var(--danger-text); }
+.alert-warning{ border-color:rgba(233,166,58,0.4); background:var(--warning-soft); color:var(--warning-text); }
 
 /* ---------- Badges / indicadores de status ----------
    Base compartilhada + apelidos para os nomes de classe já usados nas
-   páginas hoje (cada uma os declarava duplicado localmente). Ao revisar
-   cada módulo, o CSS local duplicado é removido e a página passa a herdar
-   daqui — sem trocar nenhum nome de classe já referenciado por PHP/JS. */
+   páginas (cada uma os declarava duplicado localmente). */
 .badge{
     display:inline-flex;
     align-items:center;
@@ -509,7 +753,7 @@ html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
     border-radius:999px;
     font-size:11px;
     font-weight:600;
-    letter-spacing:0.03em;
+    letter-spacing:0.04em;
     text-transform:uppercase;
     border:1px solid transparent;
     white-space:nowrap;
@@ -519,38 +763,40 @@ html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
 .badge-confirmado,
 .badge-concluido,
 .badge-quitado{
-    color:var(--success);
+    color:var(--success-text);
     background:var(--success-soft);
-    border-color:rgba(34,197,94,0.28);
+    border-color:rgba(56,196,129,0.32);
 }
 .badge-danger,
 .badge-inativo,
 .badge-cancelado,
 .badge-ausente{
-    color:var(--danger);
+    color:var(--danger-text);
     background:var(--danger-soft);
-    border-color:rgba(239,68,68,0.28);
+    border-color:rgba(238,91,79,0.34);
 }
 .badge-warning,
 .badge-agendado,
 .badge-pendente,
 .badge-hash{
-    color:var(--warning);
+    color:var(--warning-text);
     background:var(--warning-soft);
-    border-color:rgba(245,158,11,0.28);
+    border-color:rgba(233,166,58,0.36);
 }
 .badge-info{
-    color:var(--gold);
-    background:rgba(47,111,237,0.12);
-    border-color:rgba(47,111,237,0.28);
+    color:var(--accent-strong);
+    background:var(--accent-soft);
+    border-color:var(--accent-line);
 }
 .badge-neutral{
-    color:#64748b;
-    background:rgba(100,116,139,0.14);
-    border-color:rgba(100,116,139,0.25);
+    color:var(--text-muted);
+    background:rgba(var(--accent-rgb),0.05);
+    border-color:var(--line-strong);
 }
 
-/* ---------- Configurações: switches e opções ---------- */
+/* ======================================================================
+   5. CONFIGURAÇÕES
+   ====================================================================== */
 
 .settings-row{
     display:flex;
@@ -558,7 +804,7 @@ html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
     justify-content:space-between;
     gap:1rem;
     padding:1.1rem 0;
-    border-bottom:1px solid rgba(255,255,255,0.06);
+    border-bottom:1px solid var(--line);
 }
 .settings-row:last-child{ border-bottom:none; }
 
@@ -569,7 +815,7 @@ html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
 }
 .settings-desc{
     font-size:12.5px;
-    color:#7f8fac;
+    color:var(--text-muted);
     margin-top:2px;
 }
 
@@ -585,12 +831,13 @@ html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
     width:0;
     height:0;
 }
+.switch input:focus-visible + .switch-track{ outline:2px solid var(--accent-strong); outline-offset:2px; }
 .switch-track{
     position:absolute;
     cursor:pointer;
     inset:0;
-    background:rgba(255,255,255,0.10);
-    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(var(--accent-rgb),0.10);
+    border:1px solid var(--line-strong);
     border-radius:999px;
     transition:background-color .2s, border-color .2s;
 }
@@ -601,106 +848,111 @@ html[data-theme="light"] svg [fill="#6fa8ea"]{ fill:var(--gold) !important; }
     width:18px;
     left:3px;
     top:2.5px;
-    background:var(--cream);
+    background:var(--text-soft);
     border-radius:50%;
-    transition:transform .2s;
+    transition:transform .2s, background-color .2s;
 }
 .switch input:checked + .switch-track{
-    background:var(--gold);
+    background:var(--accent);
     border-color:transparent;
 }
 .switch input:checked + .switch-track::before{
     transform:translateX(20px);
-    background:#ffffff;
+    background:var(--accent-on);
 }
+.switch input:disabled + .switch-track{ opacity:0.5; cursor:not-allowed; }
 
 .theme-option{
     cursor:pointer;
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:1rem;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius-lg);
     padding:1rem;
     transition:border-color .2s, background-color .2s;
 }
-.theme-option:hover{ border-color:rgba(47,111,237,0.4); }
+.theme-option:hover{ border-color:var(--accent-line); }
 .theme-option-active{
-    border-color:var(--gold);
-    background:rgba(47,111,237,0.10);
+    border-color:var(--accent);
+    background:var(--accent-soft);
 }
 .theme-swatch{
     width:100%;
     height:56px;
-    border-radius:0.6rem;
-    border:1px solid rgba(255,255,255,0.08);
+    border-radius:var(--radius-sm);
+    border:1px solid var(--line);
 }
 
-/* ---------- Tema claro (ativado via <html data-theme="light">) ---------- */
+/* ---- Cor da barbearia (Configurações) ---- */
 
-html[data-theme="light"]{
-    --onyx:#f4f6fa;
-    --charcoal:#ffffff;
-    --charcoal-2:#fbfcfe;
-    --charcoal-3:#f1f4f9;
-    --gold:#2563eb;
-    --gold-light:#3b82f6;
-    --cream:#101828;
+.cor-presets{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.6rem;
 }
-
-html[data-theme="light"] .ab-sidebar{
-    background:linear-gradient(180deg, #ffffff, #f4f6fa);
-    border-right:1px solid rgba(37,99,235,0.16);
+.cor-preset{
+    display:inline-flex;
+    align-items:center;
+    gap:0.55rem;
+    padding:0.5rem 0.85rem 0.5rem 0.55rem;
+    border-radius:999px;
+    border:1px solid var(--line-strong);
+    background:rgba(var(--accent-rgb),0.04);
+    color:var(--text-soft);
+    font:inherit;
+    font-size:13px;
+    cursor:pointer;
+    transition:border-color .15s, background-color .15s, color .15s;
 }
-html[data-theme="light"] .ab-nav-item{ color:#5a6b85; }
-html[data-theme="light"] .ab-nav-item:hover{ background:rgba(0,0,0,0.04); color:var(--cream); }
-html[data-theme="light"] .ab-nav-item.is-active{ background:rgba(37,99,235,0.10); color:#1d3f79; }
-html[data-theme="light"] .ab-subnav__item{ color:#93a4bf; border-left:1px solid rgba(0,0,0,0.08); }
-html[data-theme="light"] .ab-subnav__item:hover{ color:var(--cream); border-color:rgba(37,99,235,0.4); background:rgba(0,0,0,0.03); }
-html[data-theme="light"] .ab-subnav__item.is-active{ color:#1d3f79; border-color:var(--gold); background:rgba(37,99,235,0.08); }
-html[data-theme="light"] .topbar{ background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent); border-bottom:1px solid rgba(0,0,0,0.06); }
-html[data-theme="light"] .panel-card{ background:linear-gradient(180deg, #ffffff, #f4f6fa); border:1px solid rgba(37,99,235,0.16); }
-html[data-theme="light"] .field{ background:rgba(255,255,255,0.8); border:1px solid rgba(0,0,0,0.14); }
-html[data-theme="light"] .field::placeholder{ color:#8899b3; }
-html[data-theme="light"] .field:focus{ background:#ffffff; box-shadow:0 0 0 4px rgba(37,99,235,0.14); }
-html[data-theme="light"] .btn-secondary{ background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.1); }
-html[data-theme="light"] .btn-secondary:hover{ background:rgba(0,0,0,0.06); border-color:rgba(37,99,235,0.3); }
-html[data-theme="light"] .alert-success{ background:rgba(22,163,74,0.10); color:#166534; }
-html[data-theme="light"] .alert-error{ background:rgba(220,38,38,0.10); color:#991b1b; }
-html[data-theme="light"] .alert-warning{ background:rgba(217,119,6,0.10); color:#92400e; }
-html[data-theme="light"] .settings-row{ border-bottom:1px solid rgba(0,0,0,0.07); }
-html[data-theme="light"] .settings-desc{ color:#64748b; }
-html[data-theme="light"] .switch-track{ background:rgba(0,0,0,0.08); border:1px solid rgba(0,0,0,0.12); }
-html[data-theme="light"] .switch-track::before{ background:#ffffff; }
-html[data-theme="light"] .theme-option{ border:1px solid rgba(0,0,0,0.1); }
-html[data-theme="light"] .theme-option:hover{ border-color:rgba(37,99,235,0.35); }
-html[data-theme="light"] .theme-option-active{ border-color:var(--gold); background:rgba(37,99,235,0.08); }
-html[data-theme="light"] .menu-toggle-btn{ background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.1); color:#5a6b85; }
-html[data-theme="light"] .menu-toggle-btn:hover{ background:rgba(37,99,235,0.10); border-color:rgba(37,99,235,0.35); color:#1d3f79; }
-
-/* ---------- Tema claro: ajustes de contraste ----------
-   Várias páginas usam utilitários de cor "fixos" do Tailwind (ex.:
-   text-yellow-500/70, text-zinc-500) pensados para o fundo escuro
-   original. Como eles não seguem as variáveis do tema, ficavam
-   apagados/ilegíveis sobre o fundo claro (baixo contraste). As regras
-   abaixo interceptam esses utilitários somente quando o tema claro
-   está ativo, trocando por tons escuros com contraste adequado. */
-
-html[data-theme="light"] [class*="text-yellow-500"]{ color:#92400e !important; }
-html[data-theme="light"] [class*="text-zinc-300"]{ color:#334155 !important; }
-html[data-theme="light"] [class*="text-zinc-400"]{ color:#475569 !important; }
-html[data-theme="light"] [class*="text-zinc-500"]{ color:#64748b !important; }
-html[data-theme="light"] [class*="text-zinc-600"]{ color:#1e293b !important; }
-
-html[data-theme="light"] svg [stroke="#7f8fac"]{ stroke:#5a6b85 !important; }
-
-/* Scrollbar (Chromium/Edge/Safari) coerente com o tema claro */
-html[data-theme="light"] ::-webkit-scrollbar{ width:10px; height:10px; }
-html[data-theme="light"] ::-webkit-scrollbar-track{ background:transparent; }
-html[data-theme="light"] ::-webkit-scrollbar-thumb{ background:rgba(37,99,235,0.25); border-radius:999px; }
-html[data-theme="light"] ::-webkit-scrollbar-thumb:hover{ background:rgba(37,99,235,0.4); }
-
-/* Sombra suave nos cards no tema claro — sem isso, cards ficam "flutuando"
-   sem nenhuma separação visual sobre o fundo, já que o fundo escuro original
-   dependia mais do contraste de brilho do que de sombra. */
-html[data-theme="light"] .panel-card,
-html[data-theme="light"] .kpi-card{
-    box-shadow:0 2px 10px -4px rgba(20,40,70,0.12);
+.cor-preset:hover{ border-color:var(--accent-line); color:var(--cream); }
+.cor-preset.is-ativo{
+    border-color:var(--accent-strong);
+    background:var(--accent-soft);
+    color:var(--cream);
 }
+.cor-preset__bolinha{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.35);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.35);
+    flex-shrink:0;
+}
+.cor-seletor{
+    width:48px;
+    height:48px;
+    padding:3px;
+    border-radius:var(--radius);
+    border:1px solid var(--line-strong);
+    background:var(--field-bg);
+    cursor:pointer;
+}
+.cor-erro{
+    margin-top:0.5rem;
+    font-size:12.5px;
+    color:var(--danger-text);
+}
+.cor-previa{
+    padding:1.1rem;
+    border-radius:var(--radius);
+    border:1px dashed var(--accent-line);
+    background:rgba(var(--accent-rgb),0.04);
+}
+.cor-previa__link{ color:var(--accent-strong); text-decoration:underline; text-underline-offset:3px; font-size:13px; }
+.cor-previa__barra{ height:8px; border-radius:99px; background:rgba(var(--accent-rgb),0.15); overflow:hidden; }
+.cor-previa__barra span{ display:block; width:62%; height:100%; background:linear-gradient(90deg, var(--accent-lo), var(--accent-hi)); }
+
+/* ======================================================================
+   6. COMPATIBILIDADE COM UTILITÁRIOS TAILWIND FIXOS
+   ----------------------------------------------------------------------
+   Várias páginas usam utilitários de cor "fixos" do Tailwind (text-zinc-*,
+   text-yellow-500/..) pensados para o fundo escuro. Como eles não seguem
+   as variáveis do tema, no tema claro ficariam apagados. Estas regras os
+   remapeiam para os tokens (que já trocam por tema). Precisam de
+   !important porque os utilitários do Tailwind CDN carregam depois deste
+   arquivo; este é o ÚNICO ponto que faz isso.
+   ====================================================================== */
+
+html[data-theme="light"] [class*="text-yellow-500"]{ color:var(--warning-text) !important; }
+html[data-theme="light"] [class*="text-zinc-300"]{ color:var(--text-soft) !important; }
+html[data-theme="light"] [class*="text-zinc-400"]{ color:var(--text-soft) !important; }
+html[data-theme="light"] [class*="text-zinc-500"]{ color:var(--text-muted) !important; }
+html[data-theme="light"] [class*="text-zinc-600"]{ color:var(--cream) !important; }

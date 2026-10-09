@@ -21,6 +21,7 @@
 require_once __DIR__ . '/ServicoFoto.php';
 
 require_once __DIR__ . '/ImagemPersistente.php';
+require_once __DIR__ . '/ImagemSegura.php';
 
 final class CatalogoService
 {
@@ -386,7 +387,7 @@ final class CatalogoService
             }
 
             $novo = $tipo . '_' . bin2hex(random_bytes(8)) . '.' . $tipos[$mime];
-            if (!move_uploaded_file($arquivo['tmp_name'], $pasta . $novo)) {
+            if (!ImagemSegura::mover($arquivo['tmp_name'], $mime, $pasta . $novo)) {
                 return ['ok' => false, 'erro' => 'Não foi possível salvar a imagem no servidor.'];
             }
             // Cópia no banco: a pasta de uploads some a cada redeploy (ver ImagemPersistente).

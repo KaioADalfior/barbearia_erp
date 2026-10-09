@@ -72,11 +72,11 @@ $STATUS_INFO = [
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
     table tbody tr{
-        border-top:1px solid rgba(255,255,255,0.05);
+        border-top:1px solid var(--line);
     }
 
     /* Tabela exibida em ~80% de escala (mesmo efeito de zoom do navegador),
@@ -104,11 +104,11 @@ $STATUS_INFO = [
         border-radius:999px;
         white-space:nowrap;
     }
-    .badge-agendado{   color:#9dc4f0; background:rgba(61,126,201,0.14); border:1px solid rgba(61,126,201,0.4); }
-    .badge-confirmado{ color:#7fd0d9; background:rgba(15,92,102,0.32);   border:1px solid rgba(24,138,150,0.55); }
-    .badge-concluido{  color:#bfe6c7; background:rgba(66,140,82,0.14);  border:1px solid rgba(66,140,82,0.4); }
-    .badge-cancelado{  color:#c9a8ab; background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
-    .badge-ausente{    color:#f0c98a; background:rgba(224,162,74,0.14); border:1px solid rgba(224,162,74,0.4); }
+    .badge-agendado{   color:var(--info-text); background:rgba(var(--accent-rgb),0.14); border:1px solid rgba(var(--accent-rgb),0.4); }
+    .badge-confirmado{ color:var(--info-text); background:rgba(15,92,102,0.32);   border:1px solid rgba(24,138,150,0.55); }
+    .badge-concluido{  color:var(--success-text); background:rgba(66,140,82,0.14);  border:1px solid rgba(66,140,82,0.4); }
+    .badge-cancelado{  color:var(--danger-text); background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
+    .badge-ausente{    color:var(--warning-text); background:rgba(224,162,74,0.14); border:1px solid rgba(224,162,74,0.4); }
 
     .forma-pills{ display:flex; flex-wrap:wrap; gap:0.3rem; }
     .forma-pill{
@@ -122,15 +122,15 @@ $STATUS_INFO = [
         font-size:10.5px;
         font-weight:700;
         letter-spacing:0.02em;
-        color:#aebdd6;
+        color:var(--text-soft);
         background:rgba(255,255,255,0.05);
-        border:1px solid rgba(255,255,255,0.1);
+        border:1px solid var(--line);
         cursor:default;
     }
     .forma-pill--pendente{
-        color:#9dc4f0;
-        background:rgba(61,126,201,0.12);
-        border:1px solid rgba(61,126,201,0.35);
+        color:var(--info-text);
+        background:rgba(var(--accent-rgb),0.12);
+        border:1px solid rgba(var(--accent-rgb),0.35);
         font-weight:500;
         font-size:11px;
         padding:0 0.55rem;
@@ -145,15 +145,15 @@ $STATUS_INFO = [
         border-radius:0.7rem;
         font-size:12.5px;
         font-weight:500;
-        color:#8294ad;
-        border:1px solid rgba(255,255,255,0.07);
+        color:var(--text-muted);
+        border:1px solid var(--line);
         background:rgba(255,255,255,0.02);
         transition:color .15s, border-color .15s, background-color .15s;
         white-space:nowrap;
     }
-    .status-tab:hover{ color:var(--cream); border-color:rgba(61,126,201,0.3); }
+    .status-tab:hover{ color:var(--cream); border-color:rgba(var(--accent-rgb),0.3); }
     .status-tab.is-active{
-        color:#ffffff;
+        color:var(--accent-on);
         background:var(--gold);
         border-color:var(--gold);
         font-weight:600;
@@ -187,7 +187,7 @@ $STATUS_INFO = [
         <div class="flex items-start gap-3 mb-3">
             <div style="width:36px; height:36px; border-radius:999px; background:rgba(179,65,61,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="#e0a2a8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="var(--danger-text)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <div class="min-w-0">
@@ -222,7 +222,7 @@ $STATUS_INFO = [
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Agendamentos</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Agendamentos</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Agendamentos</h1>
         </div>
     </header>
@@ -253,7 +253,7 @@ $STATUS_INFO = [
                     id="btn-excluir-cancelados"
                     onclick="abrirConfirmacaoExclusaoCancelados()"
                     class="btn-secondary h-11 px-4 rounded-xl text-sm inline-flex items-center gap-2 shrink-0"
-                    style="color:#e0a2a8; border-color:rgba(140,31,40,0.4);"
+                    style="color:var(--danger-text); border-color:rgba(140,31,40,0.4);"
                 >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0-.87 12.14A2 2 0 0 1 16.14 21H7.86a2 2 0 0 1-1.99-1.86L5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -446,8 +446,8 @@ $STATUS_INFO = [
             document.getElementById('excluir-cancelados-lista').innerHTML = dados.itens.map(function (i) {
                 return '<tr style="border-top:1px solid rgba(255,255,255,0.08);">'
                     + '<td style="padding:6px 8px; text-align:left; color:var(--cream);">' + escapeHtml(i.cliente) + '</td>'
-                    + '<td style="padding:6px 8px; text-align:left; color:#9aa7bd;">' + escapeHtml(i.servico) + '</td>'
-                    + '<td style="padding:6px 8px; text-align:right; color:#9aa7bd; white-space:nowrap;">' + escapeHtml(i.data) + ' ' + escapeHtml(i.hora) + '</td>'
+                    + '<td style="padding:6px 8px; text-align:left; color:var(--text-soft);">' + escapeHtml(i.servico) + '</td>'
+                    + '<td style="padding:6px 8px; text-align:right; color:var(--text-soft); white-space:nowrap;">' + escapeHtml(i.data) + ' ' + escapeHtml(i.hora) + '</td>'
                     + '</tr>';
             }).join('');
 

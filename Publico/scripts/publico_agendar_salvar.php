@@ -68,18 +68,22 @@ if ($idHorario <= 0 || $idServico <= 0) {
     exit;
 }
 
-if ($nome === '' || mb_strlen($nome) < 3) {
-    echo json_encode(['ok' => false, 'erro' => 'Informe seu nome completo.']);
+if ($nome === '' || mb_strlen($nome) < 3 || mb_strlen($nome) > 100) {
+    echo json_encode(['ok' => false, 'erro' => 'Informe seu nome completo (até 100 caracteres).']);
     exit;
 }
 
 $telefoneDigitos = preg_replace('/\D+/', '', $telefone);
-if ($telefoneDigitos === null || strlen($telefoneDigitos) < 10) {
+if ($telefoneDigitos === null || strlen($telefoneDigitos) < 10 || strlen($telefoneDigitos) > 13 || mb_strlen($telefone) > 20) {
     echo json_encode(['ok' => false, 'erro' => 'Informe um telefone/WhatsApp válido, com DDD.']);
     exit;
 }
 
-if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (mb_strlen($observacao) > 255) {
+    $observacao = mb_substr($observacao, 0, 255);
+}
+
+if ($email !== '' && (mb_strlen($email) > 120 || !filter_var($email, FILTER_VALIDATE_EMAIL))) {
     echo json_encode(['ok' => false, 'erro' => 'Informe um e-mail válido ou deixe o campo em branco.']);
     exit;
 }
@@ -99,7 +103,7 @@ try {
     // Trava a linha do horário para evitar que dois cliques simultâneos
     // (ou o painel interno do barbeiro, ao mesmo tempo) agendem o mesmo slot.
     $stmtHorario = $pdo->prepare(
-        'SELECT idHorario, data, hora FROM Horario WHERE idHorario = :h AND id_barbeiro = :b FOR UPDATE'
+        'SELECT idHorario, data, hora, disponivel FROM Horario WHERE idHorario = :h AND id_barbeiro = :b FOR UPDATE'
     );
     $stmtHorario->execute(['h' => $idHorario, 'b' => $idBarbeiro]);
     $horario = $stmtHorario->fetch();
@@ -113,6 +117,29 @@ try {
     if ($horario['data'] < (new DateTimeImmutable('today'))->format('Y-m-d')) {
         $pdo->rollBack();
         echo json_encode(['ok' => false, 'erro' => 'Esse horário já passou. Escolha outro.']);
+        exit;
+    }
+
+    // Mesma regra que a lista de horários mostra ao cliente: horário que o
+    // barbeiro inativou (almoço, folga, cliente ausente...) não pode ser
+    // reservado mandando o idHorario direto, e hoje não se marca hora que já passou.
+    if (!(int) $horario['disponivel']) {
+        $pdo->rollBack();
+        echo json_encode(['ok' => false, 'erro' => 'Esse horário não está disponível. Escolha outro horário.']);
+        exit;
+    }
+
+    $agoraLocal = new DateTimeImmutable();
+    if ($horario['data'] === $agoraLocal->format('Y-m-d')
+        && substr((string) $horario['hora'], 0, 5) <= $agoraLocal->format('H:i')) {
+        $pdo->rollBack();
+        echo json_encode(['ok' => false, 'erro' => 'Esse horário já passou. Escolha outro.']);
+        exit;
+    }
+
+    if ($horario['data'] > $agoraLocal->modify('+180 days')->format('Y-m-d')) {
+        $pdo->rollBack();
+        echo json_encode(['ok' => false, 'erro' => 'Escolha uma data mais próxima.']);
         exit;
     }
 
@@ -159,13 +186,26 @@ try {
     // mesmo cliente independente de como o número foi digitado da vez
     // passada. Se achar mais de um cadastro ativo com o mesmo telefone
     // (dado antigo duplicado), usa o mais recente.
+    // O número precisa ser IGUAL (sem DDI 55): antes bastava o número digitado
+    // TERMINAR igual ao cadastrado, e o agendamento caía no cliente errado.
+    $normalizaTel = static function (string $d): string {
+        $d = preg_replace('/\D+/', '', $d) ?? '';
+        return (strlen($d) > 11 && strncmp($d, '55', 2) === 0) ? substr($d, 2) : $d;
+    };
+    $telNormalizado = $normalizaTel($telefoneDigitos);
     $stmtClienteExistente = $pdo->prepare(
-        "SELECT idCliente FROM Cliente
+        "SELECT idCliente, telefone FROM Cliente
          WHERE ativo = 1 AND REPLACE(REPLACE(REPLACE(REPLACE(telefone, ' ', ''), '-', ''), '(', ''), ')', '') LIKE :telefone
-         ORDER BY idCliente DESC LIMIT 1"
+         ORDER BY idCliente DESC LIMIT 20"
     );
-    $stmtClienteExistente->execute(['telefone' => '%' . $telefoneDigitos]);
-    $clienteExistente = $stmtClienteExistente->fetch();
+    $stmtClienteExistente->execute(['telefone' => '%' . substr($telNormalizado, -8)]);
+    $clienteExistente = false;
+    foreach ($stmtClienteExistente->fetchAll() as $cand) {
+        if ($normalizaTel((string) $cand['telefone']) === $telNormalizado) {
+            $clienteExistente = $cand;
+            break;
+        }
+    }
 
     if ($clienteExistente) {
         $idCliente = (int) $clienteExistente['idCliente'];
@@ -203,9 +243,9 @@ try {
         echo json_encode([
             'ok'           => false,
             'codigo'       => 'agendamento_duplicado',
+            // Sem hora/profissional: quem só sabe o telefone de alguém não deve
+            // descobrir a agenda dele por aqui.
             'erro'         => 'Você já tem um agendamento nesse dia.',
-            'hora'         => substr((string) $ativo['hora'], 0, 5),
-            'profissional' => $ativo['profissional'],
         ]);
         exit;
     }

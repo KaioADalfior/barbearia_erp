@@ -69,45 +69,45 @@ if ($ehProprietarioView && !empty($filtros['funcionario'])) {
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 
 <style>
-    table tbody tr{ border-top:1px solid rgba(255,255,255,0.05); }
+    table tbody tr{ border-top:1px solid var(--line); }
     .kpi-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.12);
+        border:1px solid rgba(var(--accent-rgb),0.12);
         border-radius:1rem; padding:1rem 1.1rem; min-width:0;
     }
-    .kpi-label{ font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:#7f8fac; margin-bottom:.3rem; }
+    .kpi-label{ font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-muted); margin-bottom:.3rem; }
     .kpi-valor{ font-size:1.25rem; font-weight:600; color:var(--cream); line-height:1.25; word-break:break-word; }
-    .kpi-sub{ font-size:11.5px; color:#7f8fac; margin-top:.15rem; }
-    .kpi-pendente .kpi-valor{ color:#f0d18a; }
-    .kpi-pago .kpi-valor{ color:#7fd696; }
-    .kpi-despesa .kpi-valor{ color:#f0a2a8; }
+    .kpi-sub{ font-size:11.5px; color:var(--text-muted); margin-top:.15rem; }
+    .kpi-pendente .kpi-valor{ color:var(--warning-text); }
+    .kpi-pago .kpi-valor{ color:var(--success-text); }
+    .kpi-despesa .kpi-valor{ color:var(--danger-text); }
 
     .badge{
         display:inline-flex; align-items:center; gap:.35rem; font-size:11px; font-weight:600;
         letter-spacing:.03em; padding:.28rem .65rem; border-radius:999px; white-space:nowrap;
     }
-    .badge-pendente{  color:#f0d18a; background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45); }
-    .badge-pago{      color:#bfe6c7; background:rgba(66,140,82,0.14);  border:1px solid rgba(66,140,82,0.4); }
-    .badge-cancelado{ color:#c9a8ab; background:rgba(140,31,40,0.12);  border:1px solid rgba(140,31,40,0.4); }
-    .badge-receita{   color:#bfe6c7; background:rgba(66,140,82,0.14);  border:1px solid rgba(66,140,82,0.4); }
-    .badge-despesa{   color:#f0a2a8; background:rgba(140,31,40,0.12);  border:1px solid rgba(140,31,40,0.4); }
+    .badge-pendente{  color:var(--warning-text); background:rgba(184,140,24,0.14); border:1px solid rgba(184,140,24,0.45); }
+    .badge-pago{      color:var(--success-text); background:rgba(66,140,82,0.14);  border:1px solid rgba(66,140,82,0.4); }
+    .badge-cancelado{ color:var(--danger-text); background:rgba(140,31,40,0.12);  border:1px solid rgba(140,31,40,0.4); }
+    .badge-receita{   color:var(--success-text); background:rgba(66,140,82,0.14);  border:1px solid rgba(66,140,82,0.4); }
+    .badge-despesa{   color:var(--danger-text); background:rgba(140,31,40,0.12);  border:1px solid rgba(140,31,40,0.4); }
 
     .linha-cancelada td{ opacity:.55; }
     .linha-cancelada .valor-cancelado{ text-decoration:line-through; }
     .num{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
-    .chk{ width:16px; height:16px; accent-color:#3d7ec9; cursor:pointer; }
-    .tbl-th{ padding:.8rem .7rem; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#7f8fac; font-weight:500; text-align:left; white-space:nowrap; }
+    .chk{ width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
+    .tbl-th{ padding:.8rem .7rem; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:500; text-align:left; white-space:nowrap; }
     .tbl-td{ padding:.65rem .7rem; font-size:12.5px; color:#cdd6e6; vertical-align:middle; }
     .btn-mini{
         font-size:12px; font-weight:600; padding:.38rem .75rem; border-radius:.6rem; cursor:pointer;
-        border:1px solid rgba(61,126,201,0.45); color:#9dc4f0; background:rgba(61,126,201,0.10); white-space:nowrap;
+        border:1px solid rgba(var(--accent-rgb),0.45); color:var(--info-text); background:rgba(var(--accent-rgb),0.10); white-space:nowrap;
     }
-    .btn-mini:hover{ background:rgba(61,126,201,0.2); }
-    .btn-mini-neutro{ border-color:rgba(255,255,255,0.15); color:#aebdd6; background:rgba(255,255,255,0.04); }
-    .link-func{ color:#9dc4f0; text-decoration:none; font-weight:500; }
+    .btn-mini:hover{ background:rgba(var(--accent-rgb),0.2); }
+    .btn-mini-neutro{ border-color:var(--line); color:var(--text-soft); background:rgba(255,255,255,0.04); }
+    .link-func{ color:var(--info-text); text-decoration:none; font-weight:500; }
     .link-func:hover{ text-decoration:underline; }
 
     html[data-theme="light"] .kpi-label, html[data-theme="light"] .kpi-sub, html[data-theme="light"] .tbl-th{ color:#475569; }
@@ -136,7 +136,7 @@ if ($ehProprietarioView && !empty($filtros['funcionario'])) {
             </svg>
         </button>
         <div class="min-w-0 flex-1">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75"><?= $ehProprietarioView ? 'Financeiro' : 'Meus ganhos' ?></p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75"><?= $ehProprietarioView ? 'Financeiro' : 'Meus ganhos' ?></p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">
                 <?= htmlspecialchars($tituloPagina) ?><?= $nomeFiltrado ? ' — ' . htmlspecialchars($nomeFiltrado) : '' ?>
             </h1>
@@ -308,8 +308,8 @@ if ($ehProprietarioView && !empty($filtros['funcionario'])) {
                             <td class="tbl-td num"><?= (int) $pf['qtd_servicos'] ?></td>
                             <td class="tbl-td num"><?= $fmt($pf['total_servicos']) ?></td>
                             <td class="tbl-td num"><?= $fmt($pf['total_comissao']) ?></td>
-                            <td class="tbl-td num" style="color:#7fd696;"><?= $fmt($pf['total_pago']) ?></td>
-                            <td class="tbl-td num" style="color:#f0d18a;"><?= $fmt($pf['total_pendente']) ?></td>
+                            <td class="tbl-td num" style="color:var(--success-text);"><?= $fmt($pf['total_pago']) ?></td>
+                            <td class="tbl-td num" style="color:var(--warning-text);"><?= $fmt($pf['total_pendente']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
@@ -446,7 +446,7 @@ if ($ehProprietarioView && !empty($filtros['funcionario'])) {
                             <td class="tbl-td"><?= htmlspecialchars($e['titulo']) ?></td>
                             <td class="tbl-td"><?= htmlspecialchars($e['responsavel'] ?? '—') ?></td>
                             <td class="tbl-td"><?= htmlspecialchars($formasTxt($e['forma_pagamento'])) ?></td>
-                            <td class="tbl-td num" style="font-weight:600; color:<?= $receita ? '#7fd696' : '#f0a2a8' ?>;"><?= $receita ? '' : '− ' ?><?= $fmt((float) $e['valor']) ?></td>
+                            <td class="tbl-td num" style="font-weight:600; color:<?= $receita ? 'var(--success-text)' : 'var(--danger-text)' ?>;"><?= $receita ? '' : '− ' ?><?= $fmt((float) $e['valor']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>

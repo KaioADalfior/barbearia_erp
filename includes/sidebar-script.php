@@ -9,7 +9,35 @@
  *    estiver recolhida (evita perder acesso às páginas do submenu)
  * Inclua uma vez, no final do arquivo de sidebar.
  */
+require_once __DIR__ . '/csrf.php';
 ?>
+<script>
+/* CSRF automático: todo fetch não-GET para o mesmo site leva o header
+   X-CSRF-Token (validado por includes/csrf.php nos endpoints). Assim os
+   scripts de cada página não precisam lembrar de enviar o token. */
+(function () {
+    var token = <?= json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    var original = window.fetch;
+    if (!original || window.__abCsrfFetch) { return; }
+    window.__abCsrfFetch = true;
+    window.fetch = function (entrada, opcoes) {
+        try {
+            var metodo = String((opcoes && opcoes.method) || (entrada && entrada.method) || 'GET').toUpperCase();
+            if (metodo !== 'GET' && metodo !== 'HEAD' && metodo !== 'OPTIONS') {
+                var url = typeof entrada === 'string' ? entrada : ((entrada && entrada.url) || '');
+                var mesmoSite = !/^[a-z][a-z0-9+.-]*:|^\/\//i.test(url) || url.indexOf(location.origin) === 0;
+                if (mesmoSite) {
+                    opcoes = opcoes || {};
+                    var h = new Headers(opcoes.headers || (entrada && entrada.headers) || {});
+                    if (!h.has('X-CSRF-Token')) { h.set('X-CSRF-Token', token); }
+                    opcoes.headers = h;
+                }
+            }
+        } catch (e) { /* segue sem o header: o servidor recusa e a tela avisa */ }
+        return original.call(this, entrada, opcoes);
+    };
+})();
+</script>
 <script>
 (function () {
     function aplicarColapso(colapsado) {

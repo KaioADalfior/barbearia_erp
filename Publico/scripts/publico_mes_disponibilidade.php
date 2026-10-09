@@ -38,7 +38,7 @@ if ($mes < 1 || $mes > 12 || $ano < 2000 || $ano > 2100) {
 // um mês passado não faz sentido pro cliente final escolher).
 $hoje = new DateTimeImmutable('today');
 $primeiroDiaMesConsultado = DateTimeImmutable::createFromFormat('Y-m-d', sprintf('%04d-%02d-01', $ano, $mes));
-if ($primeiroDiaMesConsultado < $hoje->modify('first day of this month')) {
+if ($primeiroDiaMesConsultado < $hoje->modify('first day of this month') || $primeiroDiaMesConsultado > $hoje->modify('+200 days')) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'erro' => 'Mês inválido.']);
     exit;

@@ -31,6 +31,30 @@ class HorarioService
         return array_map(static fn(array $t): array => [$fmt($t['inicio']), $fmt($t['fim'])], self::TURNOS);
     }
 
+    /**
+     * Data "YYYY-MM-DD" REAL (rejeita 2026-02-31) e dentro da janela
+     * [hoje - $diasPassado, hoje + $diasFuturo]. Sem isso, qualquer data
+     * (inclusive 9999-12-31 ou 0000-00-00) criava a grade de 17 horários no banco.
+     */
+    public static function dataValida(string $data, int $diasFuturo = 800, int $diasPassado = 3650): bool
+    {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
+            return false;
+        }
+        $d = DateTimeImmutable::createFromFormat('!Y-m-d', $data);
+        if ($d === false || $d->format('Y-m-d') !== $data) {
+            return false;
+        }
+        $hoje = new DateTimeImmutable('today');
+        return $d <= $hoje->modify("+{$diasFuturo} days") && $d >= $hoje->modify("-{$diasPassado} days");
+    }
+
+    /** Hora "HH:MM" REAL (00:00 a 23:59). */
+    public static function horaValida(string $hora): bool
+    {
+        return (bool) preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $hora);
+    }
+
     public static function passoMinutos(): int
     {
         return self::PASSO_MINUTOS;

@@ -122,13 +122,13 @@ try {
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/admin-theme.css?v=2">
+<link rel="stylesheet" href="/assets/css/admin-theme.css?v=3">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <style>
     .kpi-card{
         background:linear-gradient(180deg, var(--charcoal-2), var(--charcoal-3));
-        border:1px solid rgba(61,126,201,0.12);
+        border:1px solid rgba(var(--accent-rgb),0.12);
         position:relative;
         overflow:hidden;
     }
@@ -141,8 +141,8 @@ try {
         justify-content:center;
         flex-shrink:0;
     }
-    .kpi-clientes    .kpi-card__icon{ background:rgba(15,92,102,0.16); color:#7fd0d9; }
-    .kpi-agendamentos .kpi-card__icon{ background:rgba(61,126,201,0.16); color:var(--gold-light); }
+    .kpi-clientes    .kpi-card__icon{ background:rgba(15,92,102,0.16); color:var(--info-text); }
+    .kpi-agendamentos .kpi-card__icon{ background:rgba(var(--accent-rgb),0.16); color:var(--accent-strong); }
     .kpi-concluidos  .kpi-card__icon{ background:rgba(66,140,82,0.16); color:#4fae67; }
     .kpi-cancelados  .kpi-card__icon{ background:rgba(140,31,40,0.16); color:#c94550; }
 
@@ -158,8 +158,8 @@ try {
         border-radius:999px;
     }
     .trend-positivo{ color:#4fae67; background:rgba(66,140,82,0.14); }
-    .trend-negativo{ color:#e08b91; background:rgba(140,31,40,0.14); }
-    .trend-neutro{ color:#7fd0d9; background:rgba(15,92,102,0.16); }
+    .trend-negativo{ color:var(--danger-text); background:rgba(140,31,40,0.14); }
+    .trend-neutro{ color:var(--info-text); background:rgba(15,92,102,0.16); }
     html[data-theme="light"] .trend-positivo{ color:#2c6b3c; }
     html[data-theme="light"] .trend-negativo{ color:#8c1f28; }
     html[data-theme="light"] .trend-neutro{ color:#0d6b74; }
@@ -173,7 +173,7 @@ try {
         justify-content:space-between;
         gap:0.75rem;
         padding:0.6rem 0;
-        border-top:1px solid rgba(255,255,255,0.06);
+        border-top:1px solid var(--line);
         font-size:13px;
     }
     html[data-theme="light"] .legend-item{ border-top:1px solid rgba(0,0,0,0.06); }
@@ -187,7 +187,7 @@ try {
         justify-content:center;
         text-align:center;
         height:100%;
-        color:#7f8fac;
+        color:var(--text-muted);
         gap:0.5rem;
         padding:2rem 1rem;
     }
@@ -207,7 +207,7 @@ try {
             </svg>
         </button>
         <div class="min-w-0">
-            <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Painel do Barbeiro</p>
+            <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Painel do Barbeiro</p>
             <h1 class="display text-3xl sm:text-4xl text-[color:var(--cream)] truncate">Bem-vindo, <?= htmlspecialchars($_SESSION['nome'] ?? 'Barbeiro') ?></h1>
         </div>
     </header>
@@ -293,7 +293,7 @@ try {
         <!-- ==================== FINANCEIRO DO MÊS ==================== -->
         <div class="flex items-center justify-between gap-3 mb-3">
             <p class="eyebrow text-yellow-500/70 uppercase"><?= $ehProprietarioPainel ? 'Financeiro da barbearia' : 'Minhas comissões' ?> · <?= htmlspecialchars($nomeMesAtual) ?></p>
-            <a href="<?= $ehProprietarioPainel ? '/financeiro/comissoes' : '/financeiro/meu' ?>" class="text-xs" style="color:var(--gold-light); text-decoration:underline;">Ver detalhes</a>
+            <a href="<?= $ehProprietarioPainel ? '/financeiro/comissoes' : '/financeiro/meu' ?>" class="text-xs" style="color:var(--accent-strong); text-decoration:underline;">Ver detalhes</a>
         </div>
         <?php if ($ehProprietarioPainel): $vm = $resumoMes['visao']; ?>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -309,12 +309,12 @@ try {
             </div>
             <div class="kpi-card rounded-2xl p-5">
                 <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Pendentes</p>
-                <p class="text-xl sm:text-2xl font-semibold" style="color:#f0d18a;"><?= $fm($tm['total_pendente']) ?></p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:var(--warning-text);"><?= $fm($tm['total_pendente']) ?></p>
                 <p class="text-xs text-zinc-500 mt-1">a pagar aos funcionários</p>
             </div>
             <div class="kpi-card rounded-2xl p-5">
                 <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Pagas</p>
-                <p class="text-xl sm:text-2xl font-semibold" style="color:#7fd696;"><?= $fm($tm['total_pago']) ?></p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:var(--success-text);"><?= $fm($tm['total_pago']) ?></p>
                 <p class="text-xs text-zinc-500 mt-1"><?= (int) $resumoMes['qtdFunc'] ?> funcionário<?= $resumoMes['qtdFunc'] == 1 ? '' : 's' ?></p>
             </div>
         </div>
@@ -347,11 +347,11 @@ try {
             </div>
             <div class="kpi-card rounded-2xl p-5">
                 <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Paga</p>
-                <p class="text-xl sm:text-2xl font-semibold" style="color:#7fd696;"><?= $fm($tm['total_pago']) ?></p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:var(--success-text);"><?= $fm($tm['total_pago']) ?></p>
             </div>
             <div class="kpi-card rounded-2xl p-5">
                 <p class="text-[11px] uppercase tracking-widest text-zinc-500 mb-1">Pendente</p>
-                <p class="text-xl sm:text-2xl font-semibold" style="color:#f0d18a;"><?= $fm($tm['total_pendente']) ?></p>
+                <p class="text-xl sm:text-2xl font-semibold" style="color:var(--warning-text);"><?= $fm($tm['total_pendente']) ?></p>
             </div>
         </div>
         <?php endif; ?>
@@ -361,7 +361,7 @@ try {
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
 
             <div class="panel-card rounded-2xl p-5 sm:p-6 lg:col-span-2">
-                <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Visão geral</p>
+                <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Visão geral</p>
                 <h2 class="display text-xl sm:text-2xl text-[color:var(--cream)] mb-4">Concluídos x Cancelados</h2>
 
                 <?php if ($totalFinalizados > 0): ?>
@@ -381,7 +381,7 @@ try {
             </div>
 
             <div class="panel-card rounded-2xl p-5 sm:p-6 lg:col-span-3">
-                <p class="eyebrow uppercase mb-1" style="color:var(--gold-light); opacity:.75">Últimos 6 meses</p>
+                <p class="eyebrow uppercase mb-1" style="color:var(--accent-strong); opacity:.75">Últimos 6 meses</p>
                 <h2 class="display text-xl sm:text-2xl text-[color:var(--cream)] mb-4">Evolução mensal</h2>
 
                 <?php if (array_sum($concluidosMensal) + array_sum($canceladosMensal) > 0): ?>
@@ -508,7 +508,8 @@ try {
 
 <script>
 const ehTemaClaro = document.documentElement.getAttribute('data-theme') === 'light';
-const corTexto  = ehTemaClaro ? '#1e293b' : '#7f8fac';
+// Chart.js desenha em <canvas> e não entende var(--x): lê o token já resolvido.
+const corTexto  = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
 const corGrade  = ehTemaClaro ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
 const corConcluido = ehTemaClaro ? '#2c6b3c' : 'rgba(66,140,82,0.85)';
 const corCancelado = ehTemaClaro ? '#8c1f28' : 'rgba(140,31,40,0.85)';
@@ -527,7 +528,7 @@ new Chart(document.getElementById('chart-status').getContext('2d'), {
         datasets: [{
             data: dadosStatus.valores,
             backgroundColor: dadosStatus.cores,
-            borderColor: ehTemaClaro ? '#ffffff' : '#131c2e',
+            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--surface-2').trim(),
             borderWidth: 2
         }]
     },

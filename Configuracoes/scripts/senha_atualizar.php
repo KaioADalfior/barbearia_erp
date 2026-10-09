@@ -6,11 +6,12 @@ require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
+require_once __DIR__ . '/../../includes/guard.php';
+require_once __DIR__ . '/../../includes/SenhaService.php';
+
+// Sessão válida (com o timeout por inatividade de exigirSessao).
+exigirSessao(['admin', 'barbeiro']);
 $tipo = $_SESSION['tipo'] ?? null;
-if ($tipo !== 'admin' && $tipo !== 'barbeiro') {
-    header('Location: /login');
-    exit;
-}
 
 // Página de origem: por padrão volta para Configurações, mas o mesmo
 // formulário/endpoint também é usado pela tela Barbeiro > Perfil.
@@ -46,8 +47,8 @@ if ($senhaNova !== $senhaConfirma) {
     voltarComErro('A nova senha e a confirmação não coincidem.');
 }
 
-if (strlen($senhaNova) < 6) {
-    voltarComErro('A nova senha deve ter pelo menos 6 caracteres.');
+if (strlen($senhaNova) < 8) {
+    voltarComErro('A nova senha deve ter pelo menos 8 caracteres.');
 }
 
 // Define tabela e coluna de id conforme o tipo de usuário logado
@@ -69,8 +70,8 @@ if (!$usuario) {
     voltarComErro('Usuário não encontrado.');
 }
 
-// Aceita hash (password_verify) ou texto puro (compatibilidade com dados de teste)
-$senhaAtualOk = password_verify($senhaAtual, $usuario['senha']) || hash_equals((string) $usuario['senha'], $senhaAtual);
+// Hash: só password_verify. Texto puro só para conta legada ainda não convertida.
+$senhaAtualOk = SenhaService::confere($senhaAtual, (string) $usuario['senha']);
 
 if (!$senhaAtualOk) {
     voltarComErro('A senha atual informada está incorreta.');
