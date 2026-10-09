@@ -22,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/forma_pagamento.php';
 require_once __DIR__ . '/../../includes/RelatorioService.php';
-require_once __DIR__ . '/../../includes/RelatorioPdfBuilder.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -31,7 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $idBarbeiro   = (int) $_SESSION['id'];
-$nomeBarbeiro = $_SESSION['nome'] ?? 'Barbeiro';
 
 $tipo = $_POST['tipo'] ?? '';
 
@@ -87,46 +85,20 @@ if ($tipo === 'periodo') {
 }
 
 try {
-    $titulo = RelatorioService::tituloPeriodo($tipo, $dataInicio, $dataFim);
-    $dados  = RelatorioService::coletarDados($pdo, $idBarbeiro, $dataInicio, $dataFim);
-
-    $logoPath = __DIR__ . '/../../assets/img/logoRelatorio.png';
-
-    $pdfBytes = construirRelatorioPdf(
-        'BarbERP',
-        $nomeBarbeiro,
-        $tipo,
-        $dataInicio,
-        $dataFim,
-        $titulo,
-        $dados,
-        $logoPath
-    );
-
-    $nomeArquivo = 'relatorio-' . $tipo . '-' . $dataInicio
-        . ($dataInicio !== $dataFim ? '_a_' . $dataFim : '')
-        . '.pdf';
-
-    $idRelatorio = RelatorioService::salvar(
-        $pdo,
-        $idBarbeiro,
-        $tipo,
-        $dataInicio,
-        $dataFim,
-        $titulo,
-        $dados,
-        $pdfBytes,
-        $nomeArquivo
-    );
+    // Mesmo caminho da geração automática (RelatorioService::emitir): dados,
+    // logo/identidade da barbearia, PDF e gravação.
+    $emitido     = RelatorioService::emitir($pdo, $idBarbeiro, $tipo, $dataInicio, $dataFim, RelatorioService::ORIGEM_MANUAL);
+    $titulo      = $emitido['titulo'];
+    $idRelatorio = $emitido['id'];
 
     DiscordLogger::financeiroRelatorios('📄 Relatório financeiro gerado', [
-        ['name' => '🏷️ Tipo', 'value' => RelatorioService::TIPOS_LABELS[$tipo], 'inline' => true],
+        ['name' => '🏷️ Tipo', 'value' => (RelatorioService::TIPOS_LABELS[$tipo] ?? 'Período'), 'inline' => true],
         ['name' => '📅 Período', 'value' => $titulo, 'inline' => true],
         ['name' => '🆔 Relatório', 'value' => '#' . $idRelatorio, 'inline' => true],
     ]);
 
     echo json_encode(['ok' => true, 'idRelatorio' => $idRelatorio]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     DiscordLogger::erro('💥 Falha ao gerar relatório financeiro', $e);
     http_response_code(500);
     echo json_encode(['ok' => false, 'erro' => 'Não foi possível gerar o relatório.']);

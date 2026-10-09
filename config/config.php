@@ -55,6 +55,10 @@ try {
     );
 } catch (PDOException $e) {
     DiscordLogger::database('🔴 Falha na conexão com o banco de dados', $e);
+    if (PHP_SAPI === 'cli') { // rotinas agendadas: sai com código de erro em vez de "sucesso" do die()
+        fwrite(STDERR, 'Erro ao conectar ao banco de dados.' . PHP_EOL);
+        exit(2);
+    }
     http_response_code(500);
     die('Erro ao conectar ao banco de dados. Já registramos o problema.');
 }
@@ -75,7 +79,7 @@ ComissaoService::iniciar($pdo);
 // é registrado automaticamente em logs-erros, sem precisar mexer em cada
 // função individualmente. Nunca mostra detalhes técnicos pro usuário.
 set_exception_handler(function (\Throwable $e) {
-    DiscordLogger::erro('💥 Exceção não tratada', $e);
+    error_log((string)$e); DiscordLogger::erro('💥 Exceção não tratada', $e);
     if (!headers_sent()) {
         http_response_code(500);
     }

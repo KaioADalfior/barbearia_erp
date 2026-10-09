@@ -27,5 +27,5 @@ COPY . /app
 # O PHP-FPM roda como "nobody": a pasta de fotos de perfil precisa ser dele
 RUN mkdir -p /app/assets/uploads/perfil /app/assets/uploads/servicos /app/assets/uploads/catalogo && chown -R nobody /app/assets/uploads && chmod -R u+rwX /app/assets/uploads
 
-CMD ["mkdir -p /app/assets/uploads/perfil /app/assets/uploads/servicos /app/assets/uploads/catalogo && chown -R nobody /app/assets/uploads && node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"]
+CMD ["mkdir -p /app/assets/uploads/perfil /app/assets/uploads/servicos /app/assets/uploads/catalogo && chown -R nobody /app/assets/uploads && node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (command -v php >/dev/null 2>&1 && (while true; do TZ=America/Sao_Paulo php /app/Financeiro/cron/agendador.php; r=$?; [ $r -eq 0 -o $r -eq 3 ] && break; sleep 10; done >> /proc/1/fd/1 2>&1 &) || echo 'AVISO: php CLI nao encontrado; relatorios automaticos desativados') && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"]
 

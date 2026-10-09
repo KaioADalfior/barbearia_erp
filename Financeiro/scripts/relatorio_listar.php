@@ -15,4 +15,6 @@ require_once __DIR__ . '/../../includes/RelatorioService.php';
 $idBarbeiro = (int) $_SESSION['id'];
 $relatorios = RelatorioService::listar($pdo, $idBarbeiro);
 
-echo json_encode(['ok' => true, 'relatorios' => $relatorios]);
+$falhas     = RelatorioService::falhasAutomaticas($pdo, $idBarbeiro);
+
+echo json_encode(['ok' => true, 'relatorios' => $relatorios, 'falhas' => $falhas]);

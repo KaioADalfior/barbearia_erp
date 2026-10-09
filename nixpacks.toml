@@ -6,5 +6,13 @@
 # Ajustamos o dono da pasta de uploads a cada inicialização do container
 # (inclusive se ela for um volume montado no EasyPanel), e só depois subimos
 # o PHP-FPM e o nginx exatamente como o Nixpacks faria por padrão.
+#
+# RELATÓRIOS AUTOMÁTICOS (todo dia à 00h, America/Sao_Paulo): o container
+# também sobe o agendador dedicado Financeiro/cron/agendador.php (processo PHP
+# em segundo plano; instância única por trava de arquivo — por isso o loop
+# abaixo, que o reinicia se cair, sai sozinho se já houver um rodando).
+# Os logs vão para o log do container. Para desligar: variável de ambiente
+# RELATORIOS_AGENDADOR=0 (por exemplo, se preferir o "Cron Job" do EasyPanel).
+# Ver scriptBD/LEIA-ME_relatorios_automaticos.md.
 [start]
-cmd = "mkdir -p /app/assets/uploads/perfil /app/assets/uploads/servicos /app/assets/uploads/catalogo && chown -R nobody /app/assets/uploads && node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"
+cmd = "mkdir -p /app/assets/uploads/perfil /app/assets/uploads/servicos /app/assets/uploads/catalogo && chown -R nobody /app/assets/uploads && node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (command -v php >/dev/null 2>&1 && (while true; do TZ=America/Sao_Paulo php /app/Financeiro/cron/agendador.php; r=$?; [ $r -eq 0 -o $r -eq 3 ] && break; sleep 10; done >> /proc/1/fd/1 2>&1 &) || echo 'AVISO: php CLI nao encontrado; relatorios automaticos desativados') && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"

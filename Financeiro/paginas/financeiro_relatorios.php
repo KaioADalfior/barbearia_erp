@@ -43,6 +43,14 @@ $paginaAtual = 'financeiro-relatorios';
     .badge-semanal { color:var(--success-text); background:rgba(66,140,82,0.16); border:1px solid rgba(66,140,82,0.45); }
     .badge-mensal  { color:var(--info-text); background:rgba(var(--accent-rgb),0.16); border:1px solid rgba(var(--accent-rgb),0.45); }
     .badge-anual   { color:var(--danger-text); background:rgba(140,31,40,0.16); border:1px solid rgba(140,31,40,0.45); }
+    .btn-mini{
+        display:inline-flex; align-items:center; justify-content:center; padding:6px 12px; border-radius:10px; font-size:12px; font-weight:600;
+        color:var(--accent-strong); border:1px solid rgba(var(--accent-rgb),0.4); background:rgba(var(--accent-rgb),0.08);
+        transition:background-color .15s, opacity .15s; white-space:nowrap;
+    }
+    .btn-mini:hover{ background:rgba(var(--accent-rgb),0.16); }
+    .btn-mini:disabled{ opacity:.55; cursor:not-allowed; }
+    .badge-auto    { color:var(--text-muted); background:rgba(255,255,255,0.04); border:1px solid var(--line); margin-left:6px; }
     .badge-periodo { color:var(--warning-text); background:rgba(158,120,25,0.16); border:1px solid rgba(158,120,25,0.45); }
 
     .valor-entrada{ color:var(--success-text); font-weight:600; }
@@ -203,9 +211,24 @@ $paginaAtual = 'financeiro-relatorios';
         <div class="panel-card rounded-2xl overflow-hidden" style="zoom:0.8;">
             <div class="barber-stripe-thin"></div>
 
-            <div class="px-5 sm:px-6 py-4 flex items-center justify-between">
+            <div class="px-5 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap">
                 <h2 class="display text-xl text-[color:var(--cream)] leading-none">Relatórios gerados</h2>
-                <span class="text-xs text-zinc-500" id="contagem-relatorios"></span>
+                <div class="flex items-center gap-3">
+                    <label class="sr-only" for="filtro-origem">Filtrar relatórios</label>
+                    <select id="filtro-origem" class="rounded-lg text-xs px-2 py-1.5 border border-[color:var(--line)] bg-transparent text-[color:var(--cream)]">
+                        <option value="todos">Todos</option>
+                        <option value="automatico">Automáticos (00h)</option>
+                        <option value="manual">Gerados por mim</option>
+                    </select>
+                    <span class="text-xs text-zinc-500" id="contagem-relatorios"></span>
+                </div>
+            </div>
+
+            <!-- Falhas da geração automática (só do próprio profissional) -->
+            <div id="painel-falhas" class="hidden mx-5 sm:mx-6 mb-4 rounded-xl p-4" role="alert"
+                 style="background:rgba(158,120,25,0.12); border:1px solid rgba(158,120,25,0.45);">
+                <p class="text-sm font-medium" style="color:var(--warning-text);">Alguns relatórios automáticos não puderam ser gerados</p>
+                <ul id="lista-falhas" class="mt-2 space-y-2 text-xs text-zinc-300"></ul>
             </div>
 
             <div class="overflow-x-auto">
@@ -263,6 +286,10 @@ function formatarDataHora(dataHora) {
     if (isNaN(d.getTime())) return dataHora;
     return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
+function escaparAttr(texto) {
+    return escaparHtml(texto).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function escaparHtml(texto) {
     const div = document.createElement('div');
     div.textContent = texto ?? '';
@@ -305,6 +332,7 @@ document.getElementById('input-data-fim').value = hoje;
 atualizarCamposData('diario');
 
 let relatoriosAtuais = [];
+let falhasAtuais = [];
 
 async function carregarRelatorios() {
     document.getElementById('estado-carregando').classList.remove('hidden');
@@ -321,22 +349,65 @@ async function carregarRelatorios() {
         }
 
         relatoriosAtuais = dados.relatorios;
+        falhasAtuais = dados.falhas || [];
         renderizarRelatorios();
+        renderizarFalhas();
     } catch (e) {
         document.getElementById('estado-carregando').classList.add('hidden');
         toast('Erro de conexão. Tente novamente.', 'erro');
     }
 }
 
+function renderizarFalhas() {
+    const painel = document.getElementById('painel-falhas');
+    const lista = document.getElementById('lista-falhas');
+    painel.classList.toggle('hidden', falhasAtuais.length === 0);
+    lista.innerHTML = falhasAtuais.map(function (f) {
+        const periodo = f.data_inicio === f.data_fim
+            ? formatarData(f.data_inicio)
+            : formatarData(f.data_inicio) + ' — ' + formatarData(f.data_fim);
+        return '<li class="flex items-center justify-between gap-3 flex-wrap">' +
+            '<span><strong>' + escaparHtml(TIPO_LABELS[f.tipo] || f.tipo) + '</strong> · ' + periodo +
+             ' · ' + escaparHtml(String(f.tentativas)) + ' tentativa(s)' +
+            '<br><span class="text-zinc-500" title="' + escaparAttr(f.mensagem || '') + '">Não foi possível gerar este relatório. Use "Tentar novamente"; se persistir, avise o suporte.</span></span>' +
+            '<button type="button" class="btn-mini" data-chave="' + escaparAttr(f.chave) + '" onclick="tentarNovamente(this)">Tentar novamente</button>' +
+        '</li>';
+    }).join('');
+}
+
+async function tentarNovamente(botao) {
+    botao.disabled = true;
+    const formData = new FormData();
+    formData.set('chave', botao.getAttribute('data-chave'));
+    try {
+        const resposta = await fetch('/Financeiro/scripts/relatorio_auto_retentar.php', { method: 'POST', body: formData });
+        const dados = await resposta.json();
+        if (!dados.ok) {
+            toast(dados.erro || 'Não foi possível gerar o relatório.', 'erro');
+            botao.disabled = false;
+            return;
+        }
+        toast('Relatório gerado.', 'sucesso');
+        carregarRelatorios();
+    } catch (e) {
+        toast('Erro de conexão. Tente novamente.', 'erro');
+        botao.disabled = false;
+    }
+}
+
 function renderizarRelatorios() {
     const tbody = document.getElementById('tbody-relatorios');
     const contagem = document.getElementById('contagem-relatorios');
+    const filtro = document.getElementById('filtro-origem').value;
+    const visiveis = relatoriosAtuais.filter(function (r) {
+        return filtro === 'todos' || r.origem === filtro;
+    });
 
-    contagem.textContent = relatoriosAtuais.length === 1
+    contagem.textContent = visiveis.length === 1
         ? '1 relatório'
-        : relatoriosAtuais.length + ' relatórios';
+        : visiveis.length + ' relatórios';
 
-    tbody.innerHTML = relatoriosAtuais.map(function (r) {
+    tbody.innerHTML = visiveis.map(function (r) {
         const periodo = r.data_inicio === r.data_fim
             ? formatarData(r.data_inicio)
             : formatarData(r.data_inicio) + ' — ' + formatarData(r.data_fim);
@@ -347,6 +418,8 @@ function renderizarRelatorios() {
             '<td class="px-5 py-4">' +
                 '<p class="text-[color:var(--cream)] font-medium">' + escaparHtml(r.titulo) + '</p>' +
                 '<span class="badge badge-' + r.tipo + ' mt-1">' + TIPO_LABELS[r.tipo] + '</span>' +
+                (r.origem === 'automatico' ? '<span class="badge badge-auto mt-1" title="Gerado automaticamente à 00h">Automático</span>' : '') +
+                '<p class="text-[11px] text-zinc-500 mt-1 lg:hidden">Gerado em ' + formatarDataHora(r.gerado_em) + '</p>' +
             '</td>' +
             '<td class="px-5 py-4 text-zinc-400 hidden sm:table-cell">' + periodo + '</td>' +
             '<td class="px-5 py-4 text-right valor-entrada hidden md:table-cell">' + formatarMoeda(r.total_entradas) + '</td>' +
@@ -354,7 +427,10 @@ function renderizarRelatorios() {
             '<td class="px-5 py-4 text-right font-semibold ' + saldoClasse + '">' + formatarMoeda(r.saldo) + '</td>' +
             '<td class="px-5 py-4 text-zinc-500 text-xs hidden lg:table-cell">' + formatarDataHora(r.gerado_em) + '</td>' +
             '<td class="px-5 py-4 text-right whitespace-nowrap">' +
-                '<a href="/Financeiro/scripts/relatorio_baixar.php?id=' + r.idRelatorio + '" class="icon-btn" title="Baixar PDF">' +
+                '<a href="/Financeiro/scripts/relatorio_baixar.php?id=' + r.idRelatorio + '&inline=1" target="_blank" rel="noopener" class="icon-btn mr-2" title="Visualizar PDF" aria-label="Visualizar PDF">' +
+                    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/></svg>' +
+                '</a>' +
+                '<a href="/Financeiro/scripts/relatorio_baixar.php?id=' + r.idRelatorio + '" class="icon-btn" title="Baixar PDF" aria-label="Baixar PDF">' +
                     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>' +
                 '</a>' +
                 '<button type="button" onclick="excluirRelatorio(' + r.idRelatorio + ')" class="icon-btn icon-btn-danger ml-2" title="Excluir relatório">' +
@@ -434,7 +510,7 @@ function excluirRelatorio(idRelatorio) {
         confirmButtonText: 'Sim, excluir',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#8c1f28',
-        background: '#182338',
+        background: 'var(--surface-2)',
         color: 'var(--cream)'
     }).then(function (resultado) {
         if (!resultado.isConfirmed) return;
@@ -456,6 +532,7 @@ function excluirRelatorio(idRelatorio) {
     });
 }
 
+document.getElementById('filtro-origem').addEventListener('change', renderizarRelatorios);
 document.addEventListener('DOMContentLoaded', carregarRelatorios);
 </script>
 

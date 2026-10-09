@@ -42,6 +42,9 @@ RedirectMatch 404 ^/teste_sessao\.php$
 # continuam acessíveis diretamente, pois são chamados pelo JS do navegador.
 RewriteEngine On
 
+# Rotinas de linha de comando (relatórios automáticos): nunca pela web.
+RewriteRule ^Financeiro/cron/ - [F,L]
+
 # Imagens enviadas (perfil, serviços, logo/capa do catálogo): se o arquivo não
 # está em disco (deploy novo), entrega a cópia guardada no banco — ver
 # includes/ImagemPersistente.php e Uploads/scripts/imagem_servir.php.
