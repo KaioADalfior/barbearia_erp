@@ -5,9 +5,12 @@ exigirSessao(['barbeiro']);
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/forma_pagamento.php';
+require_once __DIR__ . '/../../includes/DakIntegracao.php';
 
 $paginaAtual = 'agendamento-listar';
 $idBarbeiro  = (int) $_SESSION['id'];
+// Convite de avaliação (catálogo DAK Barber): só se a barbearia participa e o central está configurado.
+$dakConvite  = DakIntegracao::config($pdo)['participa'] && DakIntegracao::centralUrl() !== '';
 
 // Abreviações exibidas no badge da lista (o rótulo completo aparece no
 // tooltip, via FORMAS_PAGAMENTO_LABELS de includes/forma_pagamento.php).
@@ -106,6 +109,9 @@ $STATUS_INFO = [
     }
     .badge-agendado{   color:var(--info-text); background:rgba(var(--accent-rgb),0.14); border:1px solid rgba(var(--accent-rgb),0.4); }
     .badge-confirmado{ color:var(--info-text); background:rgba(15,92,102,0.32);   border:1px solid rgba(24,138,150,0.55); }
+    .btn-convite{ margin-left:8px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600; color:var(--accent-strong); border:1px solid rgba(var(--accent-rgb),0.4); background:rgba(var(--accent-rgb),0.08); cursor:pointer; }
+    .btn-convite:hover{ background:rgba(var(--accent-rgb),0.16); }
+    .btn-convite:disabled{ opacity:.55; cursor:wait; }
     .badge-concluido{  color:var(--success-text); background:rgba(66,140,82,0.14);  border:1px solid rgba(66,140,82,0.4); }
     .badge-cancelado{  color:var(--danger-text); background:rgba(140,31,40,0.12); border:1px solid rgba(140,31,40,0.4); }
     .badge-ausente{    color:var(--warning-text); background:rgba(224,162,74,0.14); border:1px solid rgba(224,162,74,0.4); }
@@ -339,6 +345,9 @@ $STATUS_INFO = [
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="badge <?= $statusCfg['badge'] ?>"><?= $statusCfg['label'] ?></span>
+                                    <?php if ($dakConvite && $status === 'concluido'): ?>
+                                        <button type="button" class="btn-convite" data-convite="<?= (int) $ag['idAgendamento'] ?>" title="Enviar convite de avaliação pelo WhatsApp (catálogo DAK Barber)">★ Convidar para avaliar</button>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4">
                                     <?php if (!empty($formas)): ?>
@@ -492,6 +501,24 @@ $STATUS_INFO = [
             btn.textContent = 'Sim, excluir tudo isso';
         }
     }
+    document.addEventListener('click', async function (ev) {
+        const b = ev.target.closest('[data-convite]');
+        if (!b) return;
+        b.disabled = true;
+        const fd = new FormData();
+        fd.set('idAgendamento', b.getAttribute('data-convite'));
+        try {
+            const r = await fetch('/Catalogo/scripts/dak_convite.php', { method: 'POST', body: fd });
+            const d = await r.json();
+            if (!d.ok) { toast(d.erro || 'Não foi possível gerar o convite.', 'erro'); return; }
+            window.open(d.whatsapp, '_blank', 'noopener');
+            toast('Convite pronto no WhatsApp (válido até ' + d.expira_em + ').', 'sucesso');
+        } catch (e) {
+            toast('Erro de conexão. Tente novamente.', 'erro');
+        } finally {
+            b.disabled = false;
+        }
+    });
 </script>
 
 </body>

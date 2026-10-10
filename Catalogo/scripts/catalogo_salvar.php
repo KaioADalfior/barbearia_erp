@@ -50,3 +50,11 @@ DiscordLogger::configuracoes('🛍️ Catálogo atualizado', [
 ]);
 
 echo json_encode(['ok' => true]);
+
+// Avisa o catálogo central DAK Barber (se a barbearia participa). Depois de responder
+// ao usuário e sem nunca atrapalhar: o catálogo também sincroniza periodicamente.
+if (function_exists('fastcgi_finish_request')) {
+    fastcgi_finish_request();
+}
+require_once __DIR__ . '/../../includes/DakIntegracao.php';
+DakIntegracao::notificarMudanca($pdo);

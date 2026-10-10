@@ -17,12 +17,16 @@ AcessoService::exigirProprietario($pdo);
 require_once __DIR__ . '/../../includes/CatalogoService.php';
 require_once __DIR__ . '/../../includes/HorarioService.php';
 require_once __DIR__ . '/../../includes/PublicoTokenService.php';
+require_once __DIR__ . '/../../includes/DakIntegracao.php';
 
 $paginaAtual = 'catalogo-configurar';
 
 $catalogoOk = CatalogoService::disponivel($pdo);
 $cfg        = CatalogoService::config($pdo);
 $servicos   = CatalogoService::servicos($pdo, true);
+$dak        = DakIntegracao::config($pdo);
+$dakCentral = DakIntegracao::centralUrl();
+$dakSuporte = DakIntegracao::suportado();
 $barbeiros  = CatalogoService::barbeiros($pdo, true);
 
 $esquema    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https' ? 'https' : 'http';
@@ -314,6 +318,7 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
             <button type="button" class="cg-tab" data-aba="horarios" role="tab">Horário de atendimento</button>
             <button type="button" class="cg-tab" data-aba="servicos" role="tab">Serviços</button>
             <button type="button" class="cg-tab" data-aba="profissionais" role="tab">Profissionais</button>
+            <button type="button" class="cg-tab" data-aba="dak" role="tab">Catálogo DAK</button>
         </div>
 
         <form id="cg-form" autocomplete="off" onsubmit="return false;">
@@ -609,6 +614,69 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
                 </div>
             </div>
         </form>
+
+        <!-- ================= CATÁLOGO DAK BARBER (integração) ================= -->
+        <div class="cg-painel" data-painel="dak" id="dak-painel">
+            <div class="panel-card cg-card">
+                <h2>Participar do catálogo DAK Barber</h2>
+                <p class="cg-card__sub">
+                    O DAK Barber reúne as barbearias do BarbERP para clientes da sua região encontrarem, conhecerem e agendarem.
+                    Ao participar, você autoriza a divulgação <strong>apenas</strong> dos dados públicos desta página (nome, descrição, fotos, serviços, horário,
+                    cidade/bairro e o link de agendamento). Clientes, agenda e financeiro <strong>nunca</strong> são enviados. Você pode encerrar a qualquer momento.
+                </p>
+                <?php if (!$dakSuporte): ?>
+                    <p class="cg-hint" style="color:var(--danger-text)">Este servidor não tem a extensão libsodium do PHP; a integração está indisponível.</p>
+                <?php endif; ?>
+                <form id="dak-form" autocomplete="off" onsubmit="return false;">
+                    <?= csrf_field() ?>
+                    <div class="cg-grid">
+                        <div class="cg-full" style="display:flex; align-items:center; gap:12px;">
+                            <label class="cg-switch"><input type="checkbox" name="dak_participa" id="dak_participa" value="1" <?= $dak['participa'] ? 'checked' : '' ?>><span></span></label>
+                            <label for="dak_participa" style="font-size:14px; color:var(--cream)">Autorizo a divulgação da minha barbearia no catálogo DAK Barber</label>
+                        </div>
+                        <div>
+                            <label class="cg-label" for="dak_cidade">Cidade</label>
+                            <input class="cg-input" id="dak_cidade" name="dak_cidade" maxlength="80" value="<?= $h($dak['cidade']) ?>" placeholder="Ex.: Vitória">
+                        </div>
+                        <div>
+                            <label class="cg-label" for="dak_uf">UF</label>
+                            <input class="cg-input" id="dak_uf" name="dak_uf" maxlength="2" value="<?= $h($dak['uf']) ?>" placeholder="ES" style="text-transform:uppercase">
+                        </div>
+                        <div class="cg-full">
+                            <label class="cg-label" for="dak_bairro">Bairro <small>(opcional)</small></label>
+                            <input class="cg-input" id="dak_bairro" name="dak_bairro" maxlength="80" value="<?= $h($dak['bairro']) ?>" placeholder="Ex.: Jardim Camburi">
+                        </div>
+                        <div>
+                            <label class="cg-label" for="dak_latitude">Latitude <small>(opcional, para busca por proximidade)</small></label>
+                            <input class="cg-input" id="dak_latitude" name="dak_latitude" inputmode="decimal" value="<?= $h($dak['latitude'] !== null ? (string) $dak['latitude'] : '') ?>" placeholder="-20.2976">
+                        </div>
+                        <div>
+                            <label class="cg-label" for="dak_longitude">Longitude <small>(opcional)</small></label>
+                            <input class="cg-input" id="dak_longitude" name="dak_longitude" inputmode="decimal" value="<?= $h($dak['longitude'] !== null ? (string) $dak['longitude'] : '') ?>" placeholder="-40.2958">
+                        </div>
+                        <div class="cg-full" style="display:flex; align-items:center; gap:12px;">
+                            <label class="cg-switch"><input type="checkbox" name="dak_divulgar_contato" id="dak_divulgar_contato" value="1" <?= $dak['divulgar_contato'] ? 'checked' : '' ?>><span></span></label>
+                            <label for="dak_divulgar_contato" style="font-size:13.5px; color:var(--cream)">Mostrar também meu telefone/WhatsApp comerciais no catálogo</label>
+                        </div>
+                    </div>
+                    <p class="cg-hint" style="margin-top:12px">A localização é arredondada (cerca de 10 m) e só usada para ordenar por proximidade. Sem coordenadas, a busca usa cidade e bairro.</p>
+                    <div style="display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap;">
+                        <button type="button" class="cg-btn cg-btn--pri" id="dak-salvar">Salvar participação</button>
+                        <span class="cg-hint" id="dak-status" style="margin:0">
+                            <?php if ($dak['participa']): ?>
+                                Situação: <strong><?= $h(['pendente' => 'aguardando aprovação da DAK', 'ativa' => 'aprovada pela DAK', 'suspensa' => 'suspensa pela DAK', 'revogada' => 'participação encerrada'][$dak['central_status'] ?? ''] ?? 'ainda não registrada no catálogo') ?></strong>
+                                <?= $dak['registro_msg'] ? ' — ' . $h($dak['registro_msg']) : '' ?>
+                            <?php else: ?>
+                                Participação desativada.
+                            <?php endif; ?>
+                        </span>
+                    </div>
+                    <?php if ($dakCentral === ''): ?>
+                        <p class="cg-hint" style="margin-top:10px">Este servidor ainda não conhece o endereço do catálogo (variável <code>DAK_CENTRAL_URL</code>). O registro automático ficará pendente até ser configurada.</p>
+                    <?php endif; ?>
+                </form>
+            </div>
+        </div>
     </div>
     </section>
 </main>
@@ -913,6 +981,29 @@ $h = static fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+(function () {
+    const btn = document.getElementById('dak-salvar');
+    if (!btn) return;
+    btn.addEventListener('click', async function () {
+        const form = document.getElementById('dak-form');
+        btn.disabled = true;
+        try {
+            const resp = await fetch('/Catalogo/scripts/dak_salvar.php', { method: 'POST', body: new FormData(form) });
+            const dados = await resp.json();
+            if (!dados.ok) { toast(dados.erro || 'Não foi possível salvar.', 'erro'); return; }
+            toast(dados.aviso || 'Participação salva.', 'sucesso');
+            document.getElementById('dak-status').textContent = dados.estado && dados.estado.participa
+                ? 'Situação: ' + ({ pendente: 'aguardando aprovação da DAK', ativa: 'aprovada pela DAK', suspensa: 'suspensa pela DAK', revogada: 'participação encerrada' }[dados.estado.central_status] || 'ainda não registrada no catálogo')
+                : 'Participação desativada.';
+        } catch (e) {
+            toast('Erro de conexão. Tente novamente.', 'erro');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+})();
+</script>
 
 </body>
 </html>

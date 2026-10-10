@@ -71,6 +71,8 @@ RewriteRule ^ - [F,L]
 # bloqueio), diferente do link público acima; se no futuro quisermos
 # bloquear o acesso direto aqui também, o padrão é o mesmo já usado para
 # Publico/paginas/agendar.php.
+# API de integração com o catálogo central DAK Barber (somente leitura, assinada).
+RewriteRule ^api/catalogo/v1/perfil/?$ Catalogo/scripts/dak_api_perfil.php [L]
 RewriteRule ^login/?$ Autenticacao/paginas/login.php [L,QSA]
 RewriteRule ^configuracoes/?$ Configuracoes/paginas/configuracoes.php [L,QSA]
 RewriteRule ^login-tentativas/?$ Configuracoes/paginas/login_tentativas.php [L,QSA]

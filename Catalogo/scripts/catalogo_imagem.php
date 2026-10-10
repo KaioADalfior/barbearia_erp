@@ -52,3 +52,11 @@ if ($resultado['ok']) {
 }
 
 echo json_encode($resultado);
+
+if (!empty($resultado['ok'])) {
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+    require_once __DIR__ . '/../../includes/DakIntegracao.php';
+    DakIntegracao::notificarMudanca($pdo);
+}
